@@ -1,0 +1,36 @@
+{
+  "name": "spring-launcher",
+  "version": "1.0.0",
+  "description": "Electron-based SpringRTS Launcher app",
+  "main": "src/main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "electron .",
+    "start-dev": "electron . --dev",
+    "pack": "electron-builder --dir",
+    "build-linux": "electron-builder -l",
+    "build-win": "electron-builder -w",
+    "build-mac": "electron-builder -m",
+    "build": "electron-builder -wl"
+  },
+  "author": "gajop",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^2.0.6",
+    "electron-builder": "^20.26.1"
+  },
+  "build": {
+    "appId": "com.springrts.launcher",
+    "linux": {
+      "target": "AppImage",
+      "category": "Game"
+    },
+    "win": {
+      "target": "portable"
+    }
+  },
+  "dependencies": {
+    "electron-log": "^2.2.16",
+    "electron-updater": "^3.0.3"
+  }
+}

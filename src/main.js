@@ -1,0 +1,56 @@
+const fs = require('fs');
+const { app, BrowserWindow, Menu, Tray } = require('electron');
+
+const { log } = require('./spring_log.js');
+
+const { config } = require('./launcher_config');
+config.setConfig("test");
+
+const { gui } = require('./launcher_gui.js');
+const { wizard } = require('./launcher_wizard.js');
+const springDownloader = require('./spring_downloader');
+const autoUpdater = require('./updater');
+const springApi = require('./spring_api');
+
+//console.log(log.transports.file.findLogPath())
+//console.log(fs.readFileSync(log.transports.file.findLogPath(), 'utf8'))
+
+springDownloader.on('started', (downloadItem, type, args) => {
+  log.info(`Download started: ${downloadItem}, ${type}, ${args}`);
+  gui.send('dl-started', downloadItem, type, args);
+});
+
+springDownloader.on('progress', (downloadItem, current, total) => {
+  if (total < 1024 * 1024) {
+    return; // ignore downloads less than 1MB (probably not real downloads!)
+  }
+  log.info(`Download progress: ${downloadItem}, ${current}, ${total}`);
+  gui.send('dl-progress', downloadItem, current, total);
+});
+
+springDownloader.on('finished', (downloadItem) => {
+  // self.lblStatus.setText("Download finished.")
+  log.info(`Download finished: ${downloadItem}`);
+  gui.send('dl-finished', downloadItem);
+  wizard.nextStep();
+});
+
+springDownloader.on('failed', (downloadItem, error) => {
+  log.info(`Download failed: ${downloadItem}: ${error}`);
+  gui.send('dl-failed', downloadItem, error);
+});
+
+autoUpdater.on('update-available', () => {
+  gui.send('dl-started', "autoupdate");
+
+  autoUpdater.on('download-progress', (d) => {
+    console.info(`Self-download progress: ${d.percent}`);
+    gui.send('dl-progress', d.percent);
+  });
+  autoUpdater.on('update-downloaded', () => {
+    console.info("Self-update downloaded");
+    gui.send('dl-finished', "autoupdate");
+  });
+
+  autoUpdater.downloadUpdate();
+})
