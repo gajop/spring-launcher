@@ -17,8 +17,7 @@ app.on('ready', () => {
 class Wizard extends EventEmitter {
   constructor() {
     super();
-    this.steps = this.generateSteps();
-    this.started = false;
+    this.generateSteps();
   }
 
   generateSteps() {
@@ -112,7 +111,8 @@ class Wizard extends EventEmitter {
       }
     })
 
-    return steps;
+    this.started = false;
+    this.steps = steps;
   }
 
   nextStep(forced) {

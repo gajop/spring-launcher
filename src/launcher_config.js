@@ -2,6 +2,7 @@ const log = require('electron-log');
 
 const configDefault = {
   "package": {
+    // Possible values are 'darwin', 'linux', 'win32'
     "platform": "all",
   },
 
@@ -25,20 +26,61 @@ const configDefault = {
 // }
 
 var configs = [];
-var availableConfigs = {};
+var availableConfigs = [];
 var currentConfig;
 
 function canUse(config) {
+  if (config.package.platform != "all") {
+    console.log("process.platform", process.platform, config.package.platform);
+    if (config.package.platform != process.platform) {
+      return false;
+    }
+  }
   return true;
+}
+
+/**
+ * Simple object check.
+ * @param item
+ * @returns {boolean}
+ */
+function isObject(item) {
+  return (item && typeof item === 'object' && !Array.isArray(item));
+}
+
+/**
+ * Deep merge two objects.
+ * @param target
+ * @param ...sources
+ */
+function mergeDeep(target, ...sources) {
+  if (!sources.length) return target;
+  const source = sources.shift();
+
+  if (isObject(target) && isObject(source)) {
+    for (const key in source) {
+      if (isObject(source[key])) {
+        if (!target[key]) Object.assign(target, { [key]: {} });
+        mergeDeep(target[key], source[key]);
+      } else {
+        Object.assign(target, { [key]: source[key] });
+      }
+    }
+  }
+
+  return mergeDeep(target, ...sources);
 }
 
 (require("./config.json")).forEach((c) => {
   // config = JSON.parse(JSON.stringify(configDefault));
-  let config = {...configDefault, ...c};
+  // const config = {...configDefault, ...c};
+  // const config = Object.assign(c, configDefault);
+  const configDefaultCopy = JSON.parse(JSON.stringify(configDefault));
+  const config = mergeDeep(configDefaultCopy, c);
   configs.push(config);
 
   if (canUse(config)) {
-    availableConfigs[config.package.id] = config;
+    availableConfigs.push(config);
     if (!currentConfig) {
       currentConfig = config;
     }
@@ -64,7 +106,16 @@ log.info(`Default config:\n${JSON.stringify(currentConfig, null, 4)}`);
 
 const proxy = new Proxy({
     setConfig: function(id) {
-      currentConfig = availableConfigs[id];
+      var found = false;
+      availableConfigs.forEach((cfg) => {
+        if (cfg.package.id == id) {
+          currentConfig = cfg;
+          found = true;
+        }
+      });
+      if (!found) {
+        throw `No config with ID: ${id}`;
+      }
     },
     getAvailableConfigs: function() {
       return availableConfigs;

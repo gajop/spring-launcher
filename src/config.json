@@ -15,6 +15,21 @@
 
   {
     "package": {
+      "id": "test-win",
+      "platform": "win32",
+      "display": "Testing-Windows"
+    },
+    "downloads": {
+      "games" : ["sbc:test"],
+      "maps" : ["Obsidian_1.5"],
+      "engines" : [ "104.0.1-something-else maintenance" ]
+    },
+
+    "start_args" : ["--game", "rapid://sbc:test", "--map", "Obsidian_1.5"]
+  },
+
+  {
+    "package": {
       "id": "test",
       "display": "Testing"
     },

@@ -9,7 +9,7 @@ let tray;
 // makeSingleInstance
 
 DEBUG = false;
-// DEBUG = true;
+DEBUG = true;
 
 
 app.on('ready', () => {
@@ -39,7 +39,6 @@ app.on('ready', () => {
   }
 
   mainWindow.loadFile(`${__dirname}/renderer/index.html`);
-
   //mainWindow.webContents.openDevTools();
 
   mainWindow.on('closed', () => {
@@ -82,6 +81,7 @@ app.on('ready', () => {
     mainWindow.show();
 
     gui.send("config", config.getConfigObj());
+    gui.send("all-configs", config.getAvailableConfigs());
 
     const { wizard } = require('./launcher_wizard.js');
 

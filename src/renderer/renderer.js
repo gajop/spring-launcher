@@ -23,17 +23,45 @@ function formatBytes(bytesFirst, bytesSecond, decimals) {
 
     strFirst = ' '.repeat(strSecond.indexOf(".") - strFirst.indexOf(".")) + strFirst;
     strFirst = strFirst + ' '.repeat(strSecond.length - strFirst.length)
-    console.log(`\n|${strFirst}|\n|${strSecond}`);
   }
 
 
   return `${strFirst} / ${strSecond} ${strUnit}`;
 }
 
+let operationInProgress = false;
+function setInProgress(state) {
+  if (state) {
+    document.getElementById("btn-progress").classList.add("is-loading");
+    document.getElementById("config-select").setAttribute("disabled", "");
+  } else {
+    document.getElementById("btn-progress").classList.remove("is-loading");
+    document.getElementById("config-select").removeAttribute("disabled");
+  }
+  operationInProgress = state;
+}
+
+function resetUI() {
+  document.getElementById("progress-part").value = 0;
+  document.getElementById("progress-full").value = 0;
+  document.getElementById("progress-full").classList.remove("is-danger", "is-success");
+  document.getElementById("progress-part").classList.remove("is-danger", "is-success");
+  document.getElementById("progress-full").classList.add("is-primary");
+  document.getElementById("progress-part").classList.add("is-primary");
+
+  document.getElementById("lbl-progress-full").classList.remove("error");
+  document.getElementById("lbl-progress-part").classList.remove("error");
+  document.getElementById("lbl-progress-full").innerHTML = ''
+  document.getElementById("lbl-progress-part").innerHTML = ''
+
+  document.getElementById("btn-progress").classList.remove("is-warning");
+  document.getElementById("btn-progress").classList.add("is-primary");
+}
+
 window.onload = function() {
   document.getElementById('btn-progress').addEventListener('click', (event) => {
     event.preventDefault();
-    if (!document.getElementById('btn-progress').classList.contains("is-loading")) {
+    if (!operationInProgress) {
       document.getElementById("lbl-progress-full").classList.remove("error");
       document.getElementById("btn-progress").classList.remove("is-warning");
       ipcRenderer.send("wizard-next");
@@ -54,6 +82,15 @@ window.onload = function() {
     }
   });
 
+  document.getElementById('config-select').addEventListener('change', (event) => {
+    if (operationInProgress) {
+      return;
+    }
+    const s = event.target;
+    const selectedID = s[s.selectedIndex].id;
+    const cfgName = selectedID.substring('cfg-'.length);
+    ipcRenderer.send("change-cfg", cfgName);
+  });
   // document.getElementById("btn-show-log").removeAttribute("tabIndex");
   // document.getElementById("btn-show-log").setAttribute("tabIndex", "-1");
   // document.getElementById('btn-show-log').addEventListener('focus', (event) => {
@@ -68,19 +105,22 @@ window.onload = function() {
 //////////////////////////////
 
 let config;
+let allConfigs;
+
 ipcRenderer.on("config", (e, c) => {
   config = c;
-  console.log(c);
 
   let buttonText;
   if (config.no_downloads) {
-    if (config.auto_start) {
+    // TODO: add later
+    if (config.auto_start && !operationInProgress  && false) {
       buttonText = "Starting...";
     } else {
       buttonText = "Start";
     }
   } else {
-    if (config.auto_download) {
+    // TODO: add later
+    if (config.auto_download && !operationInProgress && false) {
       if (config.auto_start) {
         buttonText = "Updating and Starting...";
       } else {
@@ -93,8 +133,26 @@ ipcRenderer.on("config", (e, c) => {
         buttonText = "Update";
       }
     }
-    document.getElementById("btn-progress").innerHTML = buttonText;
   }
+
+  resetUI();
+  document.getElementById("btn-progress").innerHTML = buttonText;
+
+  // document.getElementById("current_config").innerHTML = `Config: ${config.package.display}`;
+});
+
+ipcRenderer.on("all-configs", (e, ac) => {
+  allConfigs = ac;
+
+  var cfgSelect = document.getElementById("config-select");
+
+  allConfigs.forEach((cfg) => {
+    var cfgElement = document.createElement("option");
+    cfgElement.id = `cfg-${cfg.package.id}`;
+    cfgElement.appendChild(document.createTextNode(cfg.package.display));
+
+    cfgSelect.appendChild(cfgElement);
+  });
 });
 
 //////////////////////////////
@@ -109,11 +167,12 @@ ipcRenderer.on("wizard-list", (e, s) => {
 });
 
 ipcRenderer.on("wizard-started", (e) => {
-  document.getElementById("btn-progress").classList.add("is-loading");
+  currentStep = 0;
+  setInProgress(true);
 });
 
 ipcRenderer.on("wizard-stopped", (e) => {
-  document.getElementById("btn-progress").classList.remove("is-loading");
+  setInProgress(false);
 });
 
 ipcRenderer.on("wizard-finished", (e) => {
@@ -155,7 +214,6 @@ ipcRenderer.on("dl-progress", (e, downloadItem, current, total) => {
   document.getElementById("progress-part").value = parseInt(100 * current / total);
 
   const step = currentStep + current / total - 1;
-  console.log(step, currentStep, steps.length);
   document.getElementById("progress-full").value = parseInt(100 * step / steps.length);
 
   document.getElementById("lbl-progress-part").innerHTML = `${formatBytes(current, total)}`;
@@ -184,7 +242,7 @@ ipcRenderer.on("dl-failed", (e, downloadItem, error) => {
 //////////////////////////////
 
 ipcRenderer.on("launch-started", (e) => {
-  document.getElementById("btn-progress").classList.add("is-loading");
+  setInProgress(true);
   document.getElementById("lbl-progress-full").innerHTML = `Launching`;
 });
 
@@ -200,7 +258,7 @@ ipcRenderer.on("launch-failed", (e, code) => {
   // document.getElementById("progress-part").classList.add("is-danger");
   // document.getElementById("progress-part").value = 100;
 
-  document.getElementById("btn-progress").classList.remove("is-loading");
+  setInProgress(false);
   document.getElementById("btn-progress").classList.add("is-warning");
 });
 

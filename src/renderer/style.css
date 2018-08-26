@@ -18,6 +18,19 @@ body::-webkit-scrollbar {
   display: none;
 }
 
+#current_config {
+  position: relative;
+  top: 6px;
+  right: 10px;
+  text-align: center;
+}
+
+#config-select__div {
+  position: absolute;
+  top: 20px;
+  right: 10px;
+}
+
 .infobox {
   position: absolute;
   bottom: 20px;

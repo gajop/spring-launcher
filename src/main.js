@@ -1,10 +1,9 @@
 const fs = require('fs');
-const { app, BrowserWindow, Menu, Tray } = require('electron');
+const { app, BrowserWindow, Menu, Tray, ipcMain } = require('electron');
 
 const { log } = require('./spring_log.js');
 
 const { config } = require('./launcher_config');
-config.setConfig("test");
 
 const { gui } = require('./launcher_gui.js');
 const { wizard } = require('./launcher_wizard.js');
@@ -54,3 +53,10 @@ autoUpdater.on('update-available', () => {
 
   autoUpdater.downloadUpdate();
 })
+
+ipcMain.on("change-cfg", (e, cfgName) => {
+  config.setConfig(cfgName);
+
+  gui.send("config", config.getConfigObj());
+  wizard.generateSteps();
+});
