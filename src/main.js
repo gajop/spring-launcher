@@ -30,7 +30,6 @@ springDownloader.on('progress', (downloadItem, current, total) => {
 });
 
 springDownloader.on('finished', (downloadItem) => {
-  // self.lblStatus.setText("Download finished.")
   log.info(`Download finished: ${downloadItem}`);
   gui.send('dl-finished', downloadItem);
   wizard.nextStep();
@@ -55,6 +54,11 @@ autoUpdater.on('update-available', () => {
 
   autoUpdater.downloadUpdate();
 })
+
+autoUpdater.on('update-not-available', () => {
+  log.info("No update available.");
+  wizard.nextStep();
+});
 
 function setConfig(cfgName) {
   config.setConfig(cfgName);
