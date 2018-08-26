@@ -33,21 +33,23 @@ function connect() {
 		console.log('Connected');
 		sendCommand("HelloWorld", {hello: "World"});
 		sendCommand("CompileMap", {
-			diffuse: "diffuse.png",
-			heightmap: "heightmap.png"
-		});
-		sendCommand("OpenFile", {
-			path: "file:///text.txt"
+			diffusePath: '/home/gajop/radni_direktorijum/programi/spring-launcher-electron/game_package/springboard/projects/test-textures/diffuse.png',
+  		heightPath: '/home/gajop/radni_direktorijum/programi/spring-launcher-electron/game_package/springboard/projects/test-textures/heightmap.png',
+  		grass: '/home/gajop/radni_direktorijum/programi/spring-launcher-electron/game_package/springboard/projects/test-textures/grass.png',
+  		outputPath: '/home/gajop/radni_direktorijum/programi/spring-launcher-electron/game_package/springboard/projects/test-textures/MyName'
 		});
 		// sendCommand("OpenFile", {
-		// 	path: "file:///home/gajop/notes.txt"
+		// 	path: "file:///text.txt"
 		// });
-		sendCommand("OpenFile", {
-			path: "file:///home/gajop/Downloads/MyCube_LInux_v1/games/LD42.sdd/Bitmaps/LoadPictures/Background2.png"
-		});
-		sendCommand("OpenFile", {
-			path: "file:///home/gajop/"
-		});
+		// // sendCommand("OpenFile", {
+		// // 	path: "file:///home/gajop/notes.txt"
+		// // });
+		// sendCommand("OpenFile", {
+		// 	path: "file:///home/gajop/Downloads/MyCube_LInux_v1/games/LD42.sdd/Bitmaps/LoadPictures/Background2.png"
+		// });
+		// sendCommand("OpenFile", {
+		// 	path: "file:///home/gajop/"
+		// });
 	});
 
 	client.on('data', function(data) {

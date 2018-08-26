@@ -24,8 +24,10 @@ bridge.on('listening', () => {
   const normalizedPath = path.join(__dirname, EXTS_DIR);
   fs.readdirSync(normalizedPath).forEach(function(file) {
     const extPath = `./${EXTS_DIR}/` + file;
-    log.info(`Including extension: ${extPath}...`);
-    require(extPath);
+    if (extPath.endsWith(".js")) {
+      log.info(`Including extension: ${extPath}...`);
+      require(extPath);
+    }
   });
 });
 

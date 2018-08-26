@@ -6,9 +6,78 @@ const { resolve } = require('path');
 const log = require('electron-log');
 
 const { writePath, springBin } = require('./spring_platform');
+const { config } = require('./launcher_config');
+
+const { bridge } = require('./spring_bridge');
+let address;
+let json;
+bridge.on('listening', () => {
+  const a = bridge.server.address();
+  address = a.address;
+  port = a.port;
+});
+
+function generateScriptTXT() {
+return `[GAME]
+{
+	GameType = ${config.launch.game};
+	HostIP = 127.0.0.1;
+	IsHost = 1;
+	MapName = ${config.launch.map};
+	NumPlayers = 2;
+	NumUsers = 2;
+
+	[allyTeam0]
+	{
+		NumAllies = 0;
+	}
+
+	[allyTeam1]
+	{
+		NumAllies = 0;
+	}
+
+	[ModOptions]
+	{
+    _sl_address = ${address};
+    _sl_port = ${port};
+	}
+
+	[player0]
+	{
+		IsFromDemo = 1;
+		Name = Enemy;
+		Spectator = 0;
+		Team = 1;
+	}
+
+	[player1]
+	{
+		IsFromDemo = 1;
+		Name = 0;
+		Spectator = 0;
+		Team = 0;
+	}
+
+	[team0]
+	{
+		AllyTeam = 0;
+		RGBColor = 0.35294119 0.35294119 1;
+		TeamLeader = 0;
+	}
+
+	[team1]
+	{
+		AllyTeam = 1;
+		RGBColor = 0.78431374 0 0;
+		TeamLeader = 0;
+	}
+
+}`;
+}
 
 class Launcher extends EventEmitter {
-  launch(engineName, extraArgs=[]) {
+  launchSpring(engineName, extraArgs) {
     const springPath = `${writePath}/engine/${engineName}/${springBin}`;
     var args = ["--write-dir", resolve(writePath)];
     if (extraArgs != undefined) {
@@ -58,6 +127,18 @@ class Launcher extends EventEmitter {
         this.emit("stderr", text);
       });
     }
+  }
+
+  launch(engineName, opts) {
+    const scriptTXT = generateScriptTXT()
+    const fs = require('fs');
+    const scriptTxtPath = `${writePath}/script.txt`;
+    opts = [];
+    fs.writeFile(scriptTxtPath, scriptTXT, 'utf8', () => {
+      opts.push(scriptTxtPath);
+      console.log(opts);
+      this.launchSpring(engineName, opts);
+    });
   }
 }
 

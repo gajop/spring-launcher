@@ -6,6 +6,8 @@ const { bridge } = require('../spring_api');
 class Compiler extends EventEmitter {
   constructor(bridge) {
     super();
+
+    this.progressPattern = new RegExp('[0-9]+/\\s*[0-9]+');
     this.bridge = bridge;
 
     if (process.platform === 'windows') {
@@ -16,17 +18,13 @@ class Compiler extends EventEmitter {
   }
 
   compile(opts) {
-    console.log("DO IT: CompileMap", opts);
     this.bridge.send("CompileMapStarted");
     // do async
-    console.log("before")
     this.compileMap_SpringMapConvNG(opts);
-    console.log("after")
   }
 
   compileMap_SpringMapConvNG(opts) {
     const callParams = [
-        this.executableName,
         "-t", opts["diffusePath"],
         "-h", opts["heightPath"],
         "-ct", "1",
@@ -54,10 +52,28 @@ class Compiler extends EventEmitter {
     // return_code = proc.wait()
     // stderr = proc.stderr.read()
 
-    process = spawn('ls');
+    // const compilerPath = "./src/exts/springMapConvNG";
+    // process = spawn('ls');
+
+    process = spawn(`${__dirname}/${this.executableName}`, callParams);
 
     process.stdout.on('data', (data) => {
-      console.log("stdout: ", data.toString());
+      const line = data.toString();
+      console.log(line);
+      if (line.includes("Compressing")) {
+        const matched = line.match(this.progressPattern);
+        if (!matched || matched.length == 0) {
+          return;
+        }
+        var progressStr = matched[0];
+        var [current, total] = progressStr.split("/");
+        var current = parseInt(current);
+        var total = parseInt(total);
+        this.bridge.send("CompileMapProgress", {
+          current: current,
+          total: total
+        });
+      }
     });
 
     process.stderr.on('data', (data) => {

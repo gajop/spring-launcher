@@ -9,8 +9,10 @@
       "maps" : ["Obsidian_1.5"],
       "engines" : [ "104.0.1-667-g4835668 maintenance" ]
     },
-
-    "start_args" : ["--game", "rapid://sbc:stable", "--map", "Obsidian_1.5"]
+    "launch": {
+      "game": "rapid://sbc:stable",
+      "map": "Obsidian_1.5"
+    }
   },
 
   {
@@ -24,8 +26,10 @@
       "maps" : ["Obsidian_1.5"],
       "engines" : [ "104.0.1-something-else maintenance" ]
     },
-
-    "start_args" : ["--game", "rapid://sbc:test", "--map", "Obsidian_1.5"]
+    "launch": {
+      "game": "rapid://sbc:test",
+      "map": "Obsidian_1.5"
+    }
   },
 
   {
@@ -38,8 +42,10 @@
       "maps" : ["Obsidian_1.5"],
       "engines" : [ "104.0.1-667-g4835668 maintenance" ]
     },
-
-    "start_args" : ["--game", "rapid://sbc:test", "--map", "Obsidian_1.5"]
+    "launch": {
+      "game": "rapid://sbc:test",
+      "map": "Obsidian_1.5"
+    }
   },
 
   {
@@ -53,7 +59,9 @@
     },
     "auto_start" : true,
     "no_downloads" : true,
-
-    "start_args" : ["--game", "SpringBoard Core $VERSION", "--map", "Obsidian_1.5"]
+    "launch": {
+      "game": "SpringBoard Core $VERSION",
+      "map": "Obsidian_1.5"
+    }
   }
 ]
