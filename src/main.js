@@ -45,7 +45,7 @@ autoUpdater.on('update-available', () => {
 
   autoUpdater.on('download-progress', (d) => {
     console.info(`Self-download progress: ${d.percent}`);
-    gui.send('dl-progress', d.percent);
+    gui.send('dl-progress', "autoUpdate", d.percent, 100);
   });
   autoUpdater.on('update-downloaded', () => {
     console.info("Self-update downloaded");
@@ -58,6 +58,10 @@ autoUpdater.on('update-available', () => {
 autoUpdater.on('update-not-available', () => {
   log.info("No update available.");
   wizard.nextStep();
+});
+
+autoUpdater.on('update-downloaded', () => {
+  setImmediate(() => autoUpdater.quitAndInstall())
 });
 
 function setConfig(cfgName) {

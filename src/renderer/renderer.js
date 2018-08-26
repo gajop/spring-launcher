@@ -232,7 +232,11 @@ ipcRenderer.on("dl-progress", (e, downloadItem, current, total) => {
   const step = currentStep + current / total - 1;
   document.getElementById("progress-full").value = parseInt(100 * step / steps.length);
 
-  document.getElementById("lbl-progress-part").innerHTML = `${formatBytes(current, total)}`;
+  if (downloadItem != "autoUpdate") {
+    document.getElementById("lbl-progress-part").innerHTML = `${formatBytes(current, total)}`;
+  } else {
+    document.getElementById("lbl-progress-part").innerHTML = `${current.toFixed(2)}%`;
+  }
 });
 
 ipcRenderer.on("dl-finished", (e, downloadItem) => {
