@@ -21,6 +21,7 @@
   },
   "build": {
     "appId": "com.springrts.launcher",
+    "extraFiles": "bin/*",
     "linux": {
       "target": "AppImage",
       "category": "Game"
