@@ -1,4 +1,5 @@
 const {app, ipcRenderer} = require('electron');
+
 const log = require('electron-log');
 
 function formatBytes(bytesFirst, bytesSecond, decimals) {
@@ -106,6 +107,13 @@ window.onload = function() {
   //   console.log("ABC");
   //   this.blur();
   // });
+
+
+  const isDev = require('electron-is-dev');
+  if (isDev) {
+    document.getElementById("main-title").innerHTML =
+      `${document.getElementById("main-title").innerHTML} (DEV)`;
+  }
 }
 
 //////////////////////////////

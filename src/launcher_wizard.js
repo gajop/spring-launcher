@@ -11,6 +11,9 @@ const launcher = require('./engine_launcher');
 
 let mainWindow;
 app.on('ready', () => {
+  if (!gui) {
+    return;
+  }
   mainWindow = gui.getMainWindow();
 })
 

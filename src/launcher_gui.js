@@ -8,9 +8,23 @@ let tray;
 
 // makeSingleInstance
 
-DEBUG = false;
-DEBUG = true;
+const isDev = require('electron-is-dev');
 
+var shouldQuit = app.makeSingleInstance((commandLine, workingDirectory) => {
+  // Someone tried to run a second instance, we should focus our window.
+  var mainWindow = gui.getMainWindow();
+  if (mainWindow) {
+    if (mainWindow.isMinimized()) {
+      mainWindow.restore();
+    }
+    mainWindow.focus();
+  }
+});
+
+if (shouldQuit) {
+  app.quit();
+  return;
+}
 
 app.prependListener('ready', () => {
   const display = electron.screen.getPrimaryDisplay();
@@ -29,12 +43,12 @@ app.prependListener('ready', () => {
 
     icon: `${__dirname}/renderer/spring-icon.png`,
   };
-  if (!DEBUG) {
+  if (!isDev) {
     windowOpts.resizable = false;
     //windowOpts.frame = false;
   }
   mainWindow = new BrowserWindow(windowOpts);
-  if (!DEBUG) {
+  if (!isDev) {
     mainWindow.setMenu(null);
   }
 

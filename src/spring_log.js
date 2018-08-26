@@ -15,7 +15,7 @@ var ready = false;
 log.transports.console = (msg) => {
   var text = format.apply(util, msg.data);
   console.log(text);
-  if (ready) {
+  if (ready && mainWindow) {
     mainWindow.send("log", msg)
   } else {
     logBuffer.push(msg);
@@ -23,6 +23,9 @@ log.transports.console = (msg) => {
 }
 
 app.on('ready', () => {
+  if (!gui) {
+    return;
+  }
   mainWindow = gui.getMainWindow();
 
   setTimeout(() => {

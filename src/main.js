@@ -70,6 +70,9 @@ ipcMain.on("change-cfg", (e, cfgName) => {
 });
 
 app.on('ready', () => {
+  if (!gui) {
+    return;
+  }
   const oldConfig = settings.get('config');
   if (oldConfig) {
     setConfig(oldConfig);
