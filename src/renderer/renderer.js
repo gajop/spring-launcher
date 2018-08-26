@@ -25,18 +25,26 @@ function formatBytes(bytesFirst, bytesSecond, decimals) {
     strFirst = strFirst + ' '.repeat(strSecond.length - strFirst.length)
   }
 
-
   return `${strFirst} / ${strSecond} ${strUnit}`;
+}
+
+let configEnabled = true;
+function setConfigEnabled(state) {
+  configEnabled = state;
+  if (state) {
+    document.getElementById("config-select").removeAttribute("disabled");
+  } else {
+    document.getElementById("config-select").setAttribute("disabled", "");
+  }
 }
 
 let operationInProgress = false;
 function setInProgress(state) {
+  setConfigEnabled(!state);
   if (state) {
     document.getElementById("btn-progress").classList.add("is-loading");
-    document.getElementById("config-select").setAttribute("disabled", "");
   } else {
     document.getElementById("btn-progress").classList.remove("is-loading");
-    document.getElementById("config-select").removeAttribute("disabled");
   }
   operationInProgress = state;
 }
@@ -83,7 +91,7 @@ window.onload = function() {
   });
 
   document.getElementById('config-select').addEventListener('change', (event) => {
-    if (operationInProgress) {
+    if (!configEnabled) {
       return;
     }
     const s = event.target;
@@ -244,9 +252,12 @@ ipcRenderer.on("dl-failed", (e, downloadItem, error) => {
 ipcRenderer.on("launch-started", (e) => {
   setInProgress(true);
   document.getElementById("lbl-progress-full").innerHTML = `Launching`;
+  // specifically enable config editing after launch
+  setConfigEnabled(true);
 });
 
 ipcRenderer.on("launch-finished", (e) => {
+  setInProgress(false);
 });
 
 ipcRenderer.on("launch-failed", (e, code) => {

@@ -12,7 +12,7 @@ DEBUG = false;
 DEBUG = true;
 
 
-app.on('ready', () => {
+app.prependListener('ready', () => {
   const display = electron.screen.getPrimaryDisplay();
   const sWidth = display.workAreaSize.width;
   const sHeight = display.workAreaSize.height;

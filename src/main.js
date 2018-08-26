@@ -5,6 +5,8 @@ const { log } = require('./spring_log.js');
 
 const { config } = require('./launcher_config');
 
+const settings = require('electron-settings');
+
 const { gui } = require('./launcher_gui.js');
 const { wizard } = require('./launcher_wizard.js');
 const springDownloader = require('./spring_downloader');
@@ -54,9 +56,22 @@ autoUpdater.on('update-available', () => {
   autoUpdater.downloadUpdate();
 })
 
-ipcMain.on("change-cfg", (e, cfgName) => {
+function setConfig(cfgName) {
   config.setConfig(cfgName);
 
   gui.send("config", config.getConfigObj());
   wizard.generateSteps();
+
+  settings.set('config', cfgName);
+}
+
+ipcMain.on("change-cfg", (e, cfgName) => {
+  setConfig(cfgName);
 });
+
+app.on('ready', () => {
+  const oldConfig = settings.get('config');
+  if (oldConfig) {
+    setConfig(oldConfig);
+  }
+})
