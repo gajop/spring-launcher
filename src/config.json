@@ -10,10 +10,7 @@
       "engines" : [ "104.0.1-667-g4835668 maintenance" ]
     },
 
-    "launch": {
-      "game": "rapid://sbc:stable",
-      "map": "Obsidian_1.5"
-    }
+    "start_args" : ["--game", "rapid://sbc:stable", "--map", "Obsidian_1.5"]
   },
 
   {
