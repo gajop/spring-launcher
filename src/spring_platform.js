@@ -13,5 +13,7 @@ if (platformName === "win32") {
   process.exit(-1);
 }
 
+log.info(`pr-downloader path: ${exports.prDownloaderPath}`);
+
 exports.writePath = './game_package';
 //console.info(`Detected platform: ${platformName}`);

@@ -84,6 +84,7 @@ class Wizard extends EventEmitter {
         //   mainWindow.hide();
         // })
 
+        log.info(`Starting Spring from: ${config.downloads.engines[0]}`);
         launcher.launch(config.downloads.engines[0], config.start_args);
 
         gui.send("launch-started")
@@ -98,18 +99,20 @@ class Wizard extends EventEmitter {
           // console.warn(text);
         });
 
-        launcher.on("finished", () => {
+        launcher.on("finished", (code) => {
+          log.info(`Spring finished with code: ${code}`);
           app.quit();
           this.steps.push(step);
           setTimeout(() => {
             gui.send("launch-finished")
           }, 100);
         });
-        launcher.on("failed", (code) => {
+        launcher.on("failed", (error) => {
+          log.error(error);
           mainWindow.show();
           this.steps.push(step);
           setTimeout(() => {
-            gui.send("launch-failed", code)
+            gui.send("launch-failed", error)
           }, 100);
         });
       }

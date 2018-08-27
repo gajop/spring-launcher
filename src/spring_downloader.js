@@ -63,10 +63,14 @@ class SpringDownloader extends EventEmitter {
       if (code == 0) {
         this.emit("finished", name);
       } else {
-        this.emit("failed", name);
+        this.emit("failed", name, `Download failed: ${name}: ${code}`);
       }
     });
 
+    prd.on('error', (error) => {
+      finished = true;
+      this.emit("failed", name, `Failed to launch pr-downloader: ${error}`)
+    });
   }
 
 

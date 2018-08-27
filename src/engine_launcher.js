@@ -3,8 +3,6 @@ const EventEmitter = require('events');
 const { spawn } = require('child_process');
 const { resolve } = require('path');
 
-const log = require('electron-log');
-
 const { writePath, springBin } = require('./spring_platform');
 const { config } = require('./launcher_config');
 
@@ -83,9 +81,6 @@ class Launcher extends EventEmitter {
     if (extraArgs != undefined) {
       args = args.concat(extraArgs);
     }
-
-    log.info("Starting Spring with args:");
-    log.info(`${springPath} ${args.join(" ")}`);
     // const process = spawn(springPath, args, {stdio: "inherit", stderr: "inherit"});
 
     var outputMode = "pipe";
@@ -96,18 +91,18 @@ class Launcher extends EventEmitter {
 
     const spring = spawn(springPath, args,
       { stdio: outputMode, stderr: outputMode, windowsHide: true });
-    this.state = "launching";
-
+    this.state = "running";
 
     spring.on('close', (code) => {
+      if (this.state != "running") {
+        return;
+      }
       if (code == 0) {
-        log.info(`Spring finished with code: ${code}`);
         this.state = "finished";
-        this.emit("finished");
+        this.emit("finished", code);
       } else {
-        log.error(`Spring failed with code: ${code}`);
         this.state = "failed";
-        this.emit("failed", code)
+        this.emit("failed", `Spring failed with code: ${code}`)
       }
     })
 
@@ -127,6 +122,11 @@ class Launcher extends EventEmitter {
         this.emit("stderr", text);
       });
     }
+
+    spring.on('error', (error) => {
+      this.state = "failed";
+      this.emit("failed", `Failed to launch Spring: ${error}`)
+    });
   }
 
   launch(engineName, opts) {

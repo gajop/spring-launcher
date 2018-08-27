@@ -67,6 +67,19 @@ function resetUI() {
   document.getElementById("btn-progress").classList.add("is-primary");
 }
 
+function stepError(message) {
+  document.getElementById("lbl-progress-full").innerHTML = message;
+  document.getElementById("lbl-progress-full").classList.add("error");
+  document.getElementById("lbl-progress-part").classList.add("error");
+
+  document.getElementById("progress-full").classList.remove("is-primary");
+  document.getElementById("progress-part").classList.remove("is-primary");
+
+  document.getElementById("progress-full").classList.add("is-danger");
+  document.getElementById("progress-part").classList.add("is-danger");
+  setInProgress(false);
+}
+
 window.onload = function() {
   document.getElementById('btn-progress').addEventListener('click', (event) => {
     event.preventDefault();
@@ -245,16 +258,8 @@ ipcRenderer.on("dl-finished", (e, downloadItem) => {
   document.getElementById("progress-part").classList.add("is-success");
 });
 
-ipcRenderer.on("dl-failed", (e, downloadItem, error) => {
-  document.getElementById("lbl-progress-full").innerHTML =
-    `Step ${currentStep} of ${steps.length}: Downloading ${downloadItem}: FAILED`;
-  document.getElementById("error").innerHTML = error;
-
-  document.getElementById("progress-full").classList.remove("is-primary");
-  document.getElementById("progress-part").classList.remove("is-primary");
-
-  document.getElementById("progress-full").classList.add("is-danger");
-  document.getElementById("progress-part").classList.add("is-danger");
+ipcRenderer.on("dl-failed", (e, downloadItem, msg) => {
+  stepError(`Step ${currentStep} of ${steps.length}: ${msg}`);
 });
 
 //////////////////////////////
@@ -272,17 +277,8 @@ ipcRenderer.on("launch-finished", (e) => {
   setInProgress(false);
 });
 
-ipcRenderer.on("launch-failed", (e, code) => {
-  document.getElementById("lbl-progress-full").classList.add("error");
-  document.getElementById("lbl-progress-full").innerHTML =
-    `Failed to launch: see log`;
-  // document.getElementById("progress-full").classList.add("is-danger");
-  // document.getElementById("progress-full").value = 100;
-  // document.getElementById("progress-part").classList.add("is-danger");
-  // document.getElementById("progress-part").value = 100;
-
-  setInProgress(false);
-  document.getElementById("btn-progress").classList.add("is-warning");
+ipcRenderer.on("launch-failed", (e, msg) => {
+  stepError(`Step ${currentStep} of ${steps.length}: ${msg}`);
 });
 
 //////////////////////////////

@@ -35,9 +35,9 @@ springDownloader.on('finished', (downloadItem) => {
   wizard.nextStep();
 });
 
-springDownloader.on('failed', (downloadItem, error) => {
-  log.info(`Download failed: ${downloadItem}: ${error}`);
-  gui.send('dl-failed', downloadItem, error);
+springDownloader.on('failed', (downloadItem, msg) => {
+  log.error(`${msg}`);
+  gui.send('dl-failed', downloadItem, msg);
 });
 
 autoUpdater.on('update-available', () => {
