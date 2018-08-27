@@ -57,6 +57,7 @@ app.prependListener('ready', () => {
 
   mainWindow.on('closed', () => {
     mainWindow = null;
+    app.quit();
   })
 
   tray = new Tray(`${__dirname}/renderer/spring-icon.png`);
