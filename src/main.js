@@ -83,6 +83,7 @@ app.on('ready', () => {
   }
   const oldConfig = settings.get('config');
   if (oldConfig) {
-    setConfig(oldConfig);
+    // FIXME: enable saving configs again; should be portable though
+    // setConfig(oldConfig);
   }
 })
