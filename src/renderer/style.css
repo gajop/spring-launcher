@@ -69,10 +69,17 @@ body::-webkit-scrollbar {
   /* border-style: solid;
   border-width: 1px;
   border-color: black; */
-  width: 450px;
   font-size: 80%;
   overflow-wrap: break-word;
   word-wrap: break-word;
+}
+
+#lbl-progress-full {
+  width: 350px;
+}
+
+#lbl-progress-part {
+  width: 100px;
 }
 
 .progress-block {
