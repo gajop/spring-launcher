@@ -224,7 +224,7 @@ ipcRenderer.on("wizard-next-step", (e, step) => {
   document.getElementById("lbl-progress-part").innerHTML = '';
   document.getElementById("lbl-progress-full").innerHTML =
     `Step ${currentStep} of ${steps.length} Checking for download: ${step.name} `;
-  document.getElementById("progress-full").value = parseInt(100 * currentStep / steps.length);
+  document.getElementById("progress-full").value = Math.round(100 * currentStep / steps.length);
   currentStep++;
 });
 
@@ -240,10 +240,10 @@ ipcRenderer.on("dl-started", (e, downloadItem) => {
 });
 
 ipcRenderer.on("dl-progress", (e, downloadItem, current, total) => {
-  document.getElementById("progress-part").value = parseInt(100 * current / total);
+  document.getElementById("progress-part").value = Math.round(100 * current / total);
 
   const step = currentStep + current / total - 1;
-  document.getElementById("progress-full").value = parseInt(100 * step / steps.length);
+  document.getElementById("progress-full").value = Math.round(100 * step / steps.length);
 
   if (downloadItem != "autoUpdate") {
     document.getElementById("lbl-progress-part").innerHTML = `${formatBytes(current, total)}`;

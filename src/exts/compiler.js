@@ -1,5 +1,7 @@
 const EventEmitter = require('events');
 const { spawn } = require('child_process');
+const path = require('path');
+const fs = require('fs');
 
 const { bridge } = require('../spring_api');
 
@@ -11,9 +13,12 @@ class Compiler extends EventEmitter {
     this.bridge = bridge;
 
     if (process.platform === 'windows') {
-      this.executableName = "./springMapConvNG.exe";
+      this.executablePath = path.resolve(`${__dirname}/../../bin/springMapConvNG.exe`);
     } else if (process.platform === 'linux') {
-      this.executableName = "./springMapConvNG";
+      this.executablePath = path.resolve(`${__dirname}/../../bin/springMapConvNG`);
+      if (!fs.existsSync(this.executablePath)) {
+        this.executablePath = path.resolve(`${__dirname}/../../../../bin/springMapConvNG`);
+      }
     }
   }
 
@@ -55,7 +60,7 @@ class Compiler extends EventEmitter {
     // const compilerPath = "./src/exts/springMapConvNG";
     // process = spawn('ls');
 
-    process = spawn(`${__dirname}/${this.executableName}`, callParams);
+    process = spawn(this.executablePath, callParams);
 
     process.stdout.on('data', (data) => {
       const line = data.toString();
