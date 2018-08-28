@@ -95,8 +95,8 @@ app.prependListener('ready', () => {
   mainWindow.once('ready-to-show', () => {
     mainWindow.show();
 
-    gui.send("config", config.getConfigObj());
     gui.send("all-configs", config.getAvailableConfigs());
+    gui.send("config", config.getConfigObj());
 
     const { wizard } = require('./launcher_wizard.js');
 

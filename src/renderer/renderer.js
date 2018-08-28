@@ -166,7 +166,7 @@ ipcRenderer.on("config", (e, c) => {
 
   resetUI();
   document.getElementById("btn-progress").innerHTML = buttonText;
-
+  document.getElementById(`cfg-${config.package.id}`).selected = true;
   // document.getElementById("current_config").innerHTML = `Config: ${config.package.display}`;
 });
 

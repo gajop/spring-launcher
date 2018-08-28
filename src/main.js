@@ -96,11 +96,11 @@ autoUpdater.on('update-downloaded', () => {
 
 function setConfig(cfgName) {
   config.setConfig(cfgName);
-
   gui.send("config", config.getConfigObj());
-  wizard.generateSteps();
-
   settings.set('config', cfgName);
+  wizard.generateSteps();
+  const dlSteps = wizard.steps.filter(step => step.name != "start")
+  gui.send("wizard-list", dlSteps);
 }
 
 ipcMain.on("change-cfg", (e, cfgName) => {
