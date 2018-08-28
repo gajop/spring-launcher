@@ -12,13 +12,16 @@ class Compiler extends EventEmitter {
     this.progressPattern = new RegExp('[0-9]+/\\s*[0-9]+');
     this.bridge = bridge;
 
+    let executableBin;
     if (process.platform === 'windows') {
-      this.executablePath = path.resolve(`${__dirname}/../../bin/springMapConvNG.exe`);
+      executableBin = 'springMapConvNG.exe';
     } else if (process.platform === 'linux') {
-      this.executablePath = path.resolve(`${__dirname}/../../bin/springMapConvNG`);
-      if (!fs.existsSync(this.executablePath)) {
-        this.executablePath = path.resolve(`${__dirname}/../../../../bin/springMapConvNG`);
-      }
+      executableBin = 'springMapConvNG';
+    }
+
+    this.executablePath = path.resolve(`${__dirname}/../../bin/${executableBin}`);
+    if (!fs.existsSync(this.executablePath)) {
+      this.executablePath = path.resolve(`${process.resourcesPath}/../bin/${executableBin}`);
     }
   }
 
