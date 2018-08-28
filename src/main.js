@@ -12,6 +12,7 @@ const { wizard } = require('./launcher_wizard.js');
 const springDownloader = require('./spring_downloader');
 const autoUpdater = require('./updater');
 const springApi = require('./spring_api');
+const launcher = require('./engine_launcher');
 
 //console.log(log.transports.file.findLogPath())
 //console.log(fs.readFileSync(log.transports.file.findLogPath(), 'utf8'))
@@ -39,6 +40,35 @@ springDownloader.on('failed', (downloadItem, msg) => {
   log.error(`${msg}`);
   gui.send('dl-failed', downloadItem, msg);
 });
+
+launcher.on('stdout', (text) => {
+  log.info(text);
+  // console.log(text);
+});
+
+launcher.on('stderr', (text) => {
+  log.warn(text);
+  // console.warn(text);
+});
+
+launcher.on("finished", (code) => {
+  log.info(`Spring finished with code: ${code}`);
+  app.quit();
+  setTimeout(() => {
+    gui.send("launch-finished")
+  }, 100);
+});
+
+launcher.on("failed", (error) => {
+  log.error(error);
+  const mainWindow = gui.getMainWindow();
+  mainWindow.show();
+  setTimeout(() => {
+    gui.send("launch-failed", error)
+  }, 100);
+});
+
+
 
 autoUpdater.on('update-available', () => {
   gui.send('dl-started', "autoupdate");

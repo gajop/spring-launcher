@@ -88,32 +88,12 @@ class Wizard extends EventEmitter {
         launcher.launch(config.downloads.engines[0], config.start_args);
 
         gui.send("launch-started")
-
-        launcher.on('stdout', (text) => {
-          log.info(text);
-          // console.log(text);
-        });
-
-        launcher.on('stderr', (text) => {
-          log.warn(text);
-          // console.warn(text);
-        });
-
-        launcher.on("finished", (code) => {
-          log.info(`Spring finished with code: ${code}`);
-          app.quit();
+        launcher.once("finished", (code) => {
           this.steps.push(step);
-          setTimeout(() => {
-            gui.send("launch-finished")
-          }, 100);
         });
-        launcher.on("failed", (error) => {
-          log.error(error);
-          mainWindow.show();
+
+        launcher.once("failed", (error) => {
           this.steps.push(step);
-          setTimeout(() => {
-            gui.send("launch-failed", error)
-          }, 100);
         });
       }
     })
