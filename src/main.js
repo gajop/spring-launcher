@@ -81,9 +81,11 @@ app.on('ready', () => {
   if (!gui) {
     return;
   }
+  // Use local settings file
+  settings.setPath("Settings")
   const oldConfig = settings.get('config');
   if (oldConfig) {
     // FIXME: enable saving configs again; should be portable though
-    // setConfig(oldConfig);
+    setConfig(oldConfig);
   }
 })
