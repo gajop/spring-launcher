@@ -278,7 +278,7 @@ ipcRenderer.on("launch-finished", (e) => {
 });
 
 ipcRenderer.on("launch-failed", (e, msg) => {
-  stepError(`Step ${currentStep} of ${steps.length}: ${msg}`);
+  stepError(`${msg}`);
 });
 
 //////////////////////////////
