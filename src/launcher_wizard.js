@@ -34,9 +34,10 @@ class Wizard extends EventEmitter {
           if (!isDev) {
             updater.checkForUpdates();
           } else {
+            console.log("Development version: no self-update required");
             setTimeout(() => {
               this.nextStep()
-            }, 1000);
+            }, 300);
           }
         }
       })
