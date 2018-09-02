@@ -130,15 +130,21 @@ class Launcher extends EventEmitter {
   }
 
   launch(engineName, opts) {
-    const scriptTXT = generateScriptTXT()
-    const fs = require('fs');
-    const scriptTxtPath = `${writePath}/script.txt`;
-    opts = [];
-    fs.writeFile(scriptTxtPath, scriptTXT, 'utf8', () => {
-      opts.push(scriptTxtPath);
-      console.log(opts);
-      this.launchSpring(engineName, opts);
-    });
+    if (config.no_start_script) {
+      // opts.push(scriptTxtPath);
+      // console.log(opts);
+      this.launchSpring(engineName);
+    } else {
+      const scriptTXT = generateScriptTXT()
+      const fs = require('fs');
+      const scriptTxtPath = `${writePath}/script.txt`;
+      opts = [];
+      fs.writeFile(scriptTxtPath, scriptTXT, 'utf8', () => {
+        opts.push(scriptTxtPath);
+        console.log(opts);
+        this.launchSpring(engineName, opts);
+      });
+    }
   }
 }
 

@@ -9,6 +9,7 @@ const configDefault = {
   "auto_download": false,
   "auto_start": false,
   "no_downloads": false,
+  "no_start_script": false,
 
   "downloads": {
     "games": [],
@@ -114,7 +115,10 @@ const proxy = new Proxy({
         }
       });
       if (!found) {
-        throw `No config with ID: ${id}`;
+        log.error(`No config with ID: ${id} - ignoring`);
+        return false;
+      } else {
+        return true;
       }
     },
     getAvailableConfigs: function() {

@@ -1,67 +1,12 @@
 [
   {
     "package": {
-      "id": "stable",
-      "display": "Stable"
+      "id": "barebone",
+      "display": "Launch Engine"
     },
     "downloads": {
-      "games" : ["sbc:stable"],
-      "maps" : ["Obsidian_1.5"],
       "engines" : [ "104.0.1-667-g4835668 maintenance" ]
     },
-    "launch": {
-      "game": "rapid://sbc:stable",
-      "map": "Obsidian_1.5"
-    }
-  },
-
-  {
-    "package": {
-      "id": "test-win",
-      "platform": "win32",
-      "display": "Testing-Windows"
-    },
-    "downloads": {
-      "games" : ["sbc:test"],
-      "maps" : ["Obsidian_1.5"],
-      "engines" : [ "104.0.1-something-else maintenance" ]
-    },
-    "launch": {
-      "game": "rapid://sbc:test",
-      "map": "Obsidian_1.5"
-    }
-  },
-
-  {
-    "package": {
-      "id": "test",
-      "display": "Testing"
-    },
-    "downloads": {
-      "games" : ["sbc:test"],
-      "maps" : ["Obsidian_1.5"],
-      "engines" : [ "104.0.1-667-g4835668 maintenance" ]
-    },
-    "launch": {
-      "game": "rapid://sbc:test",
-      "map": "Obsidian_1.5"
-    }
-  },
-
-  {
-    "package": {
-      "id": "dev",
-      "display": "Development"
-    },
-    "downloads": {
-      "maps" : ["Obsidian_1.5"],
-      "engines" : [ "104.0.1-667-g4835668 maintenance" ]
-    },
-    "auto_start" : true,
-    "no_downloads" : true,
-    "launch": {
-      "game": "SpringBoard Core $VERSION",
-      "map": "Obsidian_1.5"
-    }
+    "no_start_script": true
   }
 ]

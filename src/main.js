@@ -121,7 +121,9 @@ app.on('ready', () => {
   settings.setPath("Settings")
   const oldConfig = settings.get('config');
   if (oldConfig) {
-    // FIXME: enable saving configs again; should be portable though
-    setConfig(oldConfig);
+    if (!setConfig(oldConfig)) {
+      // forget invalid configs
+      settings.set('config', undefined);
+    }
   }
 })
