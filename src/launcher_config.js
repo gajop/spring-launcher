@@ -6,6 +6,10 @@ const configDefault = {
     "platform": "all",
   },
 
+  "display": {
+    "title": "Spring Launcher"
+  },
+
   "auto_download": false,
   "auto_start": false,
   "no_downloads": false,

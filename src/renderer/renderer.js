@@ -139,6 +139,9 @@ let allConfigs;
 ipcRenderer.on("config", (e, c) => {
   config = c;
 
+  document.title = config.display.title;
+  document.getElementById("main-title").innerHTML = config.display.title;
+
   let buttonText;
   if (config.no_downloads) {
     // TODO: add later
