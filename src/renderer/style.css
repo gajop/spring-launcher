@@ -1,3 +1,24 @@
+body {
+    background-image: url(./images/background.png);
+    background-position: center center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+	text-shadow: 1px 1px 0px #000
+}
+
+.title {
+	text-shadow: 2px 2px 5px #000
+}
+
+.button {
+	text-shadow: 1px 1px 5px #000
+}
+
+.button.is-primary {
+	animation: radial-pulse 2s infinite;
+}
+
 p.error {
     color: red;
 }
@@ -107,7 +128,25 @@ body::-webkit-scrollbar {
   white-space: normal;
 }
 
+.progress {
+	box-shadow: 2px 2px 5px #000;
+}
+
 .section {
   padding-bottom: 0px;
   width: 100%;
 }
+
+/* Add radial Pulse ability */
+@keyframes radial-pulse {
+  0% {
+    box-shadow: 0 0 0 0px rgba(0, 0, 0, 1);
+  }
+
+  100% {
+    box-shadow: 0 0 0 10px rgba(0, 0, 0, 0);
+  }
+}
+/**/
+
+
