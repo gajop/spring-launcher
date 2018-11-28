@@ -31,7 +31,7 @@
     },
     "publish": {
       "provider": "generic",
-      "url": "http://ec2-52-24-14-255.us-west-2.compute.amazonaws.com/",
+      "url": "https://spring-launcher.ams3.digitaloceanspaces.com",
       "channel": "latest"
     }
   },
