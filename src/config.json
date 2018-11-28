@@ -1,12 +1,53 @@
-[
-  {
-    "package": {
-      "id": "barebone",
-      "display": "Launch Engine"
+{
+  "title" : "SpringBoard",
+  "setups" : [
+    {
+      "package": {
+        "id": "test",
+        "display": "Latest"
+      },
+      "downloads": {
+        "games" : ["sbc:test"],
+        "maps" : ["Obsidian_1.5"],
+        "engines" : [ "104.0.1-909-g82a205f maintenance" ]
+      },
+      "launch": {
+        "game": "rapid://sbc:test",
+        "map": "Obsidian_1.5"
+      }
     },
-    "downloads": {
-      "engines" : [ "104.0.1-667-g4835668 maintenance" ]
+
+    {
+      "package": {
+        "id": "stable",
+        "display": "Stable"
+      },
+      "downloads": {
+        "games" : ["sbc:stable"],
+        "maps" : ["Obsidian_1.5"],
+        "engines" : [ "104.0.1-909-g82a205f maintenance" ]
+      },
+      "launch": {
+        "game": "rapid://sbc:stable",
+        "map": "Obsidian_1.5"
+      }
     },
-    "no_start_script": true
-  }
-]
+
+    {
+      "package": {
+        "id": "dev",
+        "display": "Development"
+      },
+      "downloads": {
+        "maps" : ["Obsidian_1.5"],
+        "engines" : [ "104.0.1-909-g82a205f maintenance" ]
+      },
+      "auto_start" : false,
+      "no_downloads" : true,
+      "launch": {
+        "game": "SpringBoard Core $VERSION",
+        "map": "Obsidian_1.5"
+      }
+    }
+  ]
+}

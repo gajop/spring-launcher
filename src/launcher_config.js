@@ -76,7 +76,7 @@ function mergeDeep(target, ...sources) {
   return mergeDeep(target, ...sources);
 }
 
-(require("./config.json")).forEach((c) => {
+(require("./config.json")).setups.forEach((c) => {
   // config = JSON.parse(JSON.stringify(configDefault));
   // const config = {...configDefault, ...c};
   // const config = Object.assign(c, configDefault);
