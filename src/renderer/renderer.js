@@ -104,6 +104,10 @@ window.onload = function() {
     }
   });
 
+  document.getElementById('btn-upload-log').addEventListener('click', (event) => {
+    ipcRenderer.send("log-upload-ask");
+  });
+
   document.getElementById('config-select').addEventListener('change', (event) => {
     if (!configEnabled) {
       return;

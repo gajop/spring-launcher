@@ -1,4 +1,5 @@
 const log = require('electron-log');
+const assert = require('assert');
 
 const configDefault = {
   "package": {
@@ -76,7 +77,19 @@ function mergeDeep(target, ...sources) {
   return mergeDeep(target, ...sources);
 }
 
+// We setup logging information here before any logging has been done.
 const configFile = (require("./config.json"));
+assert(configFile.title != undefined);
+const { existsSync, mkdirSync, unlinkSync } = require('fs');
+if (!existsSync(configFile.title)){
+    mkdirSync(configFile.title);
+}
+const logFilePath = `${configFile.title}/spring-launcher.log`;
+if (existsSync(logFilePath)) {
+  unlinkSync(logFilePath);
+}
+log.transports.file.file = logFilePath;
+log.info(`Log file: ${logFilePath}`);
 
 configFile.setups.forEach((c) => {
   // config = JSON.parse(JSON.stringify(configDefault));

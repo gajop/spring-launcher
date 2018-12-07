@@ -14,6 +14,8 @@ const autoUpdater = require('./updater');
 const springApi = require('./spring_api');
 const launcher = require('./engine_launcher');
 
+const log_uploader = require('./log_uploader');
+
 //console.log(log.transports.file.findLogPath())
 //console.log(fs.readFileSync(log.transports.file.findLogPath(), 'utf8'))
 
@@ -111,6 +113,10 @@ function setConfig(cfgName) {
 
 ipcMain.on("change-cfg", (e, cfgName) => {
   setConfig(cfgName);
+});
+
+ipcMain.on("log-upload-ask", (e) => {
+  log_uploader.upload_ask();
 });
 
 app.on('ready', () => {

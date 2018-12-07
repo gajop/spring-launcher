@@ -4,11 +4,10 @@ const { format } = util;
 
 const log = require('electron-log');
 
-const { gui } = require('./launcher_gui.js');
-
 let mainWindow;
 
 log.transports.file.level = 'info';
+
 var logBuffer = [];
 var ready = false;
 
@@ -21,6 +20,9 @@ log.transports.console = (msg) => {
     logBuffer.push(msg);
   }
 }
+
+
+const { gui } = require('./launcher_gui.js');
 
 app.on('ready', () => {
   if (!gui) {
