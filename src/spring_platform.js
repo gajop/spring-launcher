@@ -1,6 +1,9 @@
 const log = require('electron-log');
 const path = require('path');
 const fs = require('fs');
+const { config } = require('./launcher_config');
+
+const assert = require('assert');
 
 const platformName = process.platform
 
@@ -23,5 +26,10 @@ if (!fs.existsSync(exports.prDownloaderPath)) {
 
 log.info(`pr-downloader path: ${exports.prDownloaderPath}`);
 
-exports.writePath = './game_package';
+// exports.writePath = './game_package';
 //console.info(`Detected platform: ${platformName}`);
+
+
+assert(config.title != undefined);
+
+exports.writePath = config.title;

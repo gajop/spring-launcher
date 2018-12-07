@@ -76,7 +76,9 @@ function mergeDeep(target, ...sources) {
   return mergeDeep(target, ...sources);
 }
 
-(require("./config.json")).setups.forEach((c) => {
+const configFile = (require("./config.json"));
+
+configFile.setups.forEach((c) => {
   // config = JSON.parse(JSON.stringify(configDefault));
   // const config = {...configDefault, ...c};
   // const config = Object.assign(c, configDefault);
@@ -136,7 +138,9 @@ const proxy = new Proxy({
   get: function(target, name) {
     if (target[name] != undefined) {
       return target[name];
-    } else {
+    } else if (configFile[name] != undefined) {
+      return configFile[name];
+    } {
       return currentConfig[name];
     }
   }
