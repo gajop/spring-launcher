@@ -1,9 +1,11 @@
 const log = require('electron-log');
 const path = require('path');
 const fs = require('fs');
+const { app } = require('electron');
+const assert = require('assert');
+
 const { config } = require('./launcher_config');
 
-const assert = require('assert');
 
 const platformName = process.platform
 
@@ -32,4 +34,6 @@ log.info(`pr-downloader path: ${exports.prDownloaderPath}`);
 
 assert(config.title != undefined);
 
-exports.writePath = config.title;
+const writePath = path.join(app.getAppPath(), config.title);
+log.info(`write path: ${writePath}`);
+exports.writePath = writePath;
