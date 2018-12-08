@@ -34,6 +34,11 @@ log.info(`pr-downloader path: ${exports.prDownloaderPath}`);
 
 assert(config.title != undefined);
 
-const writePath = path.join(app.getAppPath(), config.title);
+// bad path (mounted)
+// const writePath = path.join(app.getPath('exe'), config.title);
+// bad path (relative to current directory, not app directory)
+// const writePath = `./${config.title}`;
+const writePath = path.join(app.getPath('appData'), config.title);
+
 log.info(`write path: ${writePath}`);
 exports.writePath = writePath;
