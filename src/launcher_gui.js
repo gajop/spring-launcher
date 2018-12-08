@@ -1,5 +1,5 @@
 const electron = require('electron');
-const { app, BrowserWindow, ipcMain, Menu, Tray } = electron;
+const { app, BrowserWindow, Menu, Tray } = electron;
 
 const { config } = require('./launcher_config');
 
@@ -88,7 +88,8 @@ app.prependListener('ready', () => {
   if (process.platform === 'linux') {
     // template.unshift([{label: 'Spring-Launcher'}]);
   }
-  tray.setToolTip('Spring-Launcher: Distribution system for SpringRTS.');
+  // tray.setToolTip('Spring-Launcher: Distribution system for SpringRTS.');
+  tray.setToolTip(config.title);
   tray.setContextMenu(Menu.buildFromTemplate(template));
 
 

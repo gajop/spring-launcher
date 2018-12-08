@@ -16,9 +16,9 @@ bridge.on('listening', () => {
     port: address.port
   });
   const fs = require('fs');
-  fs.writeFile('server-info.json', json, 'utf8', () => {
-    log.debug("Written connection details to server-info.json");
-  });
+  // fs.writeFile('server-info.json', json, 'utf8', () => {
+  //   log.debug("Written connection details to server-info.json");
+  // });
 
 
   const normalizedPath = path.join(__dirname, EXTS_DIR);

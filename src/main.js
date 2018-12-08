@@ -1,5 +1,5 @@
 const fs = require('fs');
-const { app, BrowserWindow, Menu, Tray, ipcMain } = require('electron');
+const { app, ipcMain } = require('electron');
 
 const { log } = require('./spring_log.js');
 
@@ -124,7 +124,7 @@ app.on('ready', () => {
     return;
   }
   // Use local settings file
-  settings.setPath("Settings")
+  settings.setPath(`${config.title}/launcher_cfg.json`)
   const oldConfig = settings.get('config');
   if (oldConfig) {
     if (!setConfig(oldConfig)) {
