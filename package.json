@@ -22,6 +22,7 @@
   "build": {
     "appId": "com.springrts.launcher",
     "extraFiles": "bin/*",
+    "artifactName": "${productName}.${ext}",
     "linux": {
       "target": "AppImage",
       "category": "Game"
