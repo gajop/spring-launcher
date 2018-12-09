@@ -1,30 +1,33 @@
-const { exec } = require('child_process');
+// const { exec } = require('child_process');
 const { bridge } = require('../spring_api');
-
-function getDefaultAppOpener() {
-  switch (process.platform) {
-    case 'darwin' : return 'open';
-    case 'win32' : case 'win64': return 'start';
-    default: return 'xdg-open';
-  }
-}
+const file_opener = require('../file_opener');
 
 bridge.on("OpenFile", (command) => {
-  const fullPath = getDefaultAppOpener() + ' ' + command.path;
-  exec(fullPath, (err, stdout, stderr) => {
-    if (err) {
-      bridge.send("OpenedFileFailed", {
-        path: command.path,
-        stderr: stderr,
-        stdout: stdout,
-      });
-    } else {
-      bridge.send("OpenFileFinished", {
-        path: command.path,
-        stderr: stderr,
-        stdout: stdout,
-      });
-    }
-  });
-  console.log(fullPath);
+  // const fullPath = file_opener.GetOpenCommand(command.path);
+  if (file_opener.open(command.path)) { 
+    bridge.send("OpenFileFinished", {
+      path: command.path
+    });
+  } else {
+    bridge.send("OpenedFileFailed", {
+      path: command.path
+    });
+  }
+
+  // exec(fullPath, (err, stdout, stderr) => {
+  //   if (err) {
+  //     bridge.send("OpenedFileFailed", {
+  //       path: command.path,
+  //       stderr: stderr,
+  //       stdout: stdout,
+  //     });
+  //   } else {
+  //     bridge.send("OpenFileFinished", {
+  //       path: command.path,
+  //       stderr: stderr,
+  //       stdout: stdout,
+  //     });
+  //   }
+  // });
+  // console.log(fullPath);
 });

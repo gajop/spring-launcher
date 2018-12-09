@@ -19,6 +19,7 @@ const springApi = require('./spring_api');
 const launcher = require('./engine_launcher');
 const { writePath } = require('./spring_platform');
 const log_uploader = require('./log_uploader');
+const file_opener = require('./file_opener');
 
 //console.log(log.transports.file.findLogPath())
 //console.log(fs.readFileSync(log.transports.file.findLogPath(), 'utf8'))
@@ -123,24 +124,12 @@ ipcMain.on("log-upload-ask", (e) => {
   log_uploader.upload_ask();
 });
 
-// FIXME: Cleanup (code duplication with exts/open_file.js)
-const { exec } = require('child_process');
-function getDefaultAppOpener() {
-  switch (process.platform) {
-    case 'darwin' : return 'open';
-    case 'win32' : case 'win64': return 'start';
-    default: return 'xdg-open';
-  }
-}
 ipcMain.on("open-install-dir", (e) => {
-  const fullPath = getDefaultAppOpener() + ' ' + writePath;
-  exec(fullPath, (err, stdout, stderr) => {
-    if (err) {
-      log.error('Failed to open')
-    } else {
-      log.info(`User opened install directory: ${writePath}`);
-    }
-  });
+  if (file_opener.open(writePath)) {
+    log.info(`User opened install directory: ${writePath}`);
+  } else {
+    log.error(`Failed to open install directory: ${writePath}`);
+  }
 });
 
 app.on('ready', () => {
@@ -148,7 +137,7 @@ app.on('ready', () => {
     return;
   }
   // Use local settings file
-  settings.setPath(`${config.title}/launcher_cfg.json`)
+  settings.setPath(`${writePath}/launcher_cfg.json`)
   const oldConfig = settings.get('config');
   if (oldConfig) {
     if (!setConfig(oldConfig)) {
