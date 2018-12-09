@@ -1,21 +1,23 @@
 const fs = require('fs');
 const { app, ipcMain } = require('electron');
-
-const { log } = require('./spring_log.js');
-
-const { config } = require('./launcher_config');
-
 const settings = require('electron-settings');
 
+const isFirstInstance = app.requestSingleInstanceLock();
+if (!isFirstInstance) {
+  app.quit();
+  return;
+}
+
+
+const { log } = require('./spring_log.js');
+const { config } = require('./launcher_config');
 const { gui } = require('./launcher_gui.js');
 const { wizard } = require('./launcher_wizard.js');
 const springDownloader = require('./spring_downloader');
 const autoUpdater = require('./updater');
 const springApi = require('./spring_api');
 const launcher = require('./engine_launcher');
-
 const { writePath } = require('./spring_platform');
-
 const log_uploader = require('./log_uploader');
 
 //console.log(log.transports.file.findLogPath())

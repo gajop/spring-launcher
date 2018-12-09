@@ -6,13 +6,11 @@ const { config } = require('./launcher_config');
 let mainWindow;
 let tray;
 
-// makeSingleInstance
-
 const isDev = require('electron-is-dev');
 
-var shouldQuit = app.makeSingleInstance((commandLine, workingDirectory) => {
+app.on('second-instance', (event, argv, cwd) => {
   // Someone tried to run a second instance, we should focus our window.
-  var mainWindow = gui.getMainWindow();
+  const mainWindow = gui.getMainWindow();
   if (mainWindow) {
     if (mainWindow.isMinimized()) {
       mainWindow.restore();
@@ -20,11 +18,6 @@ var shouldQuit = app.makeSingleInstance((commandLine, workingDirectory) => {
     mainWindow.focus();
   }
 });
-
-if (shouldQuit) {
-  app.quit();
-  return;
-}
 
 app.prependListener('ready', () => {
   const display = electron.screen.getPrimaryDisplay();
