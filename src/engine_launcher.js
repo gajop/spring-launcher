@@ -39,6 +39,7 @@ return `[GAME]
 	{
     _sl_address = ${address};
     _sl_port = ${port};
+    _sl_writePath = ${writePath};
 	}
 
 	[player0]
