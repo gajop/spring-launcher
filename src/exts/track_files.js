@@ -14,11 +14,27 @@ var watcher = chokidar.watch(null, {
   usePolling: true
 });
 
-watcher.on('change', (path, stats) => {
-  // console.log('!!!!!!!!!!!!!!!!!!!!!!chokidar!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!', path, stats);
+function Notify(path, type) {
   bridge.send("FileChanged", {
     path: path,
+    type: type
   });
+}
+
+watcher.on('add', (path, stats) => {
+  Notify(path, 'add');
+});
+watcher.on('addDir', (path, stats) => {
+  Notify(path, 'addDir');
+});
+watcher.on('change', (path, stats) => {
+  Notify(path, 'change');
+});
+watcher.on('unlink', (path, stats) => {
+  Notify(path, 'unlink');
+});
+watcher.on('unlinkDir', (path, stats) => {
+  Notify(path, 'unlinkDir');
 });
 
 bridge.on("WatchFile", command => {
@@ -26,7 +42,7 @@ bridge.on("WatchFile", command => {
   watcher.add(path);
   // log.info(`Tracking file: ${path}`)
 
-  var watchedPaths = watcher.getWatched();
+  // var watchedPaths = watcher.getWatched();
   // log.info('Watched paths:');
   // for (var key in watchedPaths) {
   //   log.info(key, watchedPaths[key]);
