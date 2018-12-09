@@ -73,13 +73,13 @@ body::-webkit-scrollbar {
   display: block;
 }
 
-#btn-show-log {
+.status-button {
   display: inline-block;
 }
 
 .progress-status {
   padding-bottom: 20px;
-  height : 40px;
+  height : 60px;
   overflow: hidden;
   width: 550px;
 }
