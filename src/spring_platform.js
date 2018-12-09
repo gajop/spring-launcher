@@ -17,7 +17,11 @@ const { config } = require('./launcher_config');
 // bad path (relative to current directory, not app directory)
 // const writePath = `./${config.title}`;
 assert(config.title != undefined);
-const writePath = path.join(app.getPath('appData'), config.title);
+let dirPrefix = app.getPath('appData');
+if (process.env.PORTABLE_EXECUTABLE_DIR != null) {
+  dirPrefix = process.env.PORTABLE_EXECUTABLE_DIR;
+}
+const writePath = path.join(dirPrefix, config.title);
 assert(writePath != undefined);
 if (!existsSync(writePath)){
   mkdirSync(writePath);
