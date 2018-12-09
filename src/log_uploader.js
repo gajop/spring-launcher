@@ -1,8 +1,8 @@
 const { dialog, net } = require('electron');
 const { config } = require('./launcher_config');
-
-const { log } = require('./spring_log.js');
 const fs = require('fs');
+
+const { log, logPath } = require('./spring_log.js');
 
 function upload_ask() {
     // TODO: probably should disable the UI while this is being done
@@ -20,7 +20,7 @@ function upload_ask() {
 
 function upload() {
     log.info("Uploading...");
-    const fileData = fs.readFileSync(`${config.title}/spring-launcher.log`).toString();
+    const fileData = fs.readFileSync(logPath).toString();
     console.log(fileData);
     const isDev = require('electron-is-dev');
     var tags = ['spring-launcher', config.title ];

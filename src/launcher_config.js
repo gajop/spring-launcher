@@ -77,20 +77,7 @@ function mergeDeep(target, ...sources) {
   return mergeDeep(target, ...sources);
 }
 
-// We setup logging information here before any logging has been done.
-const configFile = (require("./config.json"));
-assert(configFile.title != undefined);
-const { existsSync, mkdirSync, unlinkSync } = require('fs');
-if (!existsSync(configFile.title)){
-    mkdirSync(configFile.title);
-}
-const logFilePath = `${configFile.title}/spring-launcher.log`;
-if (existsSync(logFilePath)) {
-  unlinkSync(logFilePath);
-}
-log.transports.file.file = logFilePath;
-log.info(`Log file: ${logFilePath}`);
-
+const configFile = require("./config.json");
 configFile.setups.forEach((c) => {
   // config = JSON.parse(JSON.stringify(configDefault));
   // const config = {...configDefault, ...c};
@@ -120,9 +107,6 @@ configFile.setups.forEach((c) => {
   //
   // exports.start_args = (config.start_args != undefined) ? config.start_args : [];
 })
-
-log.info(`Launcher configs:\n${JSON.stringify(configs, null, 4)}`);
-log.info(`Default config:\n${JSON.stringify(currentConfig, null, 4)}`);
 
 const proxy = new Proxy({
     setConfig: function(id) {

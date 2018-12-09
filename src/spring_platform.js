@@ -1,11 +1,27 @@
 const log = require('electron-log');
 const path = require('path');
 const fs = require('fs');
+const { existsSync, mkdirSync } = fs;
 const { app } = require('electron');
 const assert = require('assert');
 
 const { config } = require('./launcher_config');
 
+// The following order is necessary:
+// 1. Set write dir
+// 2. Set logfile based on the writedir
+// 3. Start logging
+
+// bad path (mounted)
+// const writePath = path.join(app.getPath('exe'), config.title);
+// bad path (relative to current directory, not app directory)
+// const writePath = `./${config.title}`;
+assert(config.title != undefined);
+const writePath = path.join(app.getPath('appData'), config.title);
+assert(writePath != undefined);
+if (!existsSync(writePath)){
+  mkdirSync(writePath);
+}
 
 const platformName = process.platform
 
@@ -22,23 +38,7 @@ if (platformName === "win32") {
 }
 
 exports.prDownloaderPath = path.resolve(`${__dirname}/../bin/${prDownloaderBin}`);
-if (!fs.existsSync(exports.prDownloaderPath)) {
+if (!existsSync(exports.prDownloaderPath)) {
   exports.prDownloaderPath = path.resolve(`${process.resourcesPath}/../bin/${prDownloaderBin}`);
 }
-
-log.info(`pr-downloader path: ${exports.prDownloaderPath}`);
-
-// exports.writePath = './game_package';
-//console.info(`Detected platform: ${platformName}`);
-
-
-assert(config.title != undefined);
-
-// bad path (mounted)
-// const writePath = path.join(app.getPath('exe'), config.title);
-// bad path (relative to current directory, not app directory)
-// const writePath = `./${config.title}`;
-const writePath = path.join(app.getPath('appData'), config.title);
-
-log.info(`write path: ${writePath}`);
 exports.writePath = writePath;

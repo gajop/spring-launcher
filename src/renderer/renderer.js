@@ -108,6 +108,10 @@ window.onload = function() {
     ipcRenderer.send("log-upload-ask");
   });
 
+  document.getElementById('btn-show-dir').addEventListener('click', (event) => {
+    ipcRenderer.send("open-install-dir");
+  });
+
   document.getElementById('config-select').addEventListener('change', (event) => {
     if (!configEnabled) {
       return;
