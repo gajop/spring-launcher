@@ -4,6 +4,7 @@ const log = require('electron-log');
 const chokidar = require('chokidar');
 
 var watcher = chokidar.watch(null, {
+  ignoreInitial: true,
   persistent: true,
   followSymlinks: true,
   // TODO: chokidar doesn't seem to work without explicitly enabling polling
