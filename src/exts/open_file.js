@@ -9,7 +9,7 @@ bridge.on("OpenFile", (command) => {
       path: command.path
     });
   } else {
-    bridge.send("OpenedFileFailed", {
+    bridge.send("OpenFileFailed", {
       path: command.path
     });
   }
