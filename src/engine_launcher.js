@@ -40,6 +40,7 @@ return `[GAME]
     _sl_address = ${address};
     _sl_port = ${port};
     _sl_write_path = ${writePath};
+    _sl_launcher_version = ${app.getVersion()};
 	}
 
 	[player0]
