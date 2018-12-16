@@ -28,6 +28,7 @@ class Bridge extends EventEmitter {
             obj = JSON.parse(msg);
           } catch(e) {
             log.error(`Failed to parse JSON message: ${msg}`);
+            log.error(e);
             return;
           }
 
