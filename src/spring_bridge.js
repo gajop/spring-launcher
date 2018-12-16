@@ -23,7 +23,13 @@ class Bridge extends EventEmitter {
             return;
           }
           log.debug(msg);
-          const obj = JSON.parse(msg);
+          var obj;
+          try {
+            obj = JSON.parse(msg);
+          } catch(e) {
+            log.error(`Failed to parse JSON message: ${msg}`);
+            return;
+          }
 
           // console.log("received obj: ", obj);
           const name = obj.name;
