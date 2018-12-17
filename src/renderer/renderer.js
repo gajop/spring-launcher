@@ -148,8 +148,8 @@ let allConfigs;
 ipcRenderer.on("config", (e, c) => {
   config = c;
 
-  document.title = config.display.title;
-  setMainTitle(config.display.title);
+  document.title = config.title;
+  setMainTitle(config.title);
 
   let buttonText;
   if (config.no_downloads) {

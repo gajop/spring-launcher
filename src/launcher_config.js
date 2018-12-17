@@ -78,6 +78,7 @@ function mergeDeep(target, ...sources) {
 }
 
 const configFile = require("./config.json");
+configDefault.title = configFile.title;
 configFile.setups.forEach((c) => {
   // config = JSON.parse(JSON.stringify(configDefault));
   // const config = {...configDefault, ...c};
