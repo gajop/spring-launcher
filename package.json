@@ -28,8 +28,8 @@
       "category": "Game"
     },
     "nsis": {
-      "oneClick": false,
-      "allowToChangeInstallationDirectory": true
+      "oneClick": true,
+      "perMachine": true
     },
     "publish": {
       "provider": "generic",
