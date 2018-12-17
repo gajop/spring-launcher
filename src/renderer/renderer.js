@@ -50,6 +50,14 @@ function setInProgress(state) {
   operationInProgress = state;
 }
 
+const isDev = require('electron-is-dev');
+function setMainTitle(title) {
+  title = `${title} (DEV)`;
+  if (isDev) {
+    document.getElementById("main-title").innerHTML = title;
+  }
+}
+
 function resetUI() {
   document.getElementById("progress-part").value = 0;
   document.getElementById("progress-full").value = 0;
@@ -128,13 +136,6 @@ window.onload = function() {
   //   console.log("ABC");
   //   this.blur();
   // });
-
-
-  const isDev = require('electron-is-dev');
-  if (isDev) {
-    document.getElementById("main-title").innerHTML =
-      `${document.getElementById("main-title").innerHTML} (DEV)`;
-  }
 }
 
 //////////////////////////////
@@ -148,7 +149,7 @@ ipcRenderer.on("config", (e, c) => {
   config = c;
 
   document.title = config.display.title;
-  document.getElementById("main-title").innerHTML = config.display.title;
+  setMainTitle(config.display.title);
 
   let buttonText;
   if (config.no_downloads) {

@@ -29,6 +29,7 @@ class SpringDownloader extends EventEmitter {
 
     prd.stdout.on('data', (data) => {
       const line = data.toString();
+      log.info(line);
       if (line.startsWith("[Progress]")) {
         const matched = line.match(this.progressPattern);
         if (!matched || matched.length == 0) {
