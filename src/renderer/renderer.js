@@ -52,10 +52,10 @@ function setInProgress(state) {
 
 const isDev = require('electron-is-dev');
 function setMainTitle(title) {
-  title = `${title} (DEV)`;
   if (isDev) {
-    document.getElementById("main-title").innerHTML = title;
+    title = `${title} (DEV)`;
   }
+  document.getElementById("main-title").innerHTML = title;
 }
 
 function resetUI() {
