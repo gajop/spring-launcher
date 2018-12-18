@@ -11,6 +11,7 @@ const configDefault = {
     "title": "Spring Launcher"
   },
 
+  "isolation": true,
   "auto_download": false,
   "auto_start": false,
   "no_downloads": false,

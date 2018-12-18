@@ -80,6 +80,9 @@ class Launcher extends EventEmitter {
   launchSpring(engineName, extraArgs) {
     const springPath = `${writePath}/engine/${engineName}/${springBin}`;
     var args = ["--write-dir", resolve(writePath)];
+    if (config.isolation) {
+      args.push("--isolation");
+    }
     if (extraArgs != undefined) {
       args = args.concat(extraArgs);
     }
