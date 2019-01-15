@@ -21,6 +21,10 @@ const configDefault = {
     "games": [],
     "maps": [],
     "engines": [],
+  },
+
+  "launch": {
+    "start_args": [],
   }
 }
 
@@ -94,6 +98,8 @@ configFile.setups.forEach((c) => {
       currentConfig = config;
     }
   }
+  // exports.start_args = (config.start_args != undefined) ? config.start_args : [];
+
   // if (c.package)
   // config.auto_download = (config.auto_download != undefined)
   // exports.auto_start = config.auto_start
@@ -107,7 +113,6 @@ configFile.setups.forEach((c) => {
   // exports.maps = (config.maps != undefined) ? config.maps : [];
   // exports.engines = (config.engines != undefined) ? config.engines : [];
   //
-  // exports.start_args = (config.start_args != undefined) ? config.start_args : [];
 })
 
 const proxy = new Proxy({

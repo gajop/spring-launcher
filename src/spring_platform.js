@@ -7,6 +7,12 @@ const assert = require('assert');
 
 const { config } = require('./launcher_config');
 
+var FILES_DIR = 'files';
+FILES_DIR = path.resolve(`${__dirname}/../files`);
+if (!existsSync(FILES_DIR)) {
+  FILES_DIR = path.resolve(`${process.resourcesPath}/../files`);
+}
+
 // The following order is necessary:
 // 1. Set write dir
 // 2. Set logfile based on the writedir
@@ -25,6 +31,16 @@ const writePath = path.join(dirPrefix, config.title);
 assert(writePath != undefined);
 if (!existsSync(writePath)){
   mkdirSync(writePath);
+}
+if (existsSync(FILES_DIR)) {
+  fs.readdirSync(FILES_DIR).forEach(function(file) {
+    const srcPath = path.join(FILES_DIR, file);
+    const dstPath = path.join(writePath, file);
+    // NB: we copy files each time, which is possibly slow
+    // if (!existsSync(dstPath)) {
+      fs.copyFileSync(srcPath, dstPath);
+    //}
+  });
 }
 
 const platformName = process.platform

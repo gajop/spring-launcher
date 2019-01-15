@@ -86,7 +86,7 @@ class Wizard extends EventEmitter {
         // })
 
         log.info(`Starting Spring from: ${config.downloads.engines[0]}`);
-        launcher.launch(config.downloads.engines[0], config.start_args);
+        launcher.launch(config.downloads.engines[0], config.launch.start_args);
 
         gui.send("launch-started")
         launcher.once("finished", (code) => {

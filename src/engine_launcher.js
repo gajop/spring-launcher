@@ -138,7 +138,7 @@ class Launcher extends EventEmitter {
     if (config.no_start_script) {
       // opts.push(scriptTxtPath);
       // console.log(opts);
-      this.launchSpring(engineName);
+      this.launchSpring(engineName, opts);
     } else {
       const scriptTXT = generateScriptTXT()
       const fs = require('fs');
