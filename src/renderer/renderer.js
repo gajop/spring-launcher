@@ -1,6 +1,19 @@
 const {app, ipcRenderer} = require('electron');
+const fs = require('fs');
+const path = require("path");
 
 const log = require('electron-log');
+
+const EXTS_DIR = "exts";
+
+const normalizedPath = path.join(__dirname, EXTS_DIR);
+fs.readdirSync(normalizedPath).forEach(function(file) {
+  const extPath = `./${EXTS_DIR}/` + file;
+  if (extPath.endsWith(".js")) {
+    log.info(`Including extension: ${extPath}...`);
+    require(extPath);
+  }
+});
 
 function formatBytes(bytesFirst, bytesSecond, decimals) {
   const sizes = ['Bytes', 'KiB', 'MiB', 'GiB', 'TiB'];

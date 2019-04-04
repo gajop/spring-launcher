@@ -8,7 +8,6 @@ if (!isFirstInstance) {
   return;
 }
 
-
 const { log } = require('./spring_log.js');
 const { config } = require('./launcher_config');
 const { gui } = require('./launcher_gui.js');

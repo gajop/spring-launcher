@@ -1,0 +1,1 @@
+You can put extensions here too (normal .js files), affecting the renderer only.
