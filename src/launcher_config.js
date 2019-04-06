@@ -16,6 +16,7 @@ const configDefault = {
   "auto_start": false,
   "no_downloads": false,
   "no_start_script": false,
+  "load_dev_exts": false,
 
   "downloads": {
     "games": [],

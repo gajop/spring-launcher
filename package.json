@@ -21,7 +21,10 @@
   },
   "build": {
     "appId": "com.springrts.launcher",
-    "extraFiles": ["bin/*", "files/*"],
+    "extraFiles": [
+      "bin/*",
+      "files/*"
+    ],
     "artifactName": "${productName}.${ext}",
     "linux": {
       "target": "AppImage",
