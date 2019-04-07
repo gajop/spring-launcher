@@ -41,10 +41,15 @@ bridge.on("LoadArchiveExtensions", (command) => {
         return;
     }
 
-    const distCfgPath = `${archivePath}/dist_cfg`;
+    const distCfgPath = `${archivePath}/dist_cfg/`;
+    const extsPath = `${distCfgPath}/exts/`;
 
-    log.log(`Loading archive extensions from: ${distCfgPath}...`);
-    fs.readdirSync(distCfgPath).forEach(function(file) {
+    log.log(`Loading archive extensions from: ${extsPath}...`);
+    const extensions = fs.readdirSync(extsPath);
+    if (extensions.length == 0) {
+        log.info(`No extensions found in: ${extsPath}...`);
+    }
+    extensions.forEach(function(file) {
         if (file.endsWith(".js")) {
             loadDevExtension(file);
         }
