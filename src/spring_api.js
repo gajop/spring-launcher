@@ -32,12 +32,13 @@ bridge.on('listening', () => {
 
   const normalizedPath = path.join(__dirname, EXTS_DIR);
   fs.readdirSync(normalizedPath).forEach(function(file) {
-    if (file != 'dev_extension_loader.js' && file.endsWith(".js")) {
-      loadExtension(`./${EXTS_DIR}/${file}`);
+    if (file.endsWith(".js")) {
+      const extension = loadExtension(`./${EXTS_DIR}/${file}`);
+      if (file == 'dev_extension_loader.js') {
+        dev_extension_loader = extension;
+      }
     }
   });
-
-  dev_extension_loader = loadExtension(`./${EXTS_DIR}/dev_extension_loader.js`);
 });
 
 wizard.on("launched", () => dev_extension_loader.setEnabled(config.load_dev_exts));

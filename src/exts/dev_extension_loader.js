@@ -1,5 +1,7 @@
 const fs = require('fs');
 
+const log = require('electron-log');
+
 const { bridge } = require('../spring_api');
 
 let m_enabled = false;
@@ -24,24 +26,24 @@ function loadDevExtension(path) {
         return;
     }
 
-    console.log(`Development extension: ${path}.`);
+    log.info(`Development extension: ${path}.`);
 }
 
 bridge.on("LoadArchiveExtensions", (command) => {
     const archvePath = command.archvePath;
     if (archvePath == null) {
-        console.error(`No archive path specified for LoadArchiveExtensions command`);
+        log.error(`No archive path specified for LoadArchiveExtensions command`);
         return;
     }
 
     if (!m_enabled) {
-        console.error(`Development extensions loading disabled.`);
+        log.error(`Development extensions loading disabled.`);
         return;
     }
 
     const distCfgPath = `${archvePath}/dist_cfg`;
 
-    console.log(`Loading archive extensions from: ${distCfgPath}...`);
+    log.log(`Loading archive extensions from: ${distCfgPath}...`);
     fs.readdirSync(distCfgPath).forEach(function(file) {
         if (file.endsWith(".js")) {
             loadDevExtension(file);

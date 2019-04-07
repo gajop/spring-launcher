@@ -43,7 +43,7 @@ var currentConfig;
 
 function canUse(config) {
   if (config.package.platform != "all") {
-    console.log("process.platform", process.platform, config.package.platform);
+    log.info("process.platform", process.platform, config.package.platform);
     if (config.package.platform != process.platform) {
       return false;
     }
