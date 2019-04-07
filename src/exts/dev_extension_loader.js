@@ -30,8 +30,8 @@ function loadDevExtension(path) {
 }
 
 bridge.on("LoadArchiveExtensions", (command) => {
-    const archvePath = command.archvePath;
-    if (archvePath == null) {
+    const archivePath = command.archivePath;
+    if (archivePath == null) {
         log.error(`No archive path specified for LoadArchiveExtensions command`);
         return;
     }
@@ -41,7 +41,7 @@ bridge.on("LoadArchiveExtensions", (command) => {
         return;
     }
 
-    const distCfgPath = `${archvePath}/dist_cfg`;
+    const distCfgPath = `${archivePath}/dist_cfg`;
 
     log.log(`Loading archive extensions from: ${distCfgPath}...`);
     fs.readdirSync(distCfgPath).forEach(function(file) {
