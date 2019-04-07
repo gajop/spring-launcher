@@ -30,6 +30,12 @@ function loadDevExtension(path) {
 bridge.on("LoadArchiveExtensions", (command) => {
     const archvePath = command.archvePath;
     if (archvePath == null) {
+        console.error(`No archive path specified for LoadArchiveExtensions command`);
+        return;
+    }
+
+    if (!m_enabled) {
+        console.error(`Development extensions loading disabled.`);
         return;
     }
 
