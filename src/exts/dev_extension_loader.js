@@ -51,7 +51,7 @@ bridge.on("LoadArchiveExtensions", (command) => {
     }
     extensions.forEach(function(file) {
         if (file.endsWith(".js")) {
-            loadDevExtension(file);
+            loadDevExtension(`${extsPath}/${file}`);
         }
     });
 });
