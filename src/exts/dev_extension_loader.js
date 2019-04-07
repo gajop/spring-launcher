@@ -3,7 +3,6 @@ const fs = require('fs');
 const { bridge } = require('../spring_api');
 
 let m_enabled = false;
-let archvePath;
 
 function loadDevExtension(path) {
     let content;
@@ -24,15 +23,19 @@ function loadDevExtension(path) {
         });
         return;
     }
+
+    console.log(`Development extension: ${path}.`);
 }
 
-bridge.on("SetArchivePath", (command) => {
-    archvePath = command.archvePath;
+bridge.on("LoadArchiveExtensions", (command) => {
+    const archvePath = command.archvePath;
     if (archvePath == null) {
         return;
     }
 
     const distCfgPath = `${archvePath}/dist_cfg`;
+
+    console.log(`Loading archive extensions from: ${distCfgPath}...`);
     fs.readdirSync(distCfgPath).forEach(function(file) {
         if (file.endsWith(".js")) {
             loadDevExtension(file);
