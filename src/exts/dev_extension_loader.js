@@ -1,4 +1,5 @@
 const fs = require('fs');
+const path = require('path');
 
 const log = require('electron-log');
 
@@ -6,13 +7,13 @@ const { bridge } = require('../spring_api');
 
 let m_enabled = false;
 
-function loadDevExtension(path) {
+function loadDevExtension(extensionPath) {
     let content;
     try {
-        content = fs.readFileSync(path).toString();
+        content = fs.readFileSync(extensionPath).toString();
     } catch (e) {
         bridge.send("LoadExtensionFailed", {
-            error: `Failed to open extension file: ${path} with error: ${e.message}`
+            error: `Failed to open extension file: ${extensionPath} with error: ${e.message}`
         });
         return;
     }
@@ -21,12 +22,12 @@ function loadDevExtension(path) {
         eval(content);
     } catch (e) {
         bridge.send("LoadExtensionFailed", {
-            error: `Failed to load extension file: ${path} with error: ${e.message}`
+            error: `Failed to load extension file: ${extensionPath} with error: ${e.message}`
         });
         return;
     }
 
-    log.info(`Development extension: ${path}.`);
+    log.info(`Development extension: ${extensionPath}.`);
 }
 
 bridge.on("LoadArchiveExtensions", (command) => {
@@ -41,17 +42,17 @@ bridge.on("LoadArchiveExtensions", (command) => {
         return;
     }
 
-    const distCfgPath = `${archivePath}/dist_cfg/`;
-    const extsPath = `${distCfgPath}/exts/`;
+    const distCfgPath = path.join(archivePath, 'dist_cfg');
+    const extsPath = path.join(distCfgPath, 'exts');
 
-    log.log(`Loading archive extensions from: ${extsPath}...`);
+    log.info(`Loading archive extensions from: ${extsPath}...`);
     const extensions = fs.readdirSync(extsPath);
     if (extensions.length == 0) {
         log.info(`No extensions found in: ${extsPath}...`);
     }
     extensions.forEach(function(file) {
         if (file.endsWith(".js")) {
-            loadDevExtension(`${extsPath}/${file}`);
+            loadDevExtension(path.join(extsPath, file));
         }
     });
 });
