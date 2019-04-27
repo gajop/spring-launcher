@@ -3,6 +3,8 @@ const EventEmitter = require('events');
 const { spawn } = require('child_process');
 const { resolve } = require('path');
 
+const log = require('electron-log');
+
 const { writePath, springBin } = require('./spring_platform');
 const { config } = require('./launcher_config');
 
@@ -94,6 +96,7 @@ class Launcher extends EventEmitter {
       outputMode = "inherit";
     }
 
+    log.info(`Launching Spring with command: ${springPath} ${args.join(" ")}`);
     const spring = spawn(springPath, args,
       { stdio: outputMode, stderr: outputMode, windowsHide: true });
     this.state = "running";
@@ -146,7 +149,6 @@ class Launcher extends EventEmitter {
       opts = [];
       fs.writeFile(scriptTxtPath, scriptTXT, 'utf8', () => {
         opts.push(scriptTxtPath);
-        console.log(opts);
         this.launchSpring(engineName, opts);
       });
     }
