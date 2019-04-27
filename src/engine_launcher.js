@@ -98,7 +98,7 @@ class Launcher extends EventEmitter {
 
     log.info(`Launching Spring with command: ${springPath} ${args.join(" ")}`);
     const spring = spawn(springPath, args,
-      { stdio: outputMode, stderr: outputMode, windowsHide: true });
+      { stdio: outputMode, stderr: outputMode, windowsHide: false });
     this.state = "running";
 
     spring.on('close', (code) => {
