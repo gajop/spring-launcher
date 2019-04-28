@@ -8,10 +8,15 @@ const { writePath } = require('./spring_platform');
 
 class Springsettings extends EventEmitter {
 	applyDefaultsOnSettings(defaults, springsettingsPath) {
-		const lines = fs.readFileSync(springsettingsPath).toString().split(/\r?\n/g);
-		var newContent = "";
-		const keysSeen = {};
+		var fileContent = "";
+		try {
+			fileContent = fs.readFileSync(springsettingsPath).toString();
+		} catch (err) {
+		}
+		const lines = fileContent.split(/\r?\n/g);
 
+		var newContent = "";
+		var keysSeen = {};
 		// read existing settings for any different values
 		for (var i = 0; i < lines.length; i++) {
 			const line = lines[i];
