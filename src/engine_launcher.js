@@ -7,6 +7,7 @@ const log = require('electron-log');
 
 const { writePath, springBin } = require('./spring_platform');
 const { config } = require('./launcher_config');
+const { springsettings } = require('./springsettings');
 
 const { bridge } = require('./spring_bridge');
 let address;
@@ -138,6 +139,7 @@ class Launcher extends EventEmitter {
   }
 
   launch(engineName, opts) {
+    springsettings.applyDefaults();
     if (config.no_start_script) {
       // opts.push(scriptTxtPath);
       // console.log(opts);
