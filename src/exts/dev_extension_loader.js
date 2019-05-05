@@ -55,6 +55,8 @@ bridge.on("LoadArchiveExtensions", (command) => {
             loadDevExtension(path.join(extsPath, file));
         }
     });
+
+    m_enabled = false; // Only load dev extensions once.
 });
 
 bridge.on("LoadExtension", (command) => {
