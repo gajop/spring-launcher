@@ -67,4 +67,7 @@ bridge.on("LoadExtension", (command) => {
     loadDevExtension(command.path);
 });
 
-exports.setEnabled = function(enabled) { m_enabled = enabled }
+exports.setEnabled = function(enabled) {
+    m_enabled = enabled;
+    log.info(`Loading dev extensions: ${enabled}`);
+}
