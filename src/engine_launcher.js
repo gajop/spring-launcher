@@ -26,7 +26,8 @@ return `[GAME]
 	IsHost = 1;
 	MapName = ${config.launch.map};
 	NumPlayers = 2;
-	NumUsers = 2;
+  NumUsers = 2;
+  GameStartDelay = 0;
 
 	[allyTeam0]
 	{
