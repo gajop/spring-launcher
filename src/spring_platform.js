@@ -23,7 +23,7 @@ if (!existsSync(FILES_DIR)) {
 // bad path (relative to current directory, not app directory)
 // const writePath = `./${config.title}`;
 assert(config.title != undefined);
-let dirPrefix = app.getPath('appData');
+let dirPrefix = app.getPath('documents');
 if (process.env.PORTABLE_EXECUTABLE_DIR != null) {
   dirPrefix = process.env.PORTABLE_EXECUTABLE_DIR;
 }
