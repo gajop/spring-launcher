@@ -5,6 +5,7 @@ const configDefault = {
   "package": {
     // Possible values are 'darwin', 'linux', 'win32'
     "platform": "all",
+    "portable": false
   },
 
   "display": {
@@ -47,6 +48,12 @@ function canUse(config) {
     if (config.package.platform != process.platform) {
       return false;
     }
+  }
+  if (config.package.portable && !process.env.PORTABLE_EXECUTABLE_DIR) {
+    return false;
+  }
+  if (process.env.PORTABLE_EXECUTABLE_DIR && !config.package.portable) {
+    return false;
   }
   return true;
 }

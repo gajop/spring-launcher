@@ -10,6 +10,7 @@
     "pack": "electron-builder --dir",
     "build-linux": "electron-builder -l",
     "build-win": "electron-builder -w",
+    "build-win-portable": "electron-builder -w portable",
     "build-mac": "electron-builder -m",
     "build": "electron-builder -wl"
   },
