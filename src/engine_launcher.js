@@ -2,6 +2,7 @@ const { app } = require('electron');
 const EventEmitter = require('events');
 const { spawn } = require('child_process');
 const { resolve } = require('path');
+const fs = require('fs');
 
 const log = require('electron-log');
 
@@ -144,10 +145,15 @@ class Launcher extends EventEmitter {
     if (config.no_start_script) {
       // opts.push(scriptTxtPath);
       // console.log(opts);
+      fs.writeFileSync(`${writePath}/sl-connection.json`, JSON.stringify({
+        _sl_address: address,
+        _sl_port: port,
+        _sl_write_path: writePath,
+        _sl_launcher_version: app.getVersion()
+      }))
       this.launchSpring(engineName, opts);
     } else {
       const scriptTXT = generateScriptTXT()
-      const fs = require('fs');
       const scriptTxtPath = `${writePath}/script.txt`;
       opts = [];
       fs.writeFile(scriptTxtPath, scriptTXT, 'utf8', () => {
