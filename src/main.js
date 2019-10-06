@@ -33,6 +33,7 @@ springDownloader.on('progress', (downloadItem, current, total) => {
     return; // ignore downloads less than 1MB (probably not real downloads!)
   }
   log.info(`Download progress: ${downloadItem}, ${current}, ${total}`);
+  gui.getMainWindow().setProgressBar(current / total);
   gui.send('dl-progress', downloadItem, current, total);
 });
 
