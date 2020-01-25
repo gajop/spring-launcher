@@ -82,8 +82,9 @@ class Wizard extends EventEmitter {
           }
         }, 1000);
 
-        log.info(`Starting Spring from: ${config.downloads.engines[0]}`);
-        launcher.launch(config.downloads.engines[0], config.launch.start_args);
+        const launchEngine = config.launch.engine || config.downloads.engines[0];
+        log.info(`Starting Spring from: ${launchEngine}`);
+        launcher.launch(launchEngine, config.launch.start_args);
 
         this.emit("launched");
 
