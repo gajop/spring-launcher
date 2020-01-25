@@ -2,8 +2,6 @@ const { dialog, net, clipboard } = require('electron');
 const { config } = require('./launcher_config');
 const fs = require('fs');
 
-const util = require('util');
-
 const { log, logPath } = require('./spring_log.js');
 
 function upload_ask() {
@@ -18,7 +16,7 @@ function upload_ask() {
     log.info("User wants to upload? ", dialogBtns[result]);
     if (result == 0) {
         upload()
-            .then((obj) => { 
+            .then((obj) => {
                 clipboard.clear();
                 clipboard.writeText(obj.url);
                 const msg = `Your log has been uploaded to: ${obj.url}` +
@@ -32,7 +30,7 @@ function upload_ask() {
                 log.info(msg);
             })
             .catch(err => failed_to_upload(err));
-    }    
+    }
 }
 
 function upload() {
@@ -77,7 +75,7 @@ function after_upload(response, resolve, reject) {
     response.on('error', (err) => {
         reject(err);
     });
-    
+
     response.on('end', () => {
         const body = Buffer.concat(chunks);
         const obj = JSON.parse(body);

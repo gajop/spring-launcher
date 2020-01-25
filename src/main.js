@@ -1,4 +1,3 @@
-const fs = require('fs');
 const { app, ipcMain } = require('electron');
 const settings = require('electron-settings');
 
@@ -19,9 +18,6 @@ const launcher = require('./engine_launcher');
 const { writePath } = require('./spring_platform');
 const log_uploader = require('./log_uploader');
 const file_opener = require('./file_opener');
-
-//console.log(log.transports.file.findLogPath())
-//console.log(fs.readFileSync(log.transports.file.findLogPath(), 'utf8'))
 
 springDownloader.on('started', (downloadItem, type, args) => {
   log.info(`Download started: ${downloadItem}, ${type}, ${args}`);
@@ -50,12 +46,10 @@ springDownloader.on('failed', (downloadItem, msg) => {
 
 launcher.on('stdout', (text) => {
   log.info(text);
-  // console.log(text);
 });
 
 launcher.on('stderr', (text) => {
   log.warn(text);
-  // console.warn(text);
 });
 
 launcher.on("finished", (code) => {

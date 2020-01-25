@@ -2,8 +2,6 @@ const { EventEmitter, once } = require('events');
 const fs = require('fs');
 const os = require("os");
 
-const log = require('electron-log');
-
 const { writePath } = require('./spring_platform');
 
 class Springsettings extends EventEmitter {

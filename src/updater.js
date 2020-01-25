@@ -1,4 +1,3 @@
-const { ipcMain } = require('electron');
 const { autoUpdater } = require('electron-updater');
 
 autoUpdater.logger = require('electron-log');

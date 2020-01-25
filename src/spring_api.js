@@ -19,17 +19,6 @@ function loadExtension(extPath) {
 }
 
 bridge.on('listening', () => {
-  const address = bridge.server.address();
-  const json = JSON.stringify({
-    address: address.address,
-    port: address.port
-  });
-  const fs = require('fs');
-  // fs.writeFile('server-info.json', json, 'utf8', () => {
-  //   log.debug("Written connection details to server-info.json");
-  // });
-
-
   const normalizedPath = path.join(__dirname, EXTS_DIR);
   fs.readdirSync(normalizedPath).forEach(function(file) {
     if (file.endsWith(".js")) {

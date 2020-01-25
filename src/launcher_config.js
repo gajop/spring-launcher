@@ -1,5 +1,4 @@
 const log = require('electron-log');
-const assert = require('assert');
 
 const configDefault = {
   "package": {
@@ -29,14 +28,6 @@ const configDefault = {
     "start_args": [],
   }
 }
-
-// function _get(obj, key, default) {
-//   if (obj[key] == undefined) {
-//     return default[key]
-//   } else if (typeof(obj) == "object") {
-//     return _get(obj[key])
-//   }
-// }
 
 var configs = [];
 var availableConfigs = [];
@@ -73,7 +64,9 @@ function isObject(item) {
  * @param ...sources
  */
 function mergeDeep(target, ...sources) {
-  if (!sources.length) return target;
+  if (sources.length === 0) {
+    return target;
+  }
   const source = sources.shift();
 
   if (isObject(target) && isObject(source)) {
@@ -93,9 +86,6 @@ function mergeDeep(target, ...sources) {
 const configFile = require("./config.json");
 configDefault.title = configFile.title;
 configFile.setups.forEach((c) => {
-  // config = JSON.parse(JSON.stringify(configDefault));
-  // const config = {...configDefault, ...c};
-  // const config = Object.assign(c, configDefault);
   const configDefaultCopy = JSON.parse(JSON.stringify(configDefault));
   const config = mergeDeep(configDefaultCopy, c);
   configs.push(config);
@@ -106,21 +96,6 @@ configFile.setups.forEach((c) => {
       currentConfig = config;
     }
   }
-  // exports.start_args = (config.start_args != undefined) ? config.start_args : [];
-
-  // if (c.package)
-  // config.auto_download = (config.auto_download != undefined)
-  // exports.auto_start = config.auto_start
-  // exports.no_downloads = config.no_downloads
-  //
-  // exports.game_title = config.game_title
-  //
-  // exports.launcher_game_id = config.launcher_game_id
-  //
-  // exports.games = (config.games != undefined) ? config.games : [];
-  // exports.maps = (config.maps != undefined) ? config.maps : [];
-  // exports.engines = (config.engines != undefined) ? config.engines : [];
-  //
 })
 
 const proxy = new Proxy({
@@ -161,11 +136,3 @@ const proxy = new Proxy({
 module.exports = {
   config: proxy,
 }
-
-// exports.setConfig = (id) => {
-//   currentConfig = configs[id];
-// }
-//
-// exports.availableConfigs = () => {
-//   return configs;
-// }

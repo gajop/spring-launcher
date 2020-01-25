@@ -1,5 +1,5 @@
 const EventEmitter = require('events');
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, ipcMain } = require('electron');
 
 const log = require('electron-log');
 
@@ -81,9 +81,6 @@ class Wizard extends EventEmitter {
             mainWindow.hide();
           }
         }, 1000);
-        // launcher.on("started", () => {
-        //   mainWindow.hide();
-        // })
 
         log.info(`Starting Spring from: ${config.downloads.engines[0]}`);
         launcher.launch(config.downloads.engines[0], config.launch.start_args);

@@ -12,12 +12,9 @@ class Bridge extends EventEmitter {
 
     var server = net.createServer((socket) => {
       this.socket = socket; // Allow multiple sockets?
-    	// socket.write('spring-launcher server');
 
       socket.on('data', (data) => {
-        // console.log("received data: ", data.toString());
         const msgs = data.toString().split('\n');
-        // console.log(msgs);
         msgs.forEach((msg) => {
           if (msg == '') {
             return;
@@ -32,7 +29,6 @@ class Bridge extends EventEmitter {
             return;
           }
 
-          // console.log("received obj: ", obj);
           const name = obj.name;
           const command = obj.command;
           this._executeCommand(name, command);

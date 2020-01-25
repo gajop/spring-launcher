@@ -60,7 +60,6 @@ class SpringDownloader extends EventEmitter {
       if (finished) { // the process already counts as finished
         return;
       }
-      //console.log(`child process exited with code ${code}`);
       if (code == 0) {
         this.emit("finished", name);
       } else {

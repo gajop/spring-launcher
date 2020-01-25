@@ -12,7 +12,7 @@ const { springsettings } = require('./springsettings');
 
 const { bridge } = require('./spring_bridge');
 let address;
-let json;
+
 bridge.on('listening', () => {
   const a = bridge.server.address();
   address = a.address;
@@ -82,6 +82,27 @@ return `[GAME]
 }
 
 class Launcher extends EventEmitter {
+  launch(engineName, opts) {
+    springsettings.applyDefaults();
+    if (config.no_start_script) {
+      fs.writeFileSync(`${writePath}/sl-connection.json`, JSON.stringify({
+        _sl_address: address,
+        _sl_port: port,
+        _sl_write_path: writePath,
+        _sl_launcher_version: app.getVersion()
+      }))
+      this.launchSpring(engineName, opts);
+    } else {
+      const scriptTXT = generateScriptTXT()
+      const scriptTxtPath = `${writePath}/script.txt`;
+      opts = [];
+      fs.writeFile(scriptTxtPath, scriptTXT, 'utf8', () => {
+        opts.push(scriptTxtPath);
+        this.launchSpring(engineName, opts);
+      });
+    }
+  }
+
   launchSpring(engineName, extraArgs) {
     const springPath = `${writePath}/engine/${engineName}/${springBin}`;
     var args = ["--write-dir", resolve(writePath)];
@@ -91,7 +112,6 @@ class Launcher extends EventEmitter {
     if (extraArgs != undefined) {
       args = args.concat(extraArgs);
     }
-    // const process = spawn(springPath, args, {stdio: "inherit", stderr: "inherit"});
 
     var outputMode = "pipe";
     const isDev = false;
@@ -138,29 +158,6 @@ class Launcher extends EventEmitter {
       this.state = "failed";
       this.emit("failed", `Failed to launch Spring: ${error}`)
     });
-  }
-
-  launch(engineName, opts) {
-    springsettings.applyDefaults();
-    if (config.no_start_script) {
-      // opts.push(scriptTxtPath);
-      // console.log(opts);
-      fs.writeFileSync(`${writePath}/sl-connection.json`, JSON.stringify({
-        _sl_address: address,
-        _sl_port: port,
-        _sl_write_path: writePath,
-        _sl_launcher_version: app.getVersion()
-      }))
-      this.launchSpring(engineName, opts);
-    } else {
-      const scriptTXT = generateScriptTXT()
-      const scriptTxtPath = `${writePath}/script.txt`;
-      opts = [];
-      fs.writeFile(scriptTxtPath, scriptTXT, 'utf8', () => {
-        opts.push(scriptTxtPath);
-        this.launchSpring(engineName, opts);
-      });
-    }
   }
 }
 
