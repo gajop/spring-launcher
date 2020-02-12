@@ -32,8 +32,9 @@
       "category": "Game"
     },
     "nsis": {
-      "oneClick": true,
-      "perMachine": true
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "perMachine": false
     },
     "publish": {
       "provider": "generic",
