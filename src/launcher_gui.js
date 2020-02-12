@@ -6,8 +6,6 @@ const { config } = require('./launcher_config');
 let mainWindow;
 let tray;
 
-const isDev = require('electron-is-dev');
-
 app.on('second-instance', (event, argv, cwd) => {
   // Someone tried to run a second instance, we should focus our window.
   const mainWindow = gui.getMainWindow();
@@ -22,9 +20,8 @@ app.on('second-instance', (event, argv, cwd) => {
 app.prependListener('ready', () => {
   const display = electron.screen.getPrimaryDisplay();
   const sWidth = display.workAreaSize.width;
-  const sHeight = display.workAreaSize.height;
   const width = 800;
-  const height = 380 + 30;
+  const height = 380 + 8;
 
   let windowOpts = {
     x: (sWidth - width) / 2,
@@ -33,17 +30,14 @@ app.prependListener('ready', () => {
     width: width,
     height: height,
     show: false,
-
     icon: `${__dirname}/renderer/spring-icon.png`,
+    webPreferences: {
+      nodeIntegration: true,
+    }
   };
-  if (!isDev) {
-    windowOpts.resizable = false;
-    //windowOpts.frame = false;
-  }
+  windowOpts.resizable = false;
   mainWindow = new BrowserWindow(windowOpts);
-  if (!isDev) {
-    mainWindow.setMenu(null);
-  }
+  mainWindow.setMenu(null);
 
   mainWindow.loadFile(`${__dirname}/renderer/index.html`);
   //mainWindow.webContents.openDevTools();
@@ -94,8 +88,16 @@ app.prependListener('ready', () => {
 
     const { wizard } = require('./launcher_wizard.js');
 
-    const dlSteps = wizard.steps.filter(step => step.name != "start")
-    gui.send("wizard-list", dlSteps);
+    const steps = wizard.steps
+      .filter(step => step.name != "start")
+      .map(step => {
+        // we have to make a copy of these steps because IPC shouldn't contain functions (step.action)
+        return {
+          name: step.name,
+          item: step.item
+        }
+      });
+    gui.send("wizard-list", steps);
 
     if (config.no_downloads &&
         config.auto_start) {

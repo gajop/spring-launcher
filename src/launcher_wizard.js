@@ -120,7 +120,10 @@ class Wizard extends EventEmitter {
     log.info(`Step: ${JSON.stringify(step, null, 4)}`);
 
     if (step.name != "start") {
-      gui.send("wizard-next-step", step);
+      gui.send("wizard-next-step", {
+        name: step.name,
+        item: step.item
+      });
     } else {
       if (!(config.auto_start || forced)) {
         gui.send("wizard-stopped");

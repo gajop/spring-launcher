@@ -17,8 +17,8 @@
   "author": "gajop",
   "license": "ISC",
   "devDependencies": {
-    "electron": "^3.0.10",
-    "electron-builder": "^20.38.2"
+    "electron": "^8.0.0",
+    "electron-builder": "^22.3.2"
   },
   "build": {
     "appId": "com.springrts.launcher",
@@ -42,10 +42,10 @@
     }
   },
   "dependencies": {
-    "chokidar": "^2.0.4",
-    "electron-is-dev": "^1.0.1",
-    "electron-log": "^2.2.17",
+    "chokidar": "^3.3.1",
+    "electron-is-dev": "^1.1.0",
+    "electron-log": "^4.0.6",
     "electron-settings": "^3.2.0",
-    "electron-updater": "^4.0.4"
+    "electron-updater": "^4.2.0"
   }
 }

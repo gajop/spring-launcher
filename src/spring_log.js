@@ -28,7 +28,7 @@ log.transports.file.file = logPath;
 log.transports.file.level = 'info';
 
 log.info(`Log file: ${logPath}`);
-log.info(`${app.getName()} - ${app.getVersion()}`);
+log.info(`${app.name} - ${app.getVersion()}`);
 log.info(`App path: ${app.getAppPath()}`);
 log.info(`pr-downloader path: ${springPlatform.prDownloaderPath}`);
 log.info(`Write path: ${springPlatform.writePath}`);

@@ -106,8 +106,16 @@ function setConfig(cfgName) {
   gui.send("config", config.getConfigObj());
   settings.set('config', cfgName);
   wizard.generateSteps();
-  const dlSteps = wizard.steps.filter(step => step.name != "start")
-  gui.send("wizard-list", dlSteps);
+  const steps = wizard.steps
+    .filter(step => step.name != "start")
+    .map(step => {
+      // we have to make a copy of these steps because IPC shouldn't contain functions (step.action)
+      return {
+        name: step.name,
+        item: step.item
+      }
+    });
+  gui.send("wizard-list", steps);
 }
 
 ipcMain.on("change-cfg", (e, cfgName) => {
