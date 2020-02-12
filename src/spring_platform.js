@@ -5,6 +5,8 @@ const { existsSync, mkdirSync } = fs;
 const { app } = require('electron');
 const assert = require('assert');
 
+const platformName = process.platform
+
 const { config } = require('./launcher_config');
 
 var FILES_DIR = 'files';
@@ -23,27 +25,39 @@ if (!existsSync(FILES_DIR)) {
 // bad path (relative to current directory, not app directory)
 // const writePath = `./${config.title}`;
 assert(config.title != undefined);
-let dirPrefix = app.getPath('documents');
-if (process.env.PORTABLE_EXECUTABLE_DIR != null) {
-  dirPrefix = process.env.PORTABLE_EXECUTABLE_DIR;
+const resolveWritePath = () => {
+  if (process.env.PORTABLE_EXECUTABLE_DIR != null) {
+    return path.join(process.env.PORTABLE_EXECUTABLE_DIR, config.title);
+  }
+
+  if (platformName === "win32") {
+    const isDev = require('electron-is-dev');
+    if (isDev) {
+      return path.join(app.getAppPath(), "data");
+    } else {
+      return path.join(app.getAppPath(), "../../data");
+    }
+  }
+
+  return path.join(app.getPath('documents'), config.title);
 }
-const writePath = path.join(dirPrefix, config.title);
+
+const writePath = resolveWritePath();
+
 assert(writePath != undefined);
-if (!existsSync(writePath)){
+if (!existsSync(writePath)) {
   mkdirSync(writePath);
 }
 if (existsSync(FILES_DIR)) {
-  fs.readdirSync(FILES_DIR).forEach(function(file) {
+  fs.readdirSync(FILES_DIR).forEach(function (file) {
     const srcPath = path.join(FILES_DIR, file);
     const dstPath = path.join(writePath, file);
     // NB: we copy files each time, which is possibly slow
     // if (!existsSync(dstPath)) {
-      fs.copyFileSync(srcPath, dstPath);
+    fs.copyFileSync(srcPath, dstPath);
     //}
   });
 }
-
-const platformName = process.platform
 
 let prDownloaderBin;
 if (platformName === "win32") {
