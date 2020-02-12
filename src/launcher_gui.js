@@ -36,8 +36,8 @@ app.prependListener('ready', () => {
     }
   };
   windowOpts.resizable = false;
+  Menu.setApplicationMenu(null);
   mainWindow = new BrowserWindow(windowOpts);
-  mainWindow.setMenu(null);
 
   mainWindow.loadFile(`${__dirname}/renderer/index.html`);
   //mainWindow.webContents.openDevTools();
@@ -70,7 +70,7 @@ app.prependListener('ready', () => {
       }
     },
     // TODO: Settings dialog for user config
-    {role: 'quit'}
+    { role: 'quit' }
   ];
   if (process.platform === 'linux') {
     // template.unshift([{label: 'Spring-Launcher'}]);
@@ -78,7 +78,6 @@ app.prependListener('ready', () => {
   // tray.setToolTip('Spring-Launcher: Distribution system for SpringRTS.');
   tray.setToolTip(config.title);
   tray.setContextMenu(Menu.buildFromTemplate(template));
-
 
   mainWindow.once('ready-to-show', () => {
     mainWindow.show();
@@ -100,7 +99,7 @@ app.prependListener('ready', () => {
     gui.send("wizard-list", steps);
 
     if (config.no_downloads &&
-        config.auto_start) {
+      config.auto_start) {
       wizard.nextStep();
     } else if (config.auto_download) {
       gui.send("wizard-started");
