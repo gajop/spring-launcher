@@ -7,14 +7,17 @@ const { log, logPath } = require('./spring_log.js');
 function upload_ask() {
     // TODO: probably should disable the UI while this is being done
     const dialogBtns = ["Yes (Upload)", "No"];
-    const result = dialog.showMessageBox({
+    dialog.showMessageBox({
         "type": "info",
         "buttons": dialogBtns,
         "title": "Upload log",
         "message": "Do you want to upload your log to http://logs.springrts.com ? All information will be public."
-    });
-    log.info("User wants to upload? ", dialogBtns[result]);
-    if (result == 0) {
+    }).then(result => {
+        const response = result.response;
+        log.info("User wants to upload? ", dialogBtns[response]);
+        if (response != 0) {
+            return;
+        }
         upload()
             .then((obj) => {
                 clipboard.clear();
@@ -30,7 +33,7 @@ function upload_ask() {
                 log.info(msg);
             })
             .catch(err => failed_to_upload(err));
-    }
+    })
 }
 
 function upload() {
