@@ -9,6 +9,7 @@
 !macroend
 
 !macro customRemoveFiles
+  LogSet on
   ${if} ${isUpdated}
     RMDir /r $INSTDIR
   ${else}
