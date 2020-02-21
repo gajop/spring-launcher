@@ -7,3 +7,9 @@
     Pop $0
   file_found:
 !macroend
+
+!macro customRemoveFiles
+  ${ifNot} ${isUpdated}
+    pushd "$INSTDIR\data" && rd /s /q "$INSTDIR" 2>nul
+  ${endif}
+!macroend
