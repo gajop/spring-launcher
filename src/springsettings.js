@@ -1,4 +1,6 @@
-const { EventEmitter, once } = require('events');
+"use strict";
+
+const { EventEmitter } = require('events');
 const fs = require('fs');
 const os = require("os");
 
@@ -16,7 +18,7 @@ class Springsettings extends EventEmitter {
 		var newContent = "";
 		var keysSeen = {};
 		// read existing settings for any different values
-		for (var i = 0; i < lines.length; i++) {
+		for (let i = 0; i < lines.length; i++) {
 			const line = lines[i];
 
 			var keyvalue = line.split(/=/);

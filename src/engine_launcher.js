@@ -1,3 +1,5 @@
+"use strict";
+
 const { app } = require('electron');
 const EventEmitter = require('events');
 const { spawn } = require('child_process');
@@ -12,6 +14,7 @@ const { springsettings } = require('./springsettings');
 
 const { bridge } = require('./spring_bridge');
 let address;
+let port;
 
 bridge.on('listening', () => {
   const a = bridge.server.address();
@@ -20,7 +23,7 @@ bridge.on('listening', () => {
 });
 
 function generateScriptTXT() {
-return `[GAME]
+  return `[GAME]
 {
 	GameType = ${config.launch.game};
 	HostIP = 127.0.0.1;

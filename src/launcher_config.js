@@ -1,3 +1,5 @@
+"use strict";
+
 const log = require('electron-log');
 
 const configDefault = {
@@ -99,39 +101,39 @@ configFile.setups.forEach((c) => {
 })
 
 const proxy = new Proxy({
-    setConfig: function(id) {
-      var found = false;
-      availableConfigs.forEach((cfg) => {
-        if (cfg.package.id == id) {
-          currentConfig = cfg;
-          found = true;
-        }
-      });
-      if (!found) {
-        log.error(`No config with ID: ${id} - ignoring`);
-        return false;
-      } else {
-        return true;
+  setConfig: function (id) {
+    var found = false;
+    availableConfigs.forEach((cfg) => {
+      if (cfg.package.id == id) {
+        currentConfig = cfg;
+        found = true;
       }
-    },
-    getAvailableConfigs: function() {
-      return availableConfigs;
-    },
-    getConfigObj: function() {
-      return currentConfig;
+    });
+    if (!found) {
+      log.error(`No config with ID: ${id} - ignoring`);
+      return false;
+    } else {
+      return true;
     }
   },
-  {
-  get: function(target, name) {
-    if (target[name] != undefined) {
-      return target[name];
-    } else if (configFile[name] != undefined) {
-      return configFile[name];
-    } {
-      return currentConfig[name];
-    }
+  getAvailableConfigs: function () {
+    return availableConfigs;
+  },
+  getConfigObj: function () {
+    return currentConfig;
   }
-})
+},
+  {
+    get: function (target, name) {
+      if (target[name] != undefined) {
+        return target[name];
+      } else if (configFile[name] != undefined) {
+        return configFile[name];
+      } {
+        return currentConfig[name];
+      }
+    }
+  })
 
 module.exports = {
   config: proxy,

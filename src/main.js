@@ -1,3 +1,5 @@
+"use strict";
+
 const { app, ipcMain } = require('electron');
 const settings = require('electron-settings');
 

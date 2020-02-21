@@ -1,3 +1,5 @@
+"use strict";
+
 // API file to be included by modules
 
 const fs = require("fs");
@@ -20,7 +22,7 @@ function loadExtension(extPath) {
 
 bridge.on('listening', () => {
   const normalizedPath = path.join(__dirname, EXTS_DIR);
-  fs.readdirSync(normalizedPath).forEach(function(file) {
+  fs.readdirSync(normalizedPath).forEach(function (file) {
     if (file.endsWith(".js")) {
       const extension = loadExtension(`./${EXTS_DIR}/${file}`);
       if (file == 'dev_extension_loader.js') {

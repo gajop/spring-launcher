@@ -1,6 +1,8 @@
+"use strict";
+
 const shell = require('electron').shell;
 
-module.exports.open = function(path) {
+module.exports.open = function (path) {
     // getDefaultAppOpener() + " '" + path + "'"
     // switch (process.platform) {
     //     // Note the empty quotes; necessary hack apparently

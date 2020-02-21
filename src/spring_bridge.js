@@ -1,3 +1,5 @@
+"use strict";
+
 const net = require('net');
 const EventEmitter = require('events');
 
@@ -23,7 +25,7 @@ class Bridge extends EventEmitter {
           var obj;
           try {
             obj = JSON.parse(msg);
-          } catch(e) {
+          } catch (e) {
             log.error(`Failed to parse JSON message: ${msg}`);
             log.error(e);
             return;

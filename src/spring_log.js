@@ -1,3 +1,5 @@
+"use strict";
+
 const { app } = require('electron');
 const util = require('util');
 const { format } = util;

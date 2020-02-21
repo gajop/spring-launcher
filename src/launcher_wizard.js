@@ -1,3 +1,5 @@
+"use strict";
+
 const EventEmitter = require('events');
 const { app, ipcMain } = require('electron');
 

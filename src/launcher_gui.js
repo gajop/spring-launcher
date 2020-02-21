@@ -1,3 +1,5 @@
+"use strict";
+
 const electron = require('electron');
 const { app, BrowserWindow, Menu, Tray } = electron;
 

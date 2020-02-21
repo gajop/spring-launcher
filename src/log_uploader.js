@@ -1,3 +1,5 @@
+"use strict";
+
 const { dialog, net, clipboard } = require('electron');
 const { config } = require('./launcher_config');
 const fs = require('fs');
@@ -23,7 +25,7 @@ function upload_ask() {
                 clipboard.clear();
                 clipboard.writeText(obj.url);
                 const msg = `Your log has been uploaded to: ${obj.url}` +
-                            '\n(Copied to clipboard)';
+                    '\n(Copied to clipboard)';
                 dialog.showMessageBox({
                     "type": "info",
                     "buttons": ["OK"],
@@ -41,22 +43,22 @@ function upload() {
         log.info("Uploading...");
         const fileData = fs.readFileSync(logPath).toString();
         const isDev = require('electron-is-dev');
-        var tags = ['spring-launcher', config.title ];
+        var tags = ['spring-launcher', config.title];
         if (isDev) {
             tags.push('dev');
         }
 
         const uploadData = {
-            name : `spring-launcher log: ${config.title}`,
-            text : fileData,
-            tags : tags
+            name: `spring-launcher log: ${config.title}`,
+            text: fileData,
+            tags: tags
         }
         const request = net.request({
-            protocol : 'http:',
-            hostname : 'logs.springrts.com',
+            protocol: 'http:',
+            hostname: 'logs.springrts.com',
             path: '/logfiles/',
             port: 80,
-            method : 'POST',
+            method: 'POST',
         })
         request.on('response', (response) => {
             after_upload(response, resolve, reject);
