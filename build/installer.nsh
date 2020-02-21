@@ -9,7 +9,21 @@
 !macroend
 
 !macro customRemoveFiles
-  ${ifNot} ${isUpdated}
-    pushd "$INSTDIR\data" && rd /s /q "$INSTDIR" 2>nul
+  ${if} ${isUpdated}
+    RMDir /r $INSTDIR
+  ${else}
+    FindFirst $0 $1 $INSTDIR
+    loop:
+      StrCmp $1 "" done
+
+      StrCmp $1 "data" skip delete
+      delete:
+      RMDir /r $1
+      skip:
+
+      FindNext $0 $1
+      Goto loop
+    done:
+    FindClose $0
   ${endif}
 !macroend
