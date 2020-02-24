@@ -1,5 +1,4 @@
 !macro customInstall
-  DetailPrint "Installing..."
   IfFileExists `$INSTDIR\data\*.*` file_found file_not_found
   file_not_found:
     CreateDirectory "$INSTDIR\data"
@@ -10,7 +9,6 @@
 !macroend
 
 !macro customRemoveFiles
-  LogSet on
   ${if} ${isUpdated}
     DetailPrint "Updating..."
     FindFirst $0 $1 $INSTDIR
