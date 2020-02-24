@@ -11,8 +11,6 @@
 !macro customRemoveFiles
   LogSet on
   ${if} ${isUpdated}
-    RMDir /r $INSTDIR
-  ${else}
     FindFirst $0 $1 $INSTDIR
     loop:
       StrCmp $1 "" done
@@ -26,5 +24,7 @@
       Goto loop
     done:
     FindClose $0
+  ${else}
+    RMDir /r $INSTDIR
   ${endif}
 !macroend
