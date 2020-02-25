@@ -15,8 +15,8 @@
     loop:
       StrCmp $1 "" done
 
-      StrCmp $1 "data" skip delete
-      delete:
+      StrCmp $1 "data" skip delete_folder
+      delete_folder:
       RMDir /r $1
       skip:
 
