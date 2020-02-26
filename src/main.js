@@ -94,7 +94,7 @@ autoUpdater.on('update-not-available', () => {
 });
 
 autoUpdater.on('update-downloaded', () => {
-  setImmediate(() => autoUpdater.quitAndInstall())
+  setImmediate(() => autoUpdater.quitAndInstall(true, true))
 });
 
 autoUpdater.on('error', (error) => {
