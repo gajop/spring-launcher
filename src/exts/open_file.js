@@ -4,7 +4,7 @@ const file_opener = require('../file_opener');
 
 bridge.on("OpenFile", (command) => {
   // const fullPath = file_opener.GetOpenCommand(command.path);
-  if (file_opener.open(command.path)) { 
+  if (file_opener.open(command.path)) {
     bridge.send("OpenFileFinished", {
       path: command.path
     });

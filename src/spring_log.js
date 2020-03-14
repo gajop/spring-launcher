@@ -10,12 +10,12 @@ const { config } = require('./launcher_config');
 
 var logBuffer = [];
 var ready = false;
-let mainWindow;
+let gui = null;
 log.transports.console = (msg) => {
   var text = format.apply(util, msg.data);
   console.log(text);
-  if (ready && mainWindow) {
-    mainWindow.send("log", msg)
+  if (ready) {
+    gui.send("log", msg)
   } else {
     logBuffer.push(msg);
   }
@@ -29,6 +29,7 @@ if (existsSync(logPath)) {
 log.transports.file.file = logPath;
 log.transports.file.level = 'info';
 
+log.info('Begin log');
 log.info(`Log file: ${logPath}`);
 log.info(`${app.name} - ${app.getVersion()}`);
 log.info(`App path: ${app.getAppPath()}`);
@@ -38,18 +39,16 @@ log.info(`Write path: ${springPlatform.writePath}`);
 log.info(`Launcher configs:\n${JSON.stringify(config.getAvailableConfigs(), null, 4)}`);
 log.info(`Default config:\n${JSON.stringify(config.getConfigObj(), null, 4)}`);
 
-
-const { gui } = require('./launcher_gui.js');
+gui = require('./launcher_gui.js').gui;
 
 app.on('ready', () => {
   if (!gui) {
     return;
   }
-  mainWindow = gui.getMainWindow();
 
   setTimeout(() => {
     logBuffer.forEach((msg) => {
-      mainWindow.send("log", msg)
+      gui.send("log", msg)
     });
     logBuffer = [];
     ready = true;

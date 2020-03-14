@@ -1,6 +1,6 @@
 "use strict";
 
-const { app, ipcMain } = require('electron');
+const { app, dialog, ipcMain } = require('electron');
 const settings = require('electron-settings');
 
 const isFirstInstance = app.requestSingleInstanceLock();
@@ -15,11 +15,27 @@ const { gui } = require('./launcher_gui.js');
 const { wizard } = require('./launcher_wizard.js');
 const springDownloader = require('./spring_downloader');
 const autoUpdater = require('./updater');
-const springApi = require('./spring_api');
+// TODO: Despite not using it in this file, we have to require spring_api here
+require('./spring_api');
 const launcher = require('./engine_launcher');
 const { writePath } = require('./spring_platform');
 const log_uploader = require('./log_uploader');
 const file_opener = require('./file_opener');
+
+process.on('uncaughtException', (err, origin) => {
+  const msg = `Uncaught exception: "${err}" from "${origin}". Closing launcher.`;
+  const messageBoxOptions = {
+      type: "error",
+      title: "spring-launcher error",
+      message: msg
+  };
+  dialog.showMessageBoxSync(messageBoxOptions);
+  try {
+    log.error(msg);
+  } catch (error) {
+  }
+  process.exit(1);
+});
 
 springDownloader.on('started', (downloadItem, type, args) => {
   log.info(`Download started: ${downloadItem}, ${type}, ${args}`);
