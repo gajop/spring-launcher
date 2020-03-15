@@ -1,3 +1,5 @@
+'use strict';
+
 /*
 And connect with a tcp client from the command line using netcat, the *nix
 utility for reading and writing across tcp/udp network connections.  I've only
@@ -24,19 +26,19 @@ const port = obj.port;
 
 var client;
 
-EXIT_CONDITION = false;
+let EXIT_CONDITION = false;
 function connect() {
 	console.log(`Connecting to: ${address}:${port}`);
 
 	client = new net.Socket();
 	client.connect(port, address, function() {
 		console.log('Connected');
-		sendCommand("HelloWorld", {hello: "World"});
-		sendCommand("CompileMap", {
+		sendCommand('HelloWorld', {hello: 'World'});
+		sendCommand('CompileMap', {
 			diffusePath: '/home/gajop/radni_direktorijum/programi/spring-launcher-electron/game_package/springboard/projects/test-textures/diffuse.png',
-  		heightPath: '/home/gajop/radni_direktorijum/programi/spring-launcher-electron/game_package/springboard/projects/test-textures/heightmap.png',
-  		grass: '/home/gajop/radni_direktorijum/programi/spring-launcher-electron/game_package/springboard/projects/test-textures/grass.png',
-  		outputPath: '/home/gajop/radni_direktorijum/programi/spring-launcher-electron/game_package/springboard/projects/test-textures/MyName'
+			heightPath: '/home/gajop/radni_direktorijum/programi/spring-launcher-electron/game_package/springboard/projects/test-textures/heightmap.png',
+			grass: '/home/gajop/radni_direktorijum/programi/spring-launcher-electron/game_package/springboard/projects/test-textures/grass.png',
+			outputPath: '/home/gajop/radni_direktorijum/programi/spring-launcher-electron/game_package/springboard/projects/test-textures/MyName'
 		});
 		// sendCommand("OpenFile", {
 		// 	path: "file:///text.txt"
@@ -75,10 +77,10 @@ function sendCommand(name, command) {
 		command: command,
 	});
 	client.write(json);
-	client.write("\n");
+	client.write('\n');
 }
 
 
 (function wait () {
-   if (!EXIT_CONDITION) setTimeout(wait, 100);
+	if (!EXIT_CONDITION) setTimeout(wait, 100);
 })();

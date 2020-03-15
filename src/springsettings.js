@@ -1,27 +1,28 @@
-"use strict";
+'use strict';
 
 const { EventEmitter } = require('events');
 const fs = require('fs');
-const os = require("os");
+const os = require('os');
 
 const { writePath } = require('./spring_platform');
 
 class Springsettings extends EventEmitter {
 	applyDefaultsOnSettings(defaults, springsettingsPath) {
-		var fileContent = "";
+		var fileContent = '';
 		try {
 			fileContent = fs.readFileSync(springsettingsPath).toString();
 		} catch (err) {
+			// ignore errors
 		}
 		const lines = fileContent.split(/\r?\n/g);
 
-		var newContent = "";
+		var newContent = '';
 		var keysSeen = {};
 		// read existing settings for any different values
 		for (let i = 0; i < lines.length; i++) {
 			const line = lines[i];
 
-			var keyvalue = line.split(/=/);
+			const keyvalue = line.split(/=/);
 			if (keyvalue.length != 2) {
 				newContent += line + os.EOL;
 				continue;

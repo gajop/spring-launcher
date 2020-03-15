@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 const { app } = require('electron');
 const EventEmitter = require('events');
@@ -17,13 +17,13 @@ let address;
 let port;
 
 bridge.on('listening', () => {
-  const a = bridge.server.address();
-  address = a.address;
-  port = a.port;
+	const a = bridge.server.address();
+	address = a.address;
+	port = a.port;
 });
 
 function generateScriptTXT() {
-  return `[GAME]
+	return `[GAME]
 {
 	GameType = ${config.launch.game};
 	HostIP = 127.0.0.1;
@@ -85,83 +85,83 @@ function generateScriptTXT() {
 }
 
 class Launcher extends EventEmitter {
-  launch(engineName, opts) {
-    springsettings.applyDefaults();
-    if (config.no_start_script) {
-      fs.writeFileSync(`${writePath}/sl-connection.json`, JSON.stringify({
-        _sl_address: address,
-        _sl_port: port,
-        _sl_write_path: writePath,
-        _sl_launcher_version: app.getVersion()
-      }))
-      this.launchSpring(engineName, opts);
-    } else {
-      const scriptTXT = generateScriptTXT()
-      const scriptTxtPath = `${writePath}/script.txt`;
-      opts = [];
-      fs.writeFile(scriptTxtPath, scriptTXT, 'utf8', () => {
-        opts.push(scriptTxtPath);
-        this.launchSpring(engineName, opts);
-      });
-    }
-  }
+	launch(engineName, opts) {
+		springsettings.applyDefaults();
+		if (config.no_start_script) {
+			fs.writeFileSync(`${writePath}/sl-connection.json`, JSON.stringify({
+				_sl_address: address,
+				_sl_port: port,
+				_sl_write_path: writePath,
+				_sl_launcher_version: app.getVersion()
+			}));
+			this.launchSpring(engineName, opts);
+		} else {
+			const scriptTXT = generateScriptTXT();
+			const scriptTxtPath = `${writePath}/script.txt`;
+			opts = [];
+			fs.writeFile(scriptTxtPath, scriptTXT, 'utf8', () => {
+				opts.push(scriptTxtPath);
+				this.launchSpring(engineName, opts);
+			});
+		}
+	}
 
-  launchSpring(engineName, extraArgs) {
-    const springPath = `${writePath}/engine/${engineName}/${springBin}`;
-    var args = ["--write-dir", resolve(writePath)];
-    if (config.isolation) {
-      args.push("--isolation");
-    }
-    if (extraArgs != undefined) {
-      args = args.concat(extraArgs);
-    }
+	launchSpring(engineName, extraArgs) {
+		const springPath = `${writePath}/engine/${engineName}/${springBin}`;
+		var args = ['--write-dir', resolve(writePath)];
+		if (config.isolation) {
+			args.push('--isolation');
+		}
+		if (extraArgs != undefined) {
+			args = args.concat(extraArgs);
+		}
 
-    var outputMode = "pipe";
-    const isDev = false;
-    if (process.platform === "linux" && isDev) {
-      outputMode = "inherit";
-    }
+		var outputMode = 'pipe';
+		const isDev = false;
+		if (process.platform === 'linux' && isDev) {
+			outputMode = 'inherit';
+		}
 
-    log.info(`Launching Spring with command: ${springPath} ${args.join(" ")}`);
-    const spring = spawn(springPath, args,
-      { stdio: outputMode, stderr: outputMode, windowsHide: false });
-    this.state = "running";
+		log.info(`Launching Spring with command: ${springPath} ${args.join(' ')}`);
+		const spring = spawn(springPath, args,
+			{ stdio: outputMode, stderr: outputMode, windowsHide: false });
+		this.state = 'running';
 
-    spring.on('close', (code) => {
-      if (this.state != "running") {
-        return;
-      }
-      if (code == 0) {
-        this.state = "finished";
-        this.emit("finished", code);
-      } else {
-        this.state = "failed";
-        this.emit("failed", `Spring failed with code: ${code}`)
-      }
-    })
+		spring.on('close', (code) => {
+			if (this.state != 'running') {
+				return;
+			}
+			if (code == 0) {
+				this.state = 'finished';
+				this.emit('finished', code);
+			} else {
+				this.state = 'failed';
+				this.emit('failed', `Spring failed with code: ${code}`);
+			}
+		});
 
-    if (spring.stdout) {
-      spring.stdout.on('data', (data) => {
-        var text = data.toString();
-        // remove newline character at the end
-        text = text.substring(0, text.length - 1);
-        this.emit("stdout", text);
-      });
-    }
+		if (spring.stdout) {
+			spring.stdout.on('data', (data) => {
+				var text = data.toString();
+				// remove newline character at the end
+				text = text.substring(0, text.length - 1);
+				this.emit('stdout', text);
+			});
+		}
 
-    if (spring.stderr) {
-      spring.stderr.on('data', (data) => {
-        var text = data.toString();
-        text = text.substring(0, text.length - 1);
-        this.emit("stderr", text);
-      });
-    }
+		if (spring.stderr) {
+			spring.stderr.on('data', (data) => {
+				var text = data.toString();
+				text = text.substring(0, text.length - 1);
+				this.emit('stderr', text);
+			});
+		}
 
-    spring.on('error', (error) => {
-      this.state = "failed";
-      this.emit("failed", `Failed to launch Spring: ${error}`)
-    });
-  }
+		spring.on('error', (error) => {
+			this.state = 'failed';
+			this.emit('failed', `Failed to launch Spring: ${error}`);
+		});
+	}
 }
 
 const launcher = new Launcher();

@@ -15,8 +15,20 @@ body {
 	text-shadow: 1px 1px 5px #000
 }
 
-.button.is-primary {
-	animation: radial-pulse 2s infinite;
+#btn-progress {
+  animation: radial-pulse 2s infinite;
+  min-height: 100px;
+  max-height: 100px;
+
+  min-width: 150px;
+  max-width: 150px;
+
+  /* font-size: 100%; */
+  white-space: normal;
+}
+
+#btn-progress:disabled {
+  animation: none
 }
 
 p.error {
@@ -115,17 +127,6 @@ body::-webkit-scrollbar {
   display: inline-block;
   padding-left: 30px;
   bottom: 80px;
-}
-
-#btn-progress {
-  min-height: 100px;
-  max-height: 100px;
-
-  min-width: 150px;
-  max-width: 150px;
-
-  /* font-size: 100%; */
-  white-space: normal;
 }
 
 .progress {

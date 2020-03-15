@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 const log = require('electron-log');
 const path = require('path');
@@ -7,14 +7,14 @@ const { existsSync, mkdirSync } = fs;
 const { app } = require('electron');
 const assert = require('assert');
 
-const platformName = process.platform
+const platformName = process.platform;
 
 const { config } = require('./launcher_config');
 
 var FILES_DIR = 'files';
 FILES_DIR = path.resolve(`${__dirname}/../files`);
 if (!existsSync(FILES_DIR)) {
-  FILES_DIR = path.resolve(`${process.resourcesPath}/../files`);
+	FILES_DIR = path.resolve(`${process.resourcesPath}/../files`);
 }
 
 // The following order is necessary:
@@ -28,53 +28,53 @@ if (!existsSync(FILES_DIR)) {
 // const writePath = `./${config.title}`;
 assert(config.title != undefined);
 const resolveWritePath = () => {
-  if (process.env.PORTABLE_EXECUTABLE_DIR != null) {
-    return path.join(process.env.PORTABLE_EXECUTABLE_DIR, config.title);
-  }
+	if (process.env.PORTABLE_EXECUTABLE_DIR != null) {
+		return path.join(process.env.PORTABLE_EXECUTABLE_DIR, config.title);
+	}
 
-  if (platformName === "win32") {
-    const isDev = require('electron-is-dev');
-    if (isDev) {
-      return path.join(app.getAppPath(), "data");
-    } else {
-      return path.join(app.getAppPath(), "../../data");
-    }
-  }
+	if (platformName === 'win32') {
+		const isDev = require('electron-is-dev');
+		if (isDev) {
+			return path.join(app.getAppPath(), 'data');
+		} else {
+			return path.join(app.getAppPath(), '../../data');
+		}
+	}
 
-  return path.join(app.getPath('documents'), config.title);
-}
+	return path.join(app.getPath('documents'), config.title);
+};
 
 const writePath = resolveWritePath();
 
 assert(writePath != undefined);
 if (!existsSync(writePath)) {
-  mkdirSync(writePath);
+	mkdirSync(writePath);
 }
 if (existsSync(FILES_DIR)) {
-  fs.readdirSync(FILES_DIR).forEach(function (file) {
-    const srcPath = path.join(FILES_DIR, file);
-    const dstPath = path.join(writePath, file);
-    // NB: we copy files each time, which is possibly slow
-    // if (!existsSync(dstPath)) {
-    fs.copyFileSync(srcPath, dstPath);
-    //}
-  });
+	fs.readdirSync(FILES_DIR).forEach(function (file) {
+		const srcPath = path.join(FILES_DIR, file);
+		const dstPath = path.join(writePath, file);
+		// NB: we copy files each time, which is possibly slow
+		// if (!existsSync(dstPath)) {
+		fs.copyFileSync(srcPath, dstPath);
+		//}
+	});
 }
 
 let prDownloaderBin;
-if (platformName === "win32") {
-  prDownloaderBin = 'pr-downloader.exe';
-  exports.springBin = "spring.exe";
-} else if (platformName === "linux") {
-  prDownloaderBin = 'pr-downloader';
-  exports.springBin = "spring";
+if (platformName === 'win32') {
+	prDownloaderBin = 'pr-downloader.exe';
+	exports.springBin = 'spring.exe';
+} else if (platformName === 'linux') {
+	prDownloaderBin = 'pr-downloader';
+	exports.springBin = 'spring';
 } else {
-  log.error(`Unsupported platform: ${platformName}`);
-  process.exit(-1);
+	log.error(`Unsupported platform: ${platformName}`);
+	process.exit(-1);
 }
 
 exports.prDownloaderPath = path.resolve(`${__dirname}/../bin/${prDownloaderBin}`);
 if (!existsSync(exports.prDownloaderPath)) {
-  exports.prDownloaderPath = path.resolve(`${process.resourcesPath}/../bin/${prDownloaderBin}`);
+	exports.prDownloaderPath = path.resolve(`${process.resourcesPath}/../bin/${prDownloaderBin}`);
 }
 exports.writePath = writePath;
