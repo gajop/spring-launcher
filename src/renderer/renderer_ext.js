@@ -13,6 +13,10 @@ fs.readdirSync(normalizedPath).forEach(function(file) {
 	const extPath = `./${EXTS_DIR}/${file}`;
 	if (extPath.endsWith('.js')) {
 		log.info(`Including extension: ${extPath}...`);
-		require(extPath);
+		try {
+			require(extPath);
+		} catch (err) {
+			log.error(`Failed to load exception: ${err}`);
+		}
 	}
 });

@@ -24,9 +24,13 @@ bridge.on('listening', () => {
 	const normalizedPath = path.join(__dirname, EXTS_DIR);
 	fs.readdirSync(normalizedPath).forEach(function (file) {
 		if (file.endsWith('.js')) {
-			const extension = loadExtension(`./${EXTS_DIR}/${file}`);
-			if (file == 'dev_extension_loader.js') {
-				dev_extension_loader = extension;
+			try {
+				const extension = loadExtension(`./${EXTS_DIR}/${file}`);
+				if (file == 'dev_extension_loader.js') {
+					dev_extension_loader = extension;
+				}
+			} catch (err) {
+				log.error(`Failed to load extension ${file} with error: ${err}`);
 			}
 		}
 	});
