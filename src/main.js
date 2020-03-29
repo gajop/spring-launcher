@@ -23,7 +23,7 @@ const log_uploader = require('./log_uploader');
 const file_opener = require('./file_opener');
 
 process.on('uncaughtException', (err, origin) => {
-	const msg = `Uncaught exception: "${err}" from "${origin}". Closing launcher.`;
+	const msg = `Closing launcher due to uncaught exception.\n"${err}" from "${origin}".  ${err.stack}`;
 	try {
 		const messageBoxOptions = {
 			type: 'error',
@@ -171,3 +171,6 @@ app.on('ready', () => {
 		}
 	}
 });
+
+const { runTest } = require('./exts/test_heightmap_import_export');
+runTest();
