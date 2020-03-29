@@ -171,6 +171,3 @@ app.on('ready', () => {
 		}
 	}
 });
-
-const { runTest } = require('./exts/test_heightmap_import_export');
-runTest();
