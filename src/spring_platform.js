@@ -51,7 +51,7 @@ if (!existsSync(writePath)) {
 	mkdirSync(writePath);
 }
 if (existsSync(FILES_DIR)) {
-	fs.readdirSync(FILES_DIR).forEach(function (file) {
+	fs.readdirSync(FILES_DIR).forEach(function(file) {
 		const srcPath = path.join(FILES_DIR, file);
 		const dstPath = path.join(writePath, file);
 		// NB: we copy files each time, which is possibly slow
@@ -67,6 +67,9 @@ if (platformName === 'win32') {
 	exports.springBin = 'spring.exe';
 } else if (platformName === 'linux') {
 	prDownloaderBin = 'pr-downloader';
+	exports.springBin = 'spring';
+} else if (platformName === 'darwin') {
+	prDownloaderBin = 'pr-downloader-mac';
 	exports.springBin = 'spring';
 } else {
 	log.error(`Unsupported platform: ${platformName}`);
