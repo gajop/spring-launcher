@@ -42,6 +42,9 @@
       "provider": "generic",
       "url": "https://spring-launcher.ams3.digitaloceanspaces.com",
       "channel": "latest"
+    },
+    "mac": {
+      "target": "zip"
     }
   },
   "dependencies": {
