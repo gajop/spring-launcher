@@ -70,7 +70,7 @@ if (platformName === 'win32') {
 	exports.springBin = 'spring';
 } else if (platformName === 'darwin') {
 	prDownloaderBin = 'pr-downloader-mac';
-	exports.springBin = 'spring';
+	exports.springBin = 'Contents/MacOS/spring';
 } else {
 	log.error(`Unsupported platform: ${platformName}`);
 	process.exit(-1);
