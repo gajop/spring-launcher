@@ -6,7 +6,7 @@ const { app, ipcMain } = require('electron');
 const log = require('electron-log');
 
 const { config } = require('./launcher_config');
-const { gui } = require('./launcher_gui.js');
+const { gui } = require('./launcher_gui');
 const updater = require('./updater');
 const springDownloader = require('./spring_downloader');
 const launcher = require('./engine_launcher');

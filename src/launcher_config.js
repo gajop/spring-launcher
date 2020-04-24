@@ -2,6 +2,8 @@
 
 const log = require('electron-log');
 
+const argv = require('./launcher_args');
+
 const configDefault = {
 	'package': {
 		// Possible values are 'darwin', 'linux', 'win32'
@@ -85,7 +87,8 @@ function mergeDeep(target, ...sources) {
 	return mergeDeep(target, ...sources);
 }
 
-const configFile = require('./config.json');
+const configFile = require(
+	argv.config != null ? argv.config : './config.json');
 configDefault.title = configFile.title;
 configFile.setups.forEach((c) => {
 	const configDefaultCopy = JSON.parse(JSON.stringify(configDefault));

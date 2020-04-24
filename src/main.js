@@ -9,10 +9,10 @@ if (!isFirstInstance) {
 	return;
 }
 
-const { log } = require('./spring_log.js');
+const { log } = require('./spring_log');
 const { config } = require('./launcher_config');
-const { gui } = require('./launcher_gui.js');
-const { wizard } = require('./launcher_wizard.js');
+const { gui } = require('./launcher_gui');
+const { wizard } = require('./launcher_wizard');
 const springDownloader = require('./spring_downloader');
 const autoUpdater = require('./updater');
 // TODO: Despite not using it in this file, we have to require spring_api here

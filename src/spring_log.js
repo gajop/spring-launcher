@@ -39,7 +39,7 @@ log.info(`Write path: ${springPlatform.writePath}`);
 log.info(`Launcher configs:\n${JSON.stringify(config.getAvailableConfigs(), null, 4)}`);
 log.info(`Default config:\n${JSON.stringify(config.getConfigObj(), null, 4)}`);
 
-gui = require('./launcher_gui.js').gui;
+gui = require('./launcher_gui').gui;
 
 app.on('ready', () => {
 	if (!gui) {

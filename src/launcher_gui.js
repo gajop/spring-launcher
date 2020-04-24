@@ -90,7 +90,7 @@ app.prependListener('ready', () => {
 		gui.send('all-configs', config.getAvailableConfigs());
 		gui.send('config', config.getConfigObj());
 
-		const { wizard } = require('./launcher_wizard.js');
+		const { wizard } = require('./launcher_wizard');
 
 		const steps = wizard.steps
 			.filter(step => step.name != 'start')

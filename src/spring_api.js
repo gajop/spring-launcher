@@ -9,7 +9,7 @@ const log = require('electron-log');
 
 const { bridge } = require('./spring_bridge');
 const { config } = require('./launcher_config');
-const { wizard } = require('./launcher_wizard.js');
+const { wizard } = require('./launcher_wizard');
 
 const EXTS_DIR = 'exts';
 

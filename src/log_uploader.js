@@ -4,7 +4,7 @@ const { dialog, net, clipboard } = require('electron');
 const { config } = require('./launcher_config');
 const fs = require('fs');
 
-const { log, logPath } = require('./spring_log.js');
+const { log, logPath } = require('./spring_log');
 
 function upload_ask() {
 	// TODO: probably should disable the UI while this is being done
