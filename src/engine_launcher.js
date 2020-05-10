@@ -8,7 +8,7 @@ const fs = require('fs');
 
 const log = require('electron-log');
 
-const { writePath, springBin } = require('./spring_platform');
+const springPlatform = require('./spring_platform');
 const { config } = require('./launcher_config');
 const { springsettings } = require('./springsettings');
 
@@ -47,7 +47,7 @@ function generateScriptTXT() {
 	{
     _sl_address = ${address};
     _sl_port = ${port};
-    _sl_write_path = ${writePath};
+    _sl_write_path = ${springPlatform.writePath};
     _sl_launcher_version = ${app.getVersion()};
 	}
 
@@ -85,30 +85,29 @@ function generateScriptTXT() {
 }
 
 class Launcher extends EventEmitter {
-	launch(engineName, opts) {
+	launch(enginePath, opts) {
 		springsettings.applyDefaults();
 		if (config.no_start_script) {
-			fs.writeFileSync(`${writePath}/sl-connection.json`, JSON.stringify({
+			fs.writeFileSync(`${springPlatform.writePath}/sl-connection.json`, JSON.stringify({
 				_sl_address: address,
 				_sl_port: port,
-				_sl_write_path: writePath,
+				_sl_write_path: springPlatform.writePath,
 				_sl_launcher_version: app.getVersion()
 			}));
-			this.launchSpring(engineName, opts);
+			this.launchSpring(enginePath, opts);
 		} else {
 			const scriptTXT = generateScriptTXT();
-			const scriptTxtPath = `${writePath}/script.txt`;
+			const scriptTxtPath = `${springPlatform.writePath}/script.txt`;
 			opts = [];
 			fs.writeFile(scriptTxtPath, scriptTXT, 'utf8', () => {
 				opts.push(scriptTxtPath);
-				this.launchSpring(engineName, opts);
+				this.launchSpring(enginePath, opts);
 			});
 		}
 	}
 
-	launchSpring(engineName, extraArgs) {
-		const springPath = `${writePath}/engine/${engineName}/${springBin}`;
-		var args = ['--write-dir', resolve(writePath)];
+	launchSpring(enginePath, extraArgs) {
+		var args = ['--write-dir', resolve(springPlatform.writePath)];
 		if (config.isolation) {
 			args.push('--isolation');
 		}
@@ -122,8 +121,8 @@ class Launcher extends EventEmitter {
 			outputMode = 'inherit';
 		}
 
-		log.info(`Launching Spring with command: ${springPath} ${args.join(' ')}`);
-		const spring = spawn(springPath, args,
+		log.info(`Launching Spring with command: ${enginePath} ${args.join(' ')}`);
+		const spring = spawn(enginePath, args,
 			{ stdio: outputMode, stderr: outputMode, windowsHide: false });
 		this.state = 'running';
 

@@ -28,6 +28,11 @@ if (!existsSync(FILES_DIR)) {
 // const writePath = `./${config.title}`;
 assert(config.title != undefined);
 const resolveWritePath = () => {
+	const argv = require('./launcher_args');
+	if (argv.writePath != null) {
+		return argv.writePath;
+	}
+
 	if (process.env.PORTABLE_EXECUTABLE_DIR != null) {
 		return path.join(process.env.PORTABLE_EXECUTABLE_DIR, config.title);
 	}

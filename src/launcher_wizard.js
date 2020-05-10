@@ -11,6 +11,9 @@ const updater = require('./updater');
 const springDownloader = require('./spring_downloader');
 const launcher = require('./engine_launcher');
 
+const path = require('path');
+const springPlatform = require('./spring_platform');
+
 let mainWindow;
 app.on('ready', () => {
 	if (!gui) {
@@ -85,9 +88,16 @@ class Wizard extends EventEmitter {
 					}
 				}, 1000);
 
-				const launchEngine = config.launch.engine || config.downloads.engines[0];
-				log.info(`Starting Spring from: ${launchEngine}`);
-				launcher.launch(launchEngine, config.launch.start_args);
+				let enginePath;
+				if (config.launch.engine_path != null) {
+					enginePath = config.launch.engine_path;
+				} else {
+					const engineName = config.launch.engine || config.downloads.engines[0];
+					enginePath = path.join(springPlatform.writePath, 'engine', engineName, springPlatform.springBin);
+				}
+
+				log.info(`Starting Spring from: ${enginePath}`);
+				launcher.launch(enginePath, config.launch.start_args);
 
 				this.emit('launched');
 
