@@ -77,6 +77,16 @@ class Wizard extends EventEmitter {
 					}
 				});
 			});
+
+			config.downloads.resources.forEach((resource) => {
+				steps.push({
+					name: 'resource',
+					item: resource,
+					action: () => {
+						springDownloader.downloadResource(resource);
+					}
+				});
+			});
 		}
 
 		steps.push({
@@ -93,6 +103,9 @@ class Wizard extends EventEmitter {
 					enginePath = config.launch.engine_path;
 				} else {
 					const engineName = config.launch.engine || config.downloads.engines[0];
+					if (!engineName) {
+						return;
+					}
 					enginePath = path.join(springPlatform.writePath, 'engine', engineName, springPlatform.springBin);
 				}
 

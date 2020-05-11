@@ -26,6 +26,7 @@ const configDefault = {
 		'games': [],
 		'maps': [],
 		'engines': [],
+		'resources': [],
 	},
 
 	'launch': {

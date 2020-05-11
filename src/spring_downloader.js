@@ -1,91 +1,63 @@
 'use strict';
 
-const { spawn } = require('child_process');
 const EventEmitter = require('events');
 
-const log = require('electron-log');
+const prdDownloader = require('./prd_downloader');
+const httpDownloader = require('./http_downloader');
 
-const springPlatform = require('./spring_platform');
+function getDownloader(name) {
+	let url;
+	try {
+		url = new URL(name);
+	} catch (_) {
+		return prdDownloader;
+	}
+
+	if (url.protocol === 'http:' || url.protocol === 'https:') {
+		return httpDownloader;
+	} else {
+		return prdDownloader;
+	}
+}
 
 class SpringDownloader extends EventEmitter {
 	constructor() {
 		super();
-		this.progressPattern = new RegExp('[0-9]+/[0-9]+');
-		this.missingPattern = new RegExp('.*no engine.*|.*no mirrors.*|.*no game found.*|.*no map found.*|.*error occured while downloading.*');
-	}
 
-	error_check(name, line) {
-		if (line.startsWith('[Error]')) {
-			if (line.toLowerCase().match(this.missingPattern)) {
-				this.emit('failed', name, line);
-				return true;
-			}
+		let downloaders = [ prdDownloader, httpDownloader ];
+		for (const downloader of downloaders) {
+			downloader.on('started', (downloadItem, type, args) => {
+				this.emit('started', downloadItem, type, args);
+			});
+
+			downloader.on('progress', (downloadItem, current, total) => {
+				this.emit('progress', downloadItem, current, total);
+			});
+
+			downloader.on('finished', (downloadItem) => {
+				this.emit('finished', downloadItem);
+			});
+
+			downloader.on('failed', (downloadItem, msg) => {
+				this.emit('failed', downloadItem, msg);
+			});
 		}
-		return false;
 	}
-
-	download_package(name, type, args) {
-		let finished = false;
-		const prd = spawn(springPlatform.prDownloaderPath, args);
-		this.emit('started', name, type, args);
-
-		prd.stdout.on('data', (data) => {
-			const line = data.toString();
-			log.info(line);
-			if (line.startsWith('[Progress]')) {
-				const matched = line.match(this.progressPattern);
-				if (!matched || matched.length == 0) {
-					return;
-				}
-				const progressStr = matched[0];
-				var [current, total] = progressStr.split('/');
-				current = parseInt(current);
-				total = parseInt(total);
-				this.emit('progress', name, current, total);
-			} else if (this.error_check(name, line)) {
-				finished = true;
-			} else if (line.startsWith('[Info]')) {
-				this.emit('info', name, line);
-			}
-		});
-
-		prd.stderr.on('data', (data) => {
-			const line = data.toString();
-			log.warn(line);
-			if (this.error_check(name, line)) {
-				finished = true;
-			}
-		});
-
-
-		prd.on('close', (code) => {
-			if (finished) { // the process already counts as finished
-				return;
-			}
-			if (code == 0) {
-				this.emit('finished', name);
-			} else {
-				this.emit('failed', name, `Download failed: ${name}: ${code}`);
-			}
-		});
-
-		prd.on('error', (error) => {
-			finished = true;
-			this.emit('failed', name, `Failed to launch pr-downloader: ${error}`);
-		});
-	}
-
 
 	downloadEngine(engineName) {
-		this.download_package(engineName, 'engine', ['--filesystem-writepath', springPlatform.writePath, '--download-engine', engineName]);
+		prdDownloader.downloadEngine(engineName);
 	}
 
 	downloadGame(gameName) {
-		this.download_package(gameName, 'game', ['--filesystem-writepath', springPlatform.writePath, '--download-game', gameName]);
+		prdDownloader.downloadGame(gameName);
 	}
 
 	downloadMap(mapName) {
-		this.download_package(mapName, 'map', ['--filesystem-writepath', springPlatform.writePath, '--download-map', mapName]);
+		prdDownloader.downloadMap(mapName);
+	}
+
+	downloadResource(resource) {
+		getDownloader(resource['url']).downloadResource(resource);
 	}
 }
 
