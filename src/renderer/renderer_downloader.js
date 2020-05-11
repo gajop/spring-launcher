@@ -39,6 +39,10 @@ ipcRenderer.on('dl-failed', (e, downloadItem, msg) => {
 	stepError(`Step ${getCurrentStepIndex()} of ${getTotalSteps()}: ${msg}`);
 });
 
+ipcRenderer.on('set-next-enabled', (e, enabled) => {
+	setNextStepEnabled(enabled);
+});
+
 function formatBytes(bytesFirst, bytesSecond, decimals) {
 	const sizes = ['Bytes', 'KiB', 'MiB', 'GiB', 'TiB'];
 	const k = 1024;

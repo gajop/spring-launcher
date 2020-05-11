@@ -89,41 +89,41 @@ class Wizard extends EventEmitter {
 			});
 		}
 
-		steps.push({
-			name: 'start',
-			action: (step) => {
-				setTimeout(() => {
-					if (launcher.state != 'failed') {
-						mainWindow.hide();
-					}
-				}, 1000);
-
-				let enginePath;
-				if (config.launch.engine_path != null) {
-					enginePath = config.launch.engine_path;
-				} else {
-					const engineName = config.launch.engine || config.downloads.engines[0];
-					if (!engineName) {
-						return;
-					}
-					enginePath = path.join(springPlatform.writePath, 'engine', engineName, springPlatform.springBin);
-				}
-
-				log.info(`Starting Spring from: ${enginePath}`);
-				launcher.launch(enginePath, config.launch.start_args);
-
-				this.emit('launched');
-
-				gui.send('launch-started');
-				launcher.once('finished', () => {
-					this.steps.push(step);
-				});
-
-				launcher.once('failed', () => {
-					this.steps.push(step);
-				});
+		let enginePath;
+		if (config.launch.engine_path != null) {
+			enginePath = config.launch.engine_path;
+		} else {
+			const engineName = config.launch.engine || config.downloads.engines[0];
+			if (engineName != null) {
+				enginePath = path.join(springPlatform.writePath, 'engine', engineName, springPlatform.springBin);
 			}
-		});
+		}
+		if (enginePath != null) {
+			steps.push({
+				name: 'start',
+				action: (step) => {
+					setTimeout(() => {
+						if (launcher.state != 'failed') {
+							mainWindow.hide();
+						}
+					}, 1000);
+
+					log.info(`Starting Spring from: ${enginePath}`);
+					launcher.launch(enginePath, config.launch.start_args);
+
+					this.emit('launched');
+
+					gui.send('launch-started');
+					launcher.once('finished', () => {
+						this.steps.push(step);
+					});
+
+					launcher.once('failed', () => {
+						this.steps.push(step);
+					});
+				}
+			});
+		}
 
 		this.started = false;
 		this.steps = steps;
@@ -144,6 +144,7 @@ class Wizard extends EventEmitter {
 			gui.send('wizard-stopped');
 			gui.send('wizard-finished');
 			this.started = false;
+			gui.send('set-next-enabled', false);
 			return false;
 		}
 		if (!this.started) {
