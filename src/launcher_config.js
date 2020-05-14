@@ -31,6 +31,11 @@ const configDefault = {
 
 	'launch': {
 		'start_args': [],
+		'game': undefined,
+		'map': undefined,
+		'map_options': undefined,
+		'mod_options': undefined,
+		'game_options': undefined
 	}
 };
 

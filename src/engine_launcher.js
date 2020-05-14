@@ -23,6 +23,29 @@ bridge.on('listening', () => {
 });
 
 function generateScriptTXT() {
+	let extraModOptions = '';
+	if (config.launch.mod_options != null) {
+		for (let [key, value] of Object.entries(config.launch.mod_options)) {
+			extraModOptions = extraModOptions + `\n${key} = ${value};`;
+		}
+	}
+
+	let mapOptions = '';
+	if (config.launch.map_options != null) {
+		mapOptions = '[MapOptions]\n{';
+		for (let [key, value] of Object.entries(config.launch.map_options)) {
+			mapOptions = mapOptions + `\n${key} = ${value};`;
+		}
+		mapOptions += '\n}';
+	}
+
+	let extraGameOptions = '';
+	if (config.launch.game_options != null) {
+		for (let [key, value] of Object.entries(config.launch.game_options)) {
+			extraGameOptions = extraGameOptions + `\n${key} = ${value};`;
+		}
+	}
+
 	return `[GAME]
 {
 	GameType = ${config.launch.game};
@@ -30,8 +53,10 @@ function generateScriptTXT() {
 	IsHost = 1;
 	MapName = ${config.launch.map};
 	NumPlayers = 2;
-  NumUsers = 2;
-  GameStartDelay = 0;
+    NumUsers = 2;
+	GameStartDelay = 0;
+
+	${extraGameOptions}
 
 	[allyTeam0]
 	{
@@ -48,8 +73,11 @@ function generateScriptTXT() {
     _sl_address = ${address};
     _sl_port = ${port};
     _sl_write_path = ${springPlatform.writePath};
-    _sl_launcher_version = ${app.getVersion()};
+	_sl_launcher_version = ${app.getVersion()};
+	${extraModOptions}
 	}
+
+	${mapOptions}
 
 	[player0]
 	{
