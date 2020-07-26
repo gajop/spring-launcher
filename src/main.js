@@ -21,6 +21,7 @@ const launcher = require('./engine_launcher');
 const { writePath } = require('./spring_platform');
 const log_uploader = require('./log_uploader');
 const file_opener = require('./file_opener');
+const { lobby } = require('./uber/lobby');
 
 process.on('uncaughtException', (err, origin) => {
 	const msg = `Closing launcher due to uncaught exception.\n"${err}" from "${origin}".  ${err.stack}`;
@@ -155,6 +156,20 @@ ipcMain.on('open-install-dir', () => {
 	} else {
 		log.error(`Failed to open install directory: ${writePath}`);
 	}
+});
+
+ipcMain.on('connect-uber', (event, username, password) => {
+	console.log('CONNECT', username, password);
+	lobby.connect();
+	lobby.login(username, password);
+});
+
+lobby.on('login-success', () => {
+	gui.send('login-success');
+});
+
+lobby.on('login-failed', (reason) => {
+	gui.send('login-failed', reason);
 });
 
 app.on('ready', () => {
