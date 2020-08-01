@@ -33,6 +33,7 @@ const configDefault = {
 		'start_args': [],
 		'game': undefined,
 		'map': undefined,
+		'engine': undefined,
 		'map_options': undefined,
 		'mod_options': undefined,
 		'game_options': undefined

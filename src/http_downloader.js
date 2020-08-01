@@ -7,7 +7,10 @@ const https = follow_redirects.https;
 const fs = require('fs');
 const path = require('path');
 
-const extract = require('extract-zip');
+const extractZip = require('extract-zip');
+
+const { path7za } = require('7zip-bin');
+const { extractFull: extract7z } = require('node-7z');
 
 const springPlatform = require('./spring_platform');
 const { log } = require('./spring_log');
@@ -110,13 +113,7 @@ class HttpDownloader extends EventEmitter {
 			}
 
 			this.emit('progress', `Extracting to ${destination}`, 99, 100);
-			extract(destinationTemp, { dir: destination }).then(() => {
-				this.emit('finished', name);
-				fs.unlinkSync(destinationTemp);
-			}).catch(reason => {
-				this.emit('failed', name, reason);
-				fs.unlinkSync(destinationTemp);
-			});
+			this.extract(name, url, destinationTemp, destination);
 		}).catch(() => fs.unlinkSync(destinationTemp));
 	}
 
@@ -152,6 +149,46 @@ class HttpDownloader extends EventEmitter {
 				this.emit('failed', name, `Failed with error: ${e.message}`);
 				reject();
 			});
+		});
+	}
+
+	extract(name, url, source, destination) {
+		const isZip = url.href.endsWith('.zip');
+		const is7z = url.href.endsWith('.7z');
+		if (isZip) {
+			log.info(`Extracting as .zip file: ${source} -> ${destination}`);
+			this.extractWithZip(name, source, destination);
+		} else if (is7z) {
+			log.info(`Extracting as .7z file: ${source} -> ${destination}`);
+			this.extractWith7z(name, source, destination);
+		} else {
+			log.warn(`Unknown archive format: ${url}. Assuming it's a zip file.`);
+			this.extractWithZip(name, source, destination);
+		}
+	}
+
+	extractWithZip(name, source, destination) {
+		extractZip(source, { dir: destination }).then(() => {
+			this.emit('finished', name);
+			fs.unlinkSync(source);
+		}).catch(reason => {
+			this.emit('failed', name, reason);
+			fs.unlinkSync(source);
+		});
+	}
+
+	extractWith7z(name, source, destination) {
+		const stream7z = extract7z(source, destination, {
+			$bin: path7za
+		});
+		stream7z.on('end', () => {
+			this.emit('finished', name);
+			fs.unlinkSync(source);
+		});
+
+		stream7z.on('error', (err) => {
+			this.emit('failed', name, err);
+			fs.unlinkSync(source);
 		});
 	}
 
