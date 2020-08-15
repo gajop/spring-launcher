@@ -9,11 +9,15 @@ const path = require('path');
 
 const extractZip = require('extract-zip');
 
-const { path7za } = require('7zip-bin');
+let { path7za } = require('7zip-bin');
+// A terrible hack indeed
+path7za = path7za.replace('app.asar', 'app.asar.unpacked');
 const { extractFull: extract7z } = require('node-7z');
 
 const springPlatform = require('./spring_platform');
 const { log } = require('./spring_log');
+
+log.info(`Patch to 7zip: ${path7za}`);
 
 // const ENGINE_FOLDER = path.join(springPlatform.writePath, 'engine');
 // const GAMES_FOLDER = path.join(springPlatform.writePath, 'games');
@@ -178,17 +182,37 @@ class HttpDownloader extends EventEmitter {
 	}
 
 	extractWith7z(name, source, destination) {
+		log.info(`Extracting ${source} to ${destination}...`);
+		const destinationParentDir = path.basename(path.dirname(destination));
+		if (!fs.existsSync(destinationParentDir)) {
+			fs.mkdirSync(destinationParentDir, { recursive: true });
+		}
+
 		const stream7z = extract7z(source, destination, {
 			$bin: path7za
 		});
+		// FIXME: This is always called for some reason
 		stream7z.on('end', () => {
 			this.emit('finished', name);
-			fs.unlinkSync(source);
+			try {
+				log.info(`Deleting file after extraction has been finished: ${source}`);
+				fs.unlinkSync(source);
+			} catch (error) {
+				log.error(`Cannot unlink file after extracting: ${source}`);
+			}
 		});
 
 		stream7z.on('error', (err) => {
 			this.emit('failed', name, err);
-			fs.unlinkSync(source);
+			// FIXME: We aren't deleting the file on failure as the above 'end' event is always called (even on failure).
+
+			// try {
+			// 	log.info(`Deleting file after a failed extract: ${source}`);
+			// 	// fs.unlinkSync(source);
+			// } catch (error) {
+			// 	log.error(`Cannot unlink file after an error: ${source}`);
+			// 	// ignore the second error
+			// }
 		});
 	}
 
