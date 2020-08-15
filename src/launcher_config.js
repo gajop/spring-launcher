@@ -142,6 +142,10 @@ const proxy = new Proxy({
 		} {
 			return currentConfig[name];
 		}
+	},
+	set: function (target, name, value) {
+		currentConfig[name] = value;
+		return true;
 	}
 });
 

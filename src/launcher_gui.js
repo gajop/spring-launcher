@@ -21,6 +21,8 @@ app.on('second-instance', () => {
 });
 
 app.prependListener('ready', () => {
+	const { wizard } = require('./launcher_wizard');
+
 	const display = electron.screen.getPrimaryDisplay();
 	const sWidth = display.workAreaSize.width;
 	const width = 800;
@@ -88,23 +90,11 @@ app.prependListener('ready', () => {
 		mainWindow.show();
 
 		gui.send('all-configs', config.getAvailableConfigs());
-		gui.send('config', config.getConfigObj());
 
-		const { wizard } = require('./launcher_wizard');
+		const { generateAndBroadcastWizard } = require('./launcher_wizard_util');
+		generateAndBroadcastWizard();
 
-		const steps = wizard.steps
-			.filter(step => step.name != 'start')
-			.map(step => {
-				// we have to make a copy of these steps because IPC shouldn't contain functions (step.action)
-				return {
-					name: step.name,
-					item: step.item
-				};
-			});
-		gui.send('wizard-list', steps);
-
-		if (config.no_downloads &&
-      config.auto_start) {
+		if (config.no_downloads && config.auto_start) {
 			wizard.nextStep();
 		} else if (config.auto_download) {
 			gui.send('wizard-started');

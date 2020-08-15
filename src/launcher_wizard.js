@@ -1,7 +1,7 @@
 'use strict';
 
 const EventEmitter = require('events');
-const { app, ipcMain } = require('electron');
+const { app } = require('electron');
 
 const log = require('electron-log');
 
@@ -172,11 +172,6 @@ class Wizard extends EventEmitter {
 		return true;
 	}
 }
-
-ipcMain.on('wizard-next', () => {
-	wizard.nextStep(true);
-});
-
 
 const wizard = new Wizard();
 

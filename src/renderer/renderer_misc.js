@@ -4,7 +4,7 @@ const { ipcRenderer } = require('electron');
 const isDev = require('electron-is-dev');
 
 const btnShowDir = document.getElementById('btn-show-dir');
-const lblMainTitle = document.getElementById('main-title');
+const lblMainTitle = document.getElementById('title');
 
 btnShowDir.addEventListener('click', () => {
 	ipcRenderer.send('open-install-dir');

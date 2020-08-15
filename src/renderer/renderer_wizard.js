@@ -10,12 +10,18 @@ const pbPart = document.getElementById('progress-part');
 const pbFull = document.getElementById('progress-full');
 
 const btnProgress = document.getElementById('btn-progress');
+const cbCheckForUpdates = document.getElementById('cb-check-for-updates');
+const lblCheckForUpdates = document.getElementById('lbl-check-for-updates');
 
 let steps;
 let currentStep = 0;
 
 let operationInProgress = false;
 let nextStepEnabled = true;
+
+const MAX_STRING_SIZE = 100;
+
+const truncateLongString = (str) => str.length > MAX_STRING_SIZE ? str.substr(0, MAX_STRING_SIZE-1) + '&hellip;' : str;
 
 ipcRenderer.on('wizard-list', (_, s) => {
 	steps = s;
@@ -48,8 +54,7 @@ ipcRenderer.on('wizard-finished', () => {
 
 ipcRenderer.on('wizard-next-step', (e, step) => {
 	lblPart.innerHTML = '';
-	lblFull.innerHTML =
-`Step ${currentStep} of ${steps.length} Checking for download: ${step.name} `;
+	lblFull.innerHTML = truncateLongString(`Step ${currentStep + 1} of ${steps.length} Checking for download: ${step.name} `);
 	pbFull.value = Math.round(100 * currentStep / steps.length);
 	currentStep++;
 });
@@ -64,18 +69,26 @@ btnProgress.addEventListener('click', (event) => {
 	}
 });
 
+cbCheckForUpdates.addEventListener('change', () => {
+	ipcRenderer.send('wizard-check-for-updates', cbCheckForUpdates.checked);
+});
+
 function setInProgress(state) {
 	setConfigEnabled(!state);
 	if (state) {
 		btnProgress.classList.add('is-loading');
+		cbCheckForUpdates.disabled = true;
+		lblCheckForUpdates.disabled = true;
 	} else {
 		btnProgress.classList.remove('is-loading');
+		cbCheckForUpdates.disabled = false;
+		lblCheckForUpdates.disabled = false;
 	}
 	operationInProgress = state;
 }
 
 function stepError(message) {
-	lblFull.innerHTML = message;
+	lblFull.innerHTML = truncateLongString(message);
 	lblFull.classList.add('error');
 	lblPart.classList.add('error');
 
@@ -90,6 +103,7 @@ function stepError(message) {
 
 function updateWizard(config) {
 	let buttonText;
+	cbCheckForUpdates.checked = !config.no_downloads;
 	if (config.no_downloads) {
 		if (config.auto_start && !operationInProgress && false) { // eslint-disable-line no-constant-condition
 			// TODO: add later
@@ -128,11 +142,13 @@ function resetUI() {
 
 	lblFull.classList.remove('error');
 	lblPart.classList.remove('error');
-	lblFull.innerHTML = '';
+	lblFull.innerHTML = 'Ready';
 	lblPart.innerHTML = '';
 
 	btnProgress.classList.remove('is-warning');
 	btnProgress.classList.add('is-primary');
+	cbCheckForUpdates.disabled = false;
+	lblCheckForUpdates.disabled = false;
 	setNextStepEnabled(true);
 }
 

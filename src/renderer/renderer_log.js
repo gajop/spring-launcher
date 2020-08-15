@@ -35,9 +35,9 @@ btnUploadLog.addEventListener('click', () => {
 });
 
 ipcRenderer.on('log', (e, msg) => {
-	var para = document.createElement('p');
-	var text = format.apply(util, msg.data);
-	var node = document.createTextNode(`[${msg.date} ${msg.level}] ${text}`);
+	const para = document.createElement('p');
+	const text = format.apply(util, msg.data);
+	const node = document.createTextNode(`[${msg.date} ${msg.level}] ${text}`);
 	para.appendChild(node);
 	para.classList.add(msg.level);
 	logContent.appendChild(para);

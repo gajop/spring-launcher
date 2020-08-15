@@ -1,28 +1,73 @@
 body {
-    background-image: url(./images/background.png);
-    background-position: center center;
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
-	text-shadow: 1px 1px 0px #000
+  text-shadow: 1px 1px 0px #000;
+  position: relative;
+  overflow-x: hidden;
 }
 
-.title {
-	text-shadow: 2px 2px 5px #000
+#main-content {
+  padding-top: 20px;
+  padding-right: 30px;
+  padding-bottom: 0px;
+  padding-left: 30px;
+
+  background-image: url(./images/background.png);
+  /* background-attachment: fixed; */
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  height: 388px;
+}
+
+.header { grid-area: header; }
+.config { grid-area: config; }
+.control-buttons { grid-area: controls; }
+.status {
+  grid-area: status;
+  align-self: end;
+}
+.mainbtn { grid-area: mainbtn; }
+#lbl-check-for-updates {
+  grid-area: checkupdates;
+  align-self: end;
+}
+.progress-area {
+  grid-area: prog;
+  align-self: end;
+}
+
+.grid-container {
+  display: grid;
+  grid-template-areas:
+    'header header config'
+    'controls controls mainbtn'
+    'status status mainbtn'
+    'prog prog mainbtn'
+    'prog prog checkupdates';
+  grid-template-columns: 1fr 4fr 1fr;
+  grid-template-rows: 10fr 1fr 1fr 1fr 1fr 5fr;
+  column-gap: 30px;
+  row-gap: 20px;
+}
+
+body::-webkit-scrollbar {
+  display: none;
+}
+
+#title {
+  text-shadow: 2px 2px 5px #000;
+  font-size: 220%;
 }
 
 .button {
-	text-shadow: 1px 1px 5px #000
+  text-shadow: 1px 1px 5px #000
 }
 
 #btn-progress {
   animation: radial-pulse 2s infinite;
   min-height: 100px;
   max-height: 100px;
-
   min-width: 150px;
   max-width: 150px;
-
   /* font-size: 100%; */
   white-space: normal;
 }
@@ -32,49 +77,29 @@ body {
 }
 
 p.error {
-    color: red;
+  color: red;
 }
 
 label.error {
-    color: red;
+  color: red;
 }
 
 p.warn {
-    color: orange;
-}
-
-body {
-  overflow-x: hidden;
-}
-
-body::-webkit-scrollbar {
-  display: none;
+  color: orange;
 }
 
 #current_config {
-  position: relative;
-  top: 6px;
-  right: 10px;
   text-align: center;
   font-size: 80%;
 }
 
-
-#config-select__div {
-  position: absolute;
-  top: 20px;
-  right: 10px;
-}
-
 .infobox {
-  position: absolute;
-  bottom: 20px;
   overflow: scroll;
   display: none;
-  width: 90%;
+  width: 100%;
   padding-right: 10px;
-  height: 370px;
-  /* user-select: all; */
+  padding-bottom: 0px;
+  height: 335px;
 }
 
 .infobox p {
@@ -85,57 +110,15 @@ body::-webkit-scrollbar {
   display: block;
 }
 
-.status-button {
-  display: inline-block;
-}
-
-.progress-status {
-  padding-bottom: 20px;
-  height : 60px;
-  overflow: hidden;
-  width: 550px;
-}
-
 .progress-label {
-  /* margin-top: auto;  */
-  display: inline-block;
-  /* border-style: solid;
-  border-width: 1px;
-  border-color: black; */
   font-size: 80%;
   overflow-wrap: break-word;
   word-wrap: break-word;
-}
-
-#lbl-progress-full {
-  width: 350px;
-}
-
-#lbl-progress-part {
-  width: 150px;
-}
-
-.progress-block {
-  position: relative;
-  padding-top: 80px;
-  width: 70%;
-  display: inline-block;
-}
-
-.button-block {
-  position: relative;
-  display: inline-block;
-  padding-left: 30px;
-  bottom: 80px;
+  word-break: break-word;
 }
 
 .progress {
-	box-shadow: 2px 2px 5px #000;
-}
-
-.section {
-  padding-bottom: 0px;
-  width: 100%;
+  box-shadow: 2px 2px 5px #000;
 }
 
 /* Add radial Pulse ability */
@@ -143,11 +126,31 @@ body::-webkit-scrollbar {
   0% {
     box-shadow: 0 0 0 0px rgba(0, 0, 0, 1);
   }
-
   100% {
     box-shadow: 0 0 0 10px rgba(0, 0, 0, 0);
   }
 }
-/**/
 
 
+/**
+ *   MAKE ELECTRON APP FEEL MORE NATIVE
+ *
+ *   * Prevent dragging all HTML elements, specially:
+ *   	- images
+ *   	- links (anchors)
+ *
+ *   * Prevent text selection
+ */
+
+
+*, *::after, *::before {
+	-webkit-user-select: none;
+	-webkit-user-drag: none;
+	-webkit-app-region: no-drag;
+	cursor: default;
+}
+
+/* But enable text selection for the log */
+#note-content > p {
+	-webkit-user-select: text;
+}

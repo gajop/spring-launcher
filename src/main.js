@@ -13,6 +13,7 @@ const { log } = require('./spring_log');
 const { config } = require('./launcher_config');
 const { gui } = require('./launcher_gui');
 const { wizard } = require('./launcher_wizard');
+const { generateAndBroadcastWizard } = require('./launcher_wizard_util');
 const springDownloader = require('./spring_downloader');
 const autoUpdater = require('./updater');
 // TODO: Despite not using it in this file, we have to require spring_api here
@@ -125,22 +126,12 @@ autoUpdater.on('error', (error) => {
 
 function setConfig(cfgName) {
 	config.setConfig(cfgName);
-	gui.send('config', config.getConfigObj());
 	settings.set('config', cfgName);
-	wizard.generateSteps();
-	const steps = wizard.steps
-		.filter(step => step.name != 'start')
-		.map(step => {
-			// we have to make a copy of these steps because IPC shouldn't contain functions (step.action)
-			return {
-				name: step.name,
-				item: step.item
-			};
-		});
-	gui.send('wizard-list', steps);
+	generateAndBroadcastWizard();
 }
 
-ipcMain.on('change-cfg', (e, cfgName) => {
+ipcMain.on('change-cfg', (_, cfgName) => {
+	settings.set('checkForUpdates', undefined);
 	setConfig(cfgName);
 	wizard.setEnabled(true);
 });
@@ -155,6 +146,19 @@ ipcMain.on('open-install-dir', () => {
 	} else {
 		log.error(`Failed to open install directory: ${writePath}`);
 	}
+});
+
+ipcMain.on('wizard-next', () => {
+	wizard.nextStep(true);
+});
+
+ipcMain.on('wizard-check-for-updates', (_, checkForUpdates) => {
+	if (checkForUpdates === settings.get('checkForUpdates')) {
+		return;
+	}
+	log.info('wizard-check-for-updates', checkForUpdates);
+	settings.set('checkForUpdates', checkForUpdates);
+	generateAndBroadcastWizard();
 });
 
 app.on('ready', () => {
