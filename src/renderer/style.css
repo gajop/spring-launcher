@@ -110,11 +110,17 @@ p.warn {
   display: block;
 }
 
+.status {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  word-break: break-all;
+  line-height: 1.0;
+}
+
 .progress-label {
   font-size: 80%;
-  overflow-wrap: break-word;
-  word-wrap: break-word;
-  word-break: break-word;
 }
 
 .progress {

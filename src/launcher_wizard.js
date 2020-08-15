@@ -25,7 +25,6 @@ app.on('ready', () => {
 class Wizard extends EventEmitter {
 	constructor() {
 		super();
-		this.enabled = true;
 		this.generateSteps();
 	}
 
@@ -127,6 +126,7 @@ class Wizard extends EventEmitter {
 
 		this.started = false;
 		this.steps = steps;
+		this.enabled = true;
 	}
 
 	setEnabled(enabled) {

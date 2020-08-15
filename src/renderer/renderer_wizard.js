@@ -19,10 +19,6 @@ let currentStep = 0;
 let operationInProgress = false;
 let nextStepEnabled = true;
 
-const MAX_STRING_SIZE = 100;
-
-const truncateLongString = (str) => str.length > MAX_STRING_SIZE ? str.substr(0, MAX_STRING_SIZE-1) + '&hellip;' : str;
-
 ipcRenderer.on('wizard-list', (_, s) => {
 	steps = s;
 });
@@ -54,13 +50,12 @@ ipcRenderer.on('wizard-finished', () => {
 
 ipcRenderer.on('wizard-next-step', (e, step) => {
 	lblPart.innerHTML = '';
-	lblFull.innerHTML = truncateLongString(`Step ${currentStep + 1} of ${steps.length} Checking for download: ${step.name} `);
+	lblFull.innerHTML = `Step ${currentStep + 1} of ${steps.length} Checking for download: ${step.name} `;
 	pbFull.value = Math.round(100 * currentStep / steps.length);
 	currentStep++;
 });
 
 btnProgress.addEventListener('click', (event) => {
-	console.log(operationInProgress, nextStepEnabled);
 	event.preventDefault();
 	if (!operationInProgress && nextStepEnabled) {
 		lblFull.classList.remove('error');
@@ -77,18 +72,16 @@ function setInProgress(state) {
 	setConfigEnabled(!state);
 	if (state) {
 		btnProgress.classList.add('is-loading');
-		cbCheckForUpdates.disabled = true;
-		lblCheckForUpdates.disabled = true;
 	} else {
 		btnProgress.classList.remove('is-loading');
-		cbCheckForUpdates.disabled = false;
-		lblCheckForUpdates.disabled = false;
 	}
+	cbCheckForUpdates.disabled = state;
+	lblCheckForUpdates.disabled = state;
 	operationInProgress = state;
 }
 
 function stepError(message) {
-	lblFull.innerHTML = truncateLongString(message);
+	lblFull.innerHTML = message;
 	lblFull.classList.add('error');
 	lblPart.classList.add('error');
 
@@ -106,19 +99,11 @@ function updateWizard(config) {
 	cbCheckForUpdates.checked = !config.no_downloads;
 	if (config.no_downloads) {
 		if (config.auto_start && !operationInProgress && false) { // eslint-disable-line no-constant-condition
-			// TODO: add later
-			buttonText = 'Starting...';
 		} else {
 			buttonText = 'Start';
 		}
 	} else {
 		if (config.auto_download && !operationInProgress && false) { // eslint-disable-line no-constant-condition
-			// TODO: add later
-			if (config.auto_start) {
-				buttonText = 'Updating and Starting...';
-			} else {
-				buttonText = 'Updating...';
-			}
 		} else {
 			if (config.auto_start) {
 				buttonText = 'Update & Start';
@@ -150,6 +135,7 @@ function resetUI() {
 	cbCheckForUpdates.disabled = false;
 	lblCheckForUpdates.disabled = false;
 	setNextStepEnabled(true);
+	setInProgress(false);
 }
 
 function setNextStepEnabled(enabled) {

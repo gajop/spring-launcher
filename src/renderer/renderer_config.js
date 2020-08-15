@@ -38,7 +38,7 @@ ipcRenderer.on('all-configs', (e, ac) => {
 	allConfigs = ac;
 
 	allConfigs.forEach((cfg) => {
-		var cfgElement = document.createElement('option');
+		let cfgElement = document.createElement('option');
 		cfgElement.id = `cfg-${cfg.package.id}`;
 		cfgElement.appendChild(document.createTextNode(cfg.package.display));
 
