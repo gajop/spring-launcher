@@ -83,7 +83,14 @@ function after_upload(response, resolve, reject) {
 
 	response.on('end', () => {
 		const body = Buffer.concat(chunks);
-		const obj = JSON.parse(body);
+		let obj;
+		try {
+			obj = JSON.parse(body);
+		} catch (err) {
+			reject('Unable to parse response from server. See log for details');
+			log.error(`Unable to parse response from server: ${body}`);
+			return;
+		}
 		if (obj.url == null) {
 			reject('unexpected error');
 			return;
