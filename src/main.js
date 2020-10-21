@@ -48,13 +48,40 @@ springDownloader.on('started', (downloadItem, type, args) => {
 	gui.send('dl-started', downloadItem, type, args);
 });
 
-springDownloader.on('progress', (downloadItem, current, total) => {
+springDownloader.on('progress', function (downloadItem, current, total) {
 	if (total < 1024 * 1024) {
 		return; // ignore downloads less than 1MB (probably not real downloads!)
 	}
-	log.info(`Download progress: ${downloadItem}, ${current}, ${total}`);
-	gui.getMainWindow().setProgressBar(current / total);
-	gui.send('dl-progress', downloadItem, current, total);
+
+	const LOG_INTERVAL = 1000;
+	const GUI_INTERVAL = 10;
+
+	let shouldLog = true;
+	let shouldUpdateGUI = true;
+
+	if (typeof this.prevLogTime == 'undefined') {
+		this.prevLogTime = (new Date()).getTime();
+	} else {
+		const now = (new Date()).getTime();
+		if (now - this.prevLogTime < LOG_INTERVAL) {
+			shouldLog = false;
+		} else {
+			this.prevLogTime = now;
+		}
+		if (now - this.prevGUIUpdateTime < GUI_INTERVAL) {
+			shouldUpdateGUI = false;
+		} else {
+			this.prevGUIUpdateTime = now;
+		}
+	}
+
+	if (shouldLog) {
+		log.info(`Download progress: ${downloadItem}, ${current}, ${total}`);
+	}
+	if (shouldUpdateGUI) {
+		gui.getMainWindow().setProgressBar(current / total);
+		gui.send('dl-progress', downloadItem, current, total);
+	}
 });
 
 springDownloader.on('finished', (downloadItem) => {
