@@ -35,6 +35,13 @@ function makeTemporary() {
 	// unreachable
 }
 
+function makeParentDir(filepath) {
+	const destinationParentDir = path.dirname(filepath);
+	if (!fs.existsSync(destinationParentDir)) {
+		fs.mkdirSync(destinationParentDir, { recursive: true });
+	}
+}
+
 class HttpDownloader extends EventEmitter {
 	constructor() {
 		super();
@@ -110,6 +117,8 @@ class HttpDownloader extends EventEmitter {
 		const destinationTemp = makeTemporary();
 		this.emit('started', name, 'resource');
 		this.download(name, 'resource', url, destinationTemp).then(() => {
+			makeParentDir(destination);
+
 			if (!resource['extract']) {
 				fs.renameSync(destinationTemp, destination);
 				this.emit('finished', name);
@@ -183,10 +192,6 @@ class HttpDownloader extends EventEmitter {
 
 	extractWith7z(name, source, destination) {
 		log.info(`Extracting ${source} to ${destination}...`);
-		const destinationParentDir = path.basename(path.dirname(destination));
-		if (!fs.existsSync(destinationParentDir)) {
-			fs.mkdirSync(destinationParentDir, { recursive: true });
-		}
 
 		const stream7z = extract7z(source, destination, {
 			$bin: path7za
