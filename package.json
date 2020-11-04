@@ -40,7 +40,7 @@
     },
     "publish": {
       "provider": "generic",
-      "url": "https://spring-launcher.ams3.digitaloceanspaces.com",
+      "url": "https://content.spring-launcher.com",
       "channel": "latest"
     },
     "mac": {
