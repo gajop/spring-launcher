@@ -79,7 +79,10 @@ springDownloader.on('progress', function (downloadItem, current, total) {
 		log.info(`Download progress: ${downloadItem}, ${current}, ${total}`);
 	}
 	if (shouldUpdateGUI) {
-		gui.getMainWindow().setProgressBar(current / total);
+		const mainWindow = gui.getMainWindow();
+		if (mainWindow != null) {
+			mainWindow.setProgressBar(current / total);
+		}
 		gui.send('dl-progress', downloadItem, current, total);
 	}
 });
