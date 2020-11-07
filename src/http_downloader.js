@@ -17,8 +17,6 @@ const { extractFull: extract7z } = require('node-7z');
 const springPlatform = require('./spring_platform');
 const { log } = require('./spring_log');
 
-log.info(`Patch to 7zip: ${path7za}`);
-
 // const ENGINE_FOLDER = path.join(springPlatform.writePath, 'engine');
 // const GAMES_FOLDER = path.join(springPlatform.writePath, 'games');
 // const MAPS_FOLDER = path.join(springPlatform.writePath, 'maps');
@@ -192,9 +190,12 @@ class HttpDownloader extends EventEmitter {
 
 	extractWith7z(name, source, destination) {
 		log.info(`Extracting ${source} to ${destination}...`);
+		log.info(`Path to 7zip: ${path7za}`);
 
+		let currentProgress;
 		const stream7z = extract7z(source, destination, {
-			$bin: path7za
+			$bin: path7za,
+			$progress: true
 		});
 		// FIXME: This is always called for some reason
 		stream7z.on('end', () => {
@@ -207,17 +208,16 @@ class HttpDownloader extends EventEmitter {
 			}
 		});
 
-		stream7z.on('error', (err) => {
-			this.emit('failed', name, err);
-			// FIXME: We aren't deleting the file on failure as the above 'end' event is always called (even on failure).
+		stream7z.on('progress', (progress) => {
+			currentProgress = progress;
+		});
 
-			// try {
-			// 	log.info(`Deleting file after a failed extract: ${source}`);
-			// 	// fs.unlinkSync(source);
-			// } catch (error) {
-			// 	log.error(`Cannot unlink file after an error: ${source}`);
-			// 	// ignore the second error
-			// }
+		stream7z.on('error', (err) => {
+			log.error(`Failed to extract ${name} with error: ${err}`);
+			log.error(`err.stderr: ${err.stderr}`);
+			log.error(`Current extraction progress: ${currentProgress}`);
+			this.emit('failed', name, `Extraction failure: ${err}`);
+			// FIXME: We aren't deleting the file on failure as the above 'end' event is always called (even on failure).
 		});
 	}
 
