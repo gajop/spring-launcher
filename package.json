@@ -28,7 +28,7 @@
       "bin/*",
       "files/*"
     ],
-    "artifactName": "${productName}.${ext}",
+    "artifactName": "${productName}-${version}.${ext}",
     "linux": {
       "target": "AppImage",
       "category": "Game"
