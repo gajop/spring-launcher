@@ -13,6 +13,8 @@ if (!isFirstInstance) {
 }
 
 const { log } = require('./spring_log');
+// Setup error handling
+require('./error_handling');
 const { config } = require('./launcher_config');
 const { gui } = require('./launcher_gui');
 const { wizard } = require('./launcher_wizard');
@@ -26,25 +28,6 @@ const { writePath } = require('./spring_platform');
 const log_uploader = require('./log_uploader');
 const file_opener = require('./file_opener');
 
-process.on('uncaughtException', (err, origin) => {
-	const msg = `Closing launcher due to uncaught exception.\n"${err}" from "${origin}".  ${err.stack}`;
-	try {
-		const messageBoxOptions = {
-			type: 'error',
-			title: 'spring-launcher error',
-			message: msg
-		};
-		dialog.showMessageBoxSync(messageBoxOptions);
-	} catch (error) {
-		// Can't handle these errors
-	}
-	try {
-		log.error(msg);
-	} catch (error) {
-		// Can't handle these errors
-	}
-	process.exit(1);
-});
 
 springDownloader.on('started', (downloadItem, type, args) => {
 	log.info(`Download started: ${downloadItem}, ${type}, ${args}`);
@@ -97,8 +80,8 @@ springDownloader.on('finished', (downloadItem) => {
 });
 
 springDownloader.on('failed', (downloadItem, msg) => {
-	log.error(`${msg}`);
-	gui.send('dl-failed', downloadItem, msg);
+	log.error(`${downloadItem}: ${msg}`);
+	gui.send('error', msg);
 	wizard.setEnabled(false);
 });
 

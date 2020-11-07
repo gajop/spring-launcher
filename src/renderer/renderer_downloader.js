@@ -34,7 +34,7 @@ ipcRenderer.on('dl-finished', () => {
 	pbPart.classList.add('is-success');
 });
 
-ipcRenderer.on('dl-failed', (e, downloadItem, msg) => {
+ipcRenderer.on('error', (e, msg) => {
 	setNextStepEnabled(false);
 	stepError(`Step ${getCurrentStepIndex()} of ${getTotalSteps()}: ${msg}`);
 });
