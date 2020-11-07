@@ -2,8 +2,6 @@
 
 const settings = require('electron-settings');
 
-const { log } = require('./spring_log');
-log.info('test');
 const { wizard } = require('./launcher_wizard');
 const { config } = require('./launcher_config');
 const { gui } = require('./launcher_gui');
