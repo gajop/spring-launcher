@@ -157,16 +157,22 @@ autoUpdater.on('error', (error) => {
 	wizard.nextStep();
 });
 
-function setConfig(cfgName) {
-	config.setConfig(cfgName);
+function maybeSetConfig(cfgName) {
+	if (!config.setConfig(cfgName)) {
+		return false;
+	}
+
 	settings.set('config', cfgName);
 	generateAndBroadcastWizard();
+
+	return true;
 }
 
 ipcMain.on('change-cfg', (_, cfgName) => {
 	settings.set('checkForUpdates', undefined);
-	setConfig(cfgName);
-	wizard.setEnabled(true);
+	if (maybeSetConfig(cfgName)) {
+		wizard.setEnabled(true);
+	}
 });
 
 ipcMain.on('log-upload-ask', () => {
@@ -202,7 +208,7 @@ app.on('ready', () => {
 	settings.setPath(`${writePath}/launcher_cfg.json`);
 	const oldConfig = settings.get('config');
 	if (oldConfig) {
-		if (!setConfig(oldConfig)) {
+		if (!maybeSetConfig(oldConfig)) {
 			// forget invalid configs
 			settings.set('config', undefined);
 		}
