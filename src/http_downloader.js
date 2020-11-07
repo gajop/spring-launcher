@@ -21,10 +21,13 @@ const { log } = require('./spring_log');
 // const GAMES_FOLDER = path.join(springPlatform.writePath, 'games');
 // const MAPS_FOLDER = path.join(springPlatform.writePath, 'maps');
 
+const TEMPORARY_FILE_DIR = springPlatform.writePath;
+const TEMPORARY_FILE_PREFIX = 'download_temp_';
+
 function makeTemporary() {
 	let i = 0;
 	while (true) {
-		let temp = path.join(springPlatform.writePath, `download_temp_${i}`);
+		let temp = path.join(TEMPORARY_FILE_DIR, `${TEMPORARY_FILE_PREFIX}${i}`);
 		if (!fs.existsSync(temp)) {
 			return temp;
 		}
@@ -43,6 +46,22 @@ function makeParentDir(filepath) {
 class HttpDownloader extends EventEmitter {
 	constructor() {
 		super();
+
+		try {
+			this.cleanupOldDownloads();
+		} catch (error) {
+			// If for some weird permission reason we failed to cleanup downloads, just log it and ignore it
+			// No need to disturb the user with this
+			log.error('Failed to delete old temporary files');
+			log.error(error);
+		}
+	}
+
+	cleanupOldDownloads()
+	{
+		fs.readdirSync(TEMPORARY_FILE_DIR)
+			.filter(file => file.startsWith(TEMPORARY_FILE_PREFIX))
+			.forEach(file => fs.unlinkSync(path.join(TEMPORARY_FILE_DIR, file)));
 	}
 
 	// TODO: http is currently enabled explicitly and only for resources
