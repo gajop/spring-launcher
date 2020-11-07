@@ -1,6 +1,9 @@
 'use strict';
 
 const { app, dialog, ipcMain } = require('electron');
+// https://github.com/electron/electron/issues/18397
+app.allowRendererProcessReuse = true;
+
 const settings = require('electron-settings');
 
 const isFirstInstance = app.requestSingleInstanceLock();
