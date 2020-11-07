@@ -208,3 +208,7 @@ app.on('ready', () => {
 		}
 	}
 });
+
+app.on('window-all-closed', () => {
+	log.info('All windows closed. Quitting...');
+});
