@@ -19,7 +19,7 @@
   "license": "ISC",
   "devDependencies": {
     "electron": "^8.5.2",
-    "electron-builder": "^22.3.2",
+    "electron-builder": "^22.9.1",
     "eslint": "^6.8.0"
   },
   "build": {
@@ -49,14 +49,14 @@
   },
   "dependencies": {
     "7zip-bin": "^5.0.3",
-    "chokidar": "^3.3.1",
-    "electron-is-dev": "^1.1.0",
-    "electron-log": "^4.0.6",
+    "chokidar": "^3.4.3",
+    "electron-is-dev": "^1.2.0",
+    "electron-log": "^4.3.0",
     "electron-settings": "^3.2.0",
-    "electron-updater": "^4.2.0",
-    "extract-zip": "^2.0.0",
-    "follow-redirects": "^1.11.0",
-    "node-7z": "^2.1.1",
-    "yargs": "^15.3.1"
+    "electron-updater": "^4.3.5",
+    "extract-zip": "^2.0.1",
+    "follow-redirects": "^1.13.0",
+    "node-7z": "^2.1.2",
+    "yargs": "^15.4.1"
   }
 }
