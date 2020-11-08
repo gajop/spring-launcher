@@ -15,18 +15,20 @@ btnShowLog.addEventListener('click', (event) => {
 	event.preventDefault();
 
 	const cl = logContent.classList;
+	const baseHeight = process.platform === 'win32' ? 418 : 380 + 8;
+	const expandedHeight = baseHeight + 362;
 	if (cl.contains('open')) {
 		cl.remove('open');
 		// We have to call setMinimumSize before .setSize due to Electron bug
 		// https://github.com/electron/electron/issues/15560
-		mainWindow.setMinimumSize(800, 380 + 8);
-		mainWindow.setSize(800, 380 + 8);
+		mainWindow.setMinimumSize(800, baseHeight);
+		mainWindow.setSize(800, baseHeight);
 	} else {
 		cl.add('open');
 		// We have to call setMinimumSize before .setSize due to Electron bug
 		// https://github.com/electron/electron/issues/15560
-		mainWindow.setMinimumSize(800, 750);
-		mainWindow.setSize(800, 750);
+		mainWindow.setMinimumSize(800, expandedHeight);
+		mainWindow.setSize(800, expandedHeight);
 	}
 });
 
