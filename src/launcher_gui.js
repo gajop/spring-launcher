@@ -26,7 +26,7 @@ app.prependListener('ready', () => {
 	const display = electron.screen.getPrimaryDisplay();
 	const sWidth = display.workAreaSize.width;
 	const width = 800;
-	const height = 380 + 8;
+	const height = process.platform === 'win32' ? 418 : 380 + 8;
 
 	let windowOpts = {
 		x: (sWidth - width) / 2,
