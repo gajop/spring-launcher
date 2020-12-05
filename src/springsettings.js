@@ -24,7 +24,9 @@ class Springsettings extends EventEmitter {
 
 			const keyvalue = line.split(/=/);
 			if (keyvalue.length != 2) {
-				newContent += line + os.EOL;
+				if (line.trim() != '') {
+					newContent += line + os.EOL;
+				}
 				continue;
 			}
 			const key = keyvalue[0].trim();
