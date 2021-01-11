@@ -38,7 +38,8 @@ app.prependListener('ready', () => {
 		icon: `${__dirname}/renderer/spring-icon.png`,
 		webPreferences: {
 			nodeIntegration: true,
-		}
+			enableRemoteModule: true,
+		},
 	};
 	windowOpts.resizable = false;
 	Menu.setApplicationMenu(null);

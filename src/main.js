@@ -1,8 +1,6 @@
 'use strict';
 
 const { app, ipcMain } = require('electron');
-// https://github.com/electron/electron/issues/18397
-app.allowRendererProcessReuse = true;
 
 const settings = require('electron-settings');
 
