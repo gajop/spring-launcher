@@ -2,6 +2,6 @@
 
 const shell = require('electron').shell;
 
-module.exports.open = function (path) {
-	return shell.openItem(path);
+module.exports.open = async (path) => {
+	await shell.openPath(path);
 };

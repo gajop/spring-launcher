@@ -1,8 +1,16 @@
 const { bridge } = require('../spring_api');
 const file_opener = require('../file_opener');
 
-bridge.on('OpenFile', (command) => {
-	if (file_opener.open(command.path)) {
+bridge.on('OpenFile', async (command) => {
+	let success = false;
+	try {
+		await file_opener.open(command.path);
+		success = true;
+	} catch (e) {
+		success = false;
+	}
+
+	if (success) {
 		bridge.send('OpenFileFinished', {
 			path: command.path
 		});
