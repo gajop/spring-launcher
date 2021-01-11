@@ -1,10 +1,9 @@
-const { bridge } = require('../spring_api');
-
 const fsPromises = require('fs').promises;
 const path = require('path');
 
 const { DemoParser } = require('sdfz-demo-parser');
 
+const { bridge } = require('../spring_api');
 const springPlatform = require('../spring_platform');
 
 bridge.on('ReadReplayInfo', async command => {
@@ -23,5 +22,4 @@ bridge.on('ReadReplayInfo', async command => {
 		// TODO: missing textual representation of start script
 		// startScript: demo.script
 	});
-
 });
