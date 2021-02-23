@@ -7,15 +7,9 @@ const https = follow_redirects.https;
 const fs = require('fs');
 const path = require('path');
 
-const extractZip = require('extract-zip');
-
-let { path7za } = require('7zip-bin');
-// A terrible hack indeed
-path7za = path7za.replace('app.asar', 'app.asar.unpacked');
-const { extractFull: extract7z } = require('node-7z');
-
 const springPlatform = require('./spring_platform');
 const { log } = require('./spring_log');
+const Extractor = require('./extractor');
 
 // const ENGINE_FOLDER = path.join(springPlatform.writePath, 'engine');
 // const GAMES_FOLDER = path.join(springPlatform.writePath, 'games');
@@ -49,6 +43,14 @@ class HttpDownloader extends EventEmitter {
 
 		try {
 			this.cleanupOldDownloads();
+			this.extractor = new Extractor();
+			this.extractor.on('finished', downloadItem => {
+				this.emit('finished', downloadItem);
+			});
+
+			this.extractor.on('failed', (downloadItem, msg) => {
+				this.emit('failed', downloadItem, msg);
+			});
 		} catch (error) {
 			// If for some weird permission reason we failed to cleanup downloads, just log it and ignore it
 			// No need to disturb the user with this
@@ -142,8 +144,9 @@ class HttpDownloader extends EventEmitter {
 				return;
 			}
 
-			this.emit('progress', `Extracting to ${destination}`, 99, 100);
-			this.extract(name, url, destinationTemp, destination);
+			this.emit('progress', `Extracting to ${destination}`, 100, 100);
+
+			this.extractor.extract(name, url, destinationTemp, destination);
 		}).catch(() => fs.unlinkSync(destinationTemp));
 	}
 
@@ -181,65 +184,6 @@ class HttpDownloader extends EventEmitter {
 			});
 		});
 	}
-
-	extract(name, url, source, destination) {
-		const isZip = url.href.endsWith('.zip');
-		const is7z = url.href.endsWith('.7z');
-		if (isZip) {
-			log.info(`Extracting as .zip file: ${source} -> ${destination}`);
-			this.extractWithZip(name, source, destination);
-		} else if (is7z) {
-			log.info(`Extracting as .7z file: ${source} -> ${destination}`);
-			this.extractWith7z(name, source, destination);
-		} else {
-			log.warn(`Unknown archive format: ${url}. Assuming it's a zip file.`);
-			this.extractWithZip(name, source, destination);
-		}
-	}
-
-	extractWithZip(name, source, destination) {
-		extractZip(source, { dir: destination }).then(() => {
-			this.emit('finished', name);
-			fs.unlinkSync(source);
-		}).catch(reason => {
-			this.emit('failed', name, reason);
-			fs.unlinkSync(source);
-		});
-	}
-
-	extractWith7z(name, source, destination) {
-		log.info(`Extracting ${source} to ${destination}...`);
-		log.info(`Path to 7zip: ${path7za}`);
-
-		let currentProgress;
-		const stream7z = extract7z(source, destination, {
-			$bin: path7za,
-			$progress: true
-		});
-		// FIXME: This is always called for some reason
-		stream7z.on('end', () => {
-			this.emit('finished', name);
-			try {
-				log.info(`Deleting file after extraction has been finished: ${source}`);
-				fs.unlinkSync(source);
-			} catch (error) {
-				log.error(`Cannot unlink file after extracting: ${source}`);
-			}
-		});
-
-		stream7z.on('progress', (progress) => {
-			currentProgress = progress;
-		});
-
-		stream7z.on('error', (err) => {
-			log.error(`Failed to extract ${name} with error: ${err}`);
-			log.error(`err.stderr: ${err.stderr}`);
-			log.error(`Current extraction progress: ${currentProgress}`);
-			this.emit('failed', name, `Extraction failure: ${err}`);
-			// FIXME: We aren't deleting the file on failure as the above 'end' event is always called (even on failure).
-		});
-	}
-
 }
 
 module.exports = new HttpDownloader();

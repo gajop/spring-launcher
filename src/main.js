@@ -32,6 +32,7 @@ springDownloader.on('started', (downloadItem, type, args) => {
 	gui.send('dl-started', downloadItem, type, args);
 });
 
+// NB: needs to be a function as we use this. on it
 springDownloader.on('progress', function (downloadItem, current, total) {
 	if (total < 1024 * 1024) {
 		return; // ignore downloads less than 1MB (probably not real downloads!)
