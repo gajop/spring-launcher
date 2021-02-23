@@ -3,5 +3,10 @@
 const shell = require('electron').shell;
 
 module.exports.open = async (path) => {
-	await shell.openPath(path);
+	if (path.match(/^https?:\/\/.*$/) ||
+		path.match(/^file:\/\/\/.*$/)) {
+		await shell.openExternal(path);
+	} else {
+		await shell.openPath(path);
+	}
 };
