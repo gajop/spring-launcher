@@ -110,20 +110,19 @@ class Extractor extends EventEmitter {
 class Extractor7Zip extends EventEmitter {
 	extract(source, destination) {
 		log.info(`Extracting ${source} to ${destination}...`);
+		let hasFailed = false;
 
 		const stream7z = extract7z(source, destination, {
 			$bin: path7za,
 			$progress: true
 		});
 
-		// FIXME: This is always called for some reason
+		// NB: This is called even when failing
 		stream7z.on('end', () => {
-			this.emit('finished');
-			try {
-				log.info(`Deleting file after extraction has been finished: ${source}`);
-			} catch (error) {
-				log.error(`Cannot unlink file after extracting: ${source}`);
+			if (hasFailed) {
+				return;
 			}
+			this.emit('finished');
 		});
 
 		this.currentProgress = null;
@@ -132,6 +131,7 @@ class Extractor7Zip extends EventEmitter {
 		});
 
 		stream7z.on('error', (err) => {
+			hasFailed = true;
 			this.emit('failed', err);
 		});
 	}
