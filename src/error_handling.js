@@ -5,7 +5,17 @@ const { gui } = require('./launcher_gui');
 
 log.catchErrors({
 	showDialog: false,
-	onError() {
+	onError(err) {
+		// Ignore self-updater errors
+		try {
+			if (err.stack.includes('app-update.yml')) {
+				log.info('Auto-update error, ignoring...');
+				return;
+			}
+		} catch (err) {
+			// Empty on purpose
+		}
+
 		gui.send('error', 'Something went wrong :( Please upload the log.');
 	}
 

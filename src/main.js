@@ -117,7 +117,7 @@ autoUpdater.on('update-available', () => {
 		gui.send('dl-progress', 'autoUpdate', d.percent, 100);
 	});
 	autoUpdater.on('update-downloaded', () => {
-		console.info('Self-update downloaded');
+		log.info('Self-update downloaded');
 		gui.send('dl-finished', 'autoupdate');
 	});
 
@@ -133,7 +133,7 @@ autoUpdater.on('update-downloaded', () => {
 	setImmediate(() => autoUpdater.quitAndInstall(true, true));
 });
 
-autoUpdater.on('error', (error) => {
+autoUpdater.on('error', error => {
 	log.error(`Application failed to self-update. Error: ${error}`);
 	log.info('Proceeding to next step.');
 	wizard.nextStep();
