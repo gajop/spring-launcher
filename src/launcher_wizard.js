@@ -25,6 +25,7 @@ app.on('ready', () => {
 class Wizard extends EventEmitter {
 	constructor() {
 		super();
+		this.isActive = false;
 		this.generateSteps();
 	}
 
@@ -52,6 +53,7 @@ class Wizard extends EventEmitter {
 					name: 'engine',
 					item: engine,
 					action: () => {
+						this.isActive = true;
 						springDownloader.downloadEngine(engine);
 					}
 				});
@@ -62,6 +64,7 @@ class Wizard extends EventEmitter {
 					name: 'game',
 					item: game,
 					action: () => {
+						this.isActive = true;
 						springDownloader.downloadGame(game);
 					}
 				});
@@ -72,6 +75,7 @@ class Wizard extends EventEmitter {
 					name: 'map',
 					item: map,
 					action: () => {
+						this.isActive = true;
 						springDownloader.downloadMap(map);
 					}
 				});
@@ -82,6 +86,7 @@ class Wizard extends EventEmitter {
 					name: 'resource',
 					item: resource,
 					action: () => {
+						this.isActive = true;
 						springDownloader.downloadResource(resource);
 					}
 				});
@@ -172,6 +177,15 @@ class Wizard extends EventEmitter {
 		return true;
 	}
 }
+
+springDownloader.prependListener('finished', () => {
+	wizard.isActive = false;
+});
+
+springDownloader.prependListener('failed', () => {
+	wizard.isActive = false;
+});
+
 
 const wizard = new Wizard();
 

@@ -73,6 +73,9 @@ class PrdDownloader extends EventEmitter {
 			finished = true;
 			this.emit('failed', name, `Failed to launch pr-downloader: ${error}`);
 		});
+
+		this.prd = prd;
+		this.name = name;
 	}
 
 
@@ -90,6 +93,16 @@ class PrdDownloader extends EventEmitter {
 
 	downloadResource(resource) {
 		throw `downloadResource(${resource['url']}, ${resource[']destination']}): pr_downloader cannot be used to download resources`;
+	}
+
+	stopDownload() {
+		if (this.name == null) {
+			return;
+		}
+
+		// this.prd.kill('SIGKILL');
+		this.prd.kill(9);
+		this.emit('aborted', this.name, 'Download interrupted via user action.');
 	}
 }
 

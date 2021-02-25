@@ -16,8 +16,9 @@ require('./error_handling');
 const { config } = require('./launcher_config');
 const { gui } = require('./launcher_gui');
 const { wizard } = require('./launcher_wizard');
+// Setup downloader bindings
+require('./launcher_downloader');
 const { generateAndBroadcastWizard } = require('./launcher_wizard_util');
-const springDownloader = require('./spring_downloader');
 const autoUpdater = require('./updater');
 // TODO: Despite not using it in this file, we have to require spring_api here
 require('./spring_api');
@@ -25,64 +26,6 @@ const launcher = require('./engine_launcher');
 const { writePath } = require('./spring_platform');
 const log_uploader = require('./log_uploader');
 const file_opener = require('./file_opener');
-
-
-springDownloader.on('started', (downloadItem, type, args) => {
-	log.info(`Download started: ${downloadItem}, ${type}, ${args}`);
-	gui.send('dl-started', downloadItem, type, args);
-});
-
-// NB: needs to be a function as we use this. on it
-springDownloader.on('progress', function (downloadItem, current, total) {
-	if (total < 1024 * 1024) {
-		return; // ignore downloads less than 1MB (probably not real downloads!)
-	}
-
-	const LOG_INTERVAL = 1000;
-	const GUI_INTERVAL = 10;
-
-	let shouldLog = true;
-	let shouldUpdateGUI = true;
-
-	if (typeof this.prevLogTime == 'undefined') {
-		this.prevLogTime = (new Date()).getTime();
-	} else {
-		const now = (new Date()).getTime();
-		if (now - this.prevLogTime < LOG_INTERVAL) {
-			shouldLog = false;
-		} else {
-			this.prevLogTime = now;
-		}
-		if (now - this.prevGUIUpdateTime < GUI_INTERVAL) {
-			shouldUpdateGUI = false;
-		} else {
-			this.prevGUIUpdateTime = now;
-		}
-	}
-
-	if (shouldLog) {
-		log.info(`Download progress: ${downloadItem}, ${current}, ${total}`);
-	}
-	if (shouldUpdateGUI) {
-		const mainWindow = gui.getMainWindow();
-		if (mainWindow != null) {
-			mainWindow.setProgressBar(current / total);
-		}
-		gui.send('dl-progress', downloadItem, current, total);
-	}
-});
-
-springDownloader.on('finished', (downloadItem) => {
-	log.info(`Download finished: ${downloadItem}`);
-	gui.send('dl-finished', downloadItem);
-	wizard.nextStep();
-});
-
-springDownloader.on('failed', (downloadItem, msg) => {
-	log.error(`${downloadItem}: ${msg}`);
-	gui.send('error', msg);
-	wizard.setEnabled(false);
-});
 
 launcher.on('stdout', (text) => {
 	log.info(text);

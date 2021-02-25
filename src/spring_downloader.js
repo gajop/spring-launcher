@@ -2,6 +2,8 @@
 
 const EventEmitter = require('events');
 
+const log = require('electron-log');
+
 const prdDownloader = require('./prd_downloader');
 const httpDownloader = require('./http_downloader');
 
@@ -20,6 +22,8 @@ function getDownloader(name) {
 	}
 }
 
+let currentDownloader = null;
+
 class SpringDownloader extends EventEmitter {
 	constructor() {
 		super();
@@ -35,29 +39,50 @@ class SpringDownloader extends EventEmitter {
 			});
 
 			downloader.on('finished', (downloadItem) => {
+				currentDownloader = null;
 				this.emit('finished', downloadItem);
 			});
 
 			downloader.on('failed', (downloadItem, msg) => {
+				currentDownloader = null;
 				this.emit('failed', downloadItem, msg);
+			});
+
+			downloader.on('aborted', (downloadItem, msg) => {
+				currentDownloader = null;
+				this.emit('aborted', downloadItem, msg);
 			});
 		}
 	}
 
 	downloadEngine(engineName) {
 		prdDownloader.downloadEngine(engineName);
+		currentDownloader = prdDownloader;
 	}
 
 	downloadGame(gameName) {
 		prdDownloader.downloadGame(gameName);
+		currentDownloader = prdDownloader;
 	}
 
 	downloadMap(mapName) {
 		prdDownloader.downloadMap(mapName);
+		currentDownloader = prdDownloader;
 	}
 
 	downloadResource(resource) {
-		getDownloader(resource['url']).downloadResource(resource);
+		const downloader = getDownloader(resource['url']);
+		downloader.downloadResource(resource);
+		currentDownloader = downloader;
+	}
+
+	stopDownload() {
+		if (currentDownloader == null) {
+			log.error('No current download. Nothing to stop');
+			return;
+		}
+
+		currentDownloader.stopDownload();
 	}
 }
 

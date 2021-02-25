@@ -184,6 +184,10 @@ class HttpDownloader extends EventEmitter {
 			});
 		});
 	}
+
+	stopDownload() {
+
+	}
 }
 
 module.exports = new HttpDownloader();
