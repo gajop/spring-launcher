@@ -178,15 +178,6 @@ class Wizard extends EventEmitter {
 	}
 }
 
-springDownloader.prependListener('finished', () => {
-	// wizard.isActive = false;
-});
-
-springDownloader.prependListener('failed', () => {
-	// wizard.isActive = false;
-});
-
-
 const wizard = new Wizard();
 
 module.exports = {
