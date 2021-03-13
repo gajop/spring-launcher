@@ -67,15 +67,19 @@ if (existsSync(FILES_DIR)) {
 }
 
 let prDownloaderBin;
+let butlerBin;
 if (platformName === 'win32') {
 	prDownloaderBin = 'pr-downloader.exe';
+	butlerBin = 'butler/windows/butler.exe';
 	exports.springBin = 'spring.exe';
 } else if (platformName === 'linux') {
 	prDownloaderBin = 'pr-downloader';
+	butlerBin = 'butler/linux/butler';
 	exports.springBin = 'spring';
-} else if (platformName === 'darwin') {
-	prDownloaderBin = 'pr-downloader-mac';
-	exports.springBin = 'Contents/MacOS/spring';
+// } else if (platformName === 'darwin') {
+// 	prDownloaderBin = 'pr-downloader-mac';
+// 	butlerBin = 'butler'; // TODO: Support Mac?
+// 	exports.springBin = 'Contents/MacOS/spring';
 } else {
 	log.error(`Unsupported platform: ${platformName}`);
 	process.exit(-1);
@@ -85,4 +89,9 @@ exports.prDownloaderPath = path.resolve(`${__dirname}/../bin/${prDownloaderBin}`
 if (!existsSync(exports.prDownloaderPath)) {
 	exports.prDownloaderPath = path.resolve(`${process.resourcesPath}/../bin/${prDownloaderBin}`);
 }
+exports.butlerPath = path.resolve(`${__dirname}/../bin/${butlerBin}`);
+if (!existsSync(exports.butlerPath)) {
+	exports.butlerPath = path.resolve(`${process.resourcesPath}/../bin/${butlerBin}`);
+}
+
 exports.writePath = writePath;
