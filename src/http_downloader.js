@@ -8,55 +8,35 @@ const springPlatform = require('./spring_platform');
 const ButlerDownload = require('./butler_dl');
 const { log } = require('./spring_log');
 const Extractor = require('./extractor');
+const { makeParentDir, getTemporaryFileName, removeTemporaryFiles } = require('./fs_utils');
 
-const TEMPORARY_FILE_DIR = springPlatform.writePath;
-const TEMPORARY_FILE_PREFIX = 'download_temp_';
-
-function makeTemporary() {
-	let i = 0;
-	while (true) {
-		let temp = path.join(TEMPORARY_FILE_DIR, `${TEMPORARY_FILE_PREFIX}${i}`);
-		if (!fs.existsSync(temp)) {
-			return temp;
-		}
-		i++;
-	}
-	// unreachable
-}
-
-function makeParentDir(filepath) {
-	const destinationParentDir = path.dirname(filepath);
-	if (!fs.existsSync(destinationParentDir)) {
-		fs.mkdirSync(destinationParentDir, { recursive: true });
-	}
-}
 
 class HttpDownloader extends EventEmitter {
 	constructor() {
 		super();
 
-		const butler_dl = new ButlerDownload();
+		const butlerDl = new ButlerDownload();
 
-		butler_dl.on('started', args => {
+		butlerDl.on('started', args => {
 			this.emit('started', this.name, this.type, args);
 		});
 
-		butler_dl.on('progress', (current, total) => {
+		butlerDl.on('progress', (current, total) => {
 			this.emit('progress', this.name, current, total);
 		});
 
-		butler_dl.on('aborted', msg => {
+		butlerDl.on('aborted', msg => {
 			this.emit('aborted', this.name, msg);
 		});
 
-		butler_dl.on('warn', msg => {
+		butlerDl.on('warn', msg => {
 			log.warn(msg);
 		});
 
-		this.butler_dl = butler_dl;
+		this.butlerDl = butlerDl;
 
 		try {
-			this.cleanupOldDownloads();
+			removeTemporaryFiles();
 			this.extractor = new Extractor();
 			this.extractor.on('finished', downloadItem => {
 				this.emit('finished', downloadItem);
@@ -73,13 +53,6 @@ class HttpDownloader extends EventEmitter {
 		}
 	}
 
-	cleanupOldDownloads()
-	{
-		fs.readdirSync(TEMPORARY_FILE_DIR)
-			.filter(file => file.startsWith(TEMPORARY_FILE_PREFIX))
-			.forEach(file => fs.unlinkSync(path.join(TEMPORARY_FILE_DIR, file)));
-	}
-
 	downloadResource(resource) {
 		const url = new URL(resource['url']);
 		const name = resource['destination'];
@@ -90,7 +63,7 @@ class HttpDownloader extends EventEmitter {
 			return;
 		}
 
-		const destinationTemp = makeTemporary();
+		const destinationTemp = getTemporaryFileName('download');
 		this.emit('started', name, 'resource');
 		this.download(name, 'resource', url, destinationTemp)
 			.then(() => {
@@ -117,11 +90,11 @@ class HttpDownloader extends EventEmitter {
 	download(name, type, url, downloadPath) {
 		this.name = name;
 		this.type = type;
-		return this.butler_dl.download(url, downloadPath);
+		return this.butlerDl.download(url, downloadPath);
 	}
 
 	stopDownload() {
-		this.butler_dl.stopDownload();
+		this.butlerDl.stopDownload();
 	}
 }
 

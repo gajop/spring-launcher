@@ -2,24 +2,20 @@
 
 const { spawn } = require('child_process');
 const EventEmitter = require('events');
-const fs = require('fs');
 const readline = require('readline');
-const path = require('path');
+
+const log = require('electron-log');
 
 const { makeParentDir, getTemporaryFileName } = require('./fs_utils');
 const springPlatform = require('./spring_platform');
 
-class ButlerDownload extends EventEmitter {
+class ButlerApply extends EventEmitter {
 
-	async download(url, downloadPath) {
-
-		// uncomment to simulate network lag
-		// await new Promise(r => setTimeout(r, Math.random() * 3000));
-
-		let promise = new Promise((resolve, reject) => {
-			const tmpDestination = getTemporaryFileName(path.basename(downloadPath));
+	apply(patch, target) {
+		return new Promise((resolve, reject) => {
+			const tmpDestination = getTemporaryFileName('download');
 			makeParentDir(tmpDestination);
-			const args = ['-j', '-v', 'dl', url, tmpDestination];
+			const args = ['-j', 'apply', '--staging-dir=tmp', patch, target];
 			const process = spawn(springPlatform.butlerPath, args);
 			this.emit('started', args.join(' '));
 
@@ -28,6 +24,7 @@ class ButlerDownload extends EventEmitter {
 
 			const rlStdout = readline.createInterface({ input: process.stdout });
 			rlStdout.on('line', line => {
+				log.info(line);
 				line = JSON.parse(line);
 				const lineType = line['type'];
 				if (lineType === 'log') {
@@ -60,11 +57,9 @@ class ButlerDownload extends EventEmitter {
 
 			const rlStderr = readline.createInterface({ input: process.stderr });
 			rlStderr.on('line', line => {
-				if (line.includes('connect: connection refuse')) {
-					console.log('Connection refused error');
-				}
 				this.emit('warn', line);
 			});
+
 
 			process.on('close', code => {
 				if (finished) { // the process already counts as finished
@@ -72,26 +67,19 @@ class ButlerDownload extends EventEmitter {
 				}
 				if (code == 0) {
 					this.emit('progress', total, total);
-					makeParentDir(downloadPath);
-					fs.renameSync(tmpDestination, downloadPath);
 					resolve();
 				} else {
-					if (fs.existsSync(tmpDestination)) {
-						fs.unlinkSync(tmpDestination);
-					}
-					reject(`Download ${url} -> ${downloadPath} failed with: ${code}`);
+					reject('failed', `Download failed: ${code}`);
 				}
 			});
 
 			process.on('error', error => {
 				finished = true;
-				reject(`Failed to launch butler with error: ${error}, for download ${url} -> ${downloadPath}`);
+				reject('failed', `Failed to launch butler with error: ${error}`);
 			});
 
 			this.process = process;
 		});
-
-		return promise;
 	}
 
 	stopDownload() {
@@ -100,4 +88,4 @@ class ButlerDownload extends EventEmitter {
 	}
 }
 
-module.exports = ButlerDownload;
+module.exports = ButlerApply;

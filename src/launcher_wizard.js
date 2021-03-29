@@ -91,6 +91,17 @@ class Wizard extends EventEmitter {
 					}
 				});
 			});
+
+			config.downloads.nextgen.forEach((resource) => {
+				steps.push({
+					name: 'nextgen',
+					item: resource,
+					action: () => {
+						this.isActive = true;
+						springDownloader.downloadNextGen(resource);
+					}
+				});
+			});
 		}
 
 		let enginePath;

@@ -27,6 +27,7 @@ const configDefault = {
 		'maps': [],
 		'engines': [],
 		'resources': [],
+		'nextgen': [],
 	},
 
 	'launch': {
@@ -96,7 +97,9 @@ function mergeDeep(target, ...sources) {
 
 const configFile = require(
 	argv.config != null ? argv.config : './config.json');
+
 configDefault.title = configFile.title;
+
 configFile.setups.forEach((c) => {
 	const configDefaultCopy = JSON.parse(JSON.stringify(configDefault));
 	const config = mergeDeep(configDefaultCopy, c);
