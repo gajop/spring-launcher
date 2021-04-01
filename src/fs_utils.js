@@ -1,0 +1,40 @@
+'use strict';
+
+const fs = require('fs');
+const path = require('path');
+
+const springPlatform = require('./spring_platform');
+
+const TEMP_DIR = `${springPlatform.writePath}/tmp`;
+
+function makeParentDir(filepath) {
+	const destinationParentDir = path.dirname(filepath);
+	if (!fs.existsSync(destinationParentDir)) {
+		fs.mkdirSync(destinationParentDir, { recursive: true });
+	}
+}
+
+let tempCounter = 0;
+function getTemporaryFileName(baseName) {
+	while (true) {
+		const temp = path.join(TEMP_DIR, `${baseName}.${tempCounter}`);
+		if (!fs.existsSync(temp)) {
+			return temp;
+		}
+		tempCounter++;
+	}
+	// unreachable
+}
+
+function removeTemporaryFiles() {
+	fs.readdirSync(TEMP_DIR)
+		.forEach(file => fs.unlinkSync(path.join(TEMP_DIR, file)));
+
+}
+
+
+module.exports = {
+	getTemporaryFileName: getTemporaryFileName,
+	removeTemporaryFiles: removeTemporaryFiles,
+	makeParentDir: makeParentDir
+};

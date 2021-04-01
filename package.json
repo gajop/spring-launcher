@@ -4,7 +4,7 @@
   "description": "Electron-based SpringRTS Launcher app",
   "main": "src/main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
     "lint": "eslint \"./src/**/*.js\"",
     "start": "electron .",
     "start-dev": "electron . --dev",
@@ -17,11 +17,6 @@
   },
   "author": "gajop",
   "license": "ISC",
-  "devDependencies": {
-    "electron": "^11.1.1",
-    "electron-builder": "^22.9.1",
-    "eslint": "^6.8.0"
-  },
   "build": {
     "appId": "com.springrts.launcher",
     "extraFiles": [
@@ -55,9 +50,14 @@
     "electron-settings": "^3.2.0",
     "electron-updater": "^4.3.5",
     "extract-zip": "^2.0.1",
-    "follow-redirects": "^1.13.1",
     "node-7z": "^2.1.2",
     "sdfz-demo-parser": "^1.4.1",
     "yargs": "^15.4.1"
+  },
+  "devDependencies": {
+    "electron": "^11.1.1",
+    "electron-builder": "^22.9.1",
+    "eslint": "^6.8.0",
+    "jest": "^26.6.3"
   }
 }

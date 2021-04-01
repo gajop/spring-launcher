@@ -6,6 +6,7 @@ const log = require('electron-log');
 
 const prdDownloader = require('./prd_downloader');
 const httpDownloader = require('./http_downloader');
+const nextGenDownloader = require('./nextgen_downloader');
 
 function getDownloader(name) {
 	let url;
@@ -28,7 +29,7 @@ class SpringDownloader extends EventEmitter {
 	constructor() {
 		super();
 
-		let downloaders = [ prdDownloader, httpDownloader ];
+		let downloaders = [prdDownloader, httpDownloader, nextGenDownloader];
 		for (const downloader of downloaders) {
 			downloader.on('started', (downloadItem, type, args) => {
 				this.emit('started', downloadItem, type, args);
@@ -74,6 +75,11 @@ class SpringDownloader extends EventEmitter {
 		const downloader = getDownloader(resource['url']);
 		downloader.downloadResource(resource);
 		currentDownloader = downloader;
+	}
+
+	downloadNextGen(resource) {
+		nextGenDownloader.download(resource);
+		currentDownloader = nextGenDownloader;
 	}
 
 	stopDownload() {

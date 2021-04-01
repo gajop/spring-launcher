@@ -91,6 +91,17 @@ class Wizard extends EventEmitter {
 					}
 				});
 			});
+
+			config.downloads.nextgen.forEach((resource) => {
+				steps.push({
+					name: 'nextgen',
+					item: resource,
+					action: () => {
+						this.isActive = true;
+						springDownloader.downloadNextGen(resource);
+					}
+				});
+			});
 		}
 
 		let enginePath;
@@ -177,15 +188,6 @@ class Wizard extends EventEmitter {
 		return true;
 	}
 }
-
-springDownloader.prependListener('finished', () => {
-	// wizard.isActive = false;
-});
-
-springDownloader.prependListener('failed', () => {
-	// wizard.isActive = false;
-});
-
 
 const wizard = new Wizard();
 

@@ -54,6 +54,7 @@ springDownloader.on('progress', function (downloadItem, current, total) {
 springDownloader.on('finished', (downloadItem) => {
 	log.info(`Download finished: ${downloadItem}`);
 	if (wizard.isActive) {
+		wizard.isActive = false;
 		gui.send('dl-finished', downloadItem);
 		wizard.nextStep();
 	}
@@ -62,6 +63,7 @@ springDownloader.on('finished', (downloadItem) => {
 springDownloader.on('failed', (downloadItem, msg) => {
 	log.error(`${downloadItem}: ${msg}`);
 	if (wizard.isActive) {
+		wizard.isActive = false;
 		gui.send('error', msg);
 		wizard.setEnabled(false);
 	}
