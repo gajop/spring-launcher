@@ -17,16 +17,13 @@ const isDev = false;
 const PKG_URL = isDev ? 'http://0.0.0.0:8000/pkg' : 'https://content.spring-launcher.com/pkg/';
 const PKG_DIR = `${springPlatform.writePath}/pkgs`;
 
-const PHASE_METADATA = 'metadata';
-const PHASE_FULL_DL = 'full_dl';
-const PHASE_PATCH_DL = 'patch_dl';
-const PHASE_PATCH_APPLY = 'patch_apply';
-
 // TODO 3rd April:
 // Support downloading based on Spring path (game, map or engine full name)
 // Fix interrupting a patch-apply resulting in incorrect local version information (might lag by one)
 
 // TODO: later
+// Multiple local channels (main, test..)
+// Multiple local versions (same channel..?)
 // Report downloads to some service
 // Allow custom path (not just game)
 // sync -> async for all IO operations?
@@ -36,6 +33,7 @@ class NextGenDownloader extends EventEmitter {
 		super();
 
 		/*
+		// TODO: or not TODO
 		// Check if any patches were in progress and correct any mistakes
 		let inProgressFile = `${PKG_DIR}/.inprogress`;
 		if (fs.existsSync(inProgressFile)) {
@@ -53,21 +51,6 @@ class NextGenDownloader extends EventEmitter {
 
 		const butlerDl = new ButlerDownload();
 		const butlerApply = new ButlerApply();
-
-		butlerDl.on('progress', (current, total) => {
-			if (this.phase === PHASE_METADATA) {
-				// console.log('metadata');
-			} else if (this.phase === PHASE_FULL_DL) {
-				// console.log('full');
-				this.emit('progress', this.name, current, total);
-			} else if (this.phase === PHASE_PATCH_DL) {
-				// console.log('dl');
-				this.emit('progress', this.name, this.progressedPatchSize + current, this.totalPatchSize);
-			} else if (this.phase === PHASE_PATCH_APPLY) {
-				console.log('apply');
-				// this.emit('progress', this.name, current, total);
-			}
-		});
 
 		butlerDl.on('aborted', msg => {
 			this.emit('aborted', this.name, msg);
@@ -94,7 +77,6 @@ class NextGenDownloader extends EventEmitter {
 		const name = parsed.user + '/' + parsed.repo;
 
 		this.emit('started', `${name}: metadata`);
-		this.phase = PHASE_METADATA;
 
 		const pkgInfo = await this.queryPackageInfo(name);
 
@@ -124,7 +106,7 @@ class NextGenDownloader extends EventEmitter {
 			}
 		}
 
-		await this.downloadPackage(name, urlPart, localVersion, targetVersion);
+		await this.downloadPackage(pkgInfo, name, urlPart, localVersion, targetVersion);
 		this.updateLocalVersion(name, targetVersion);
 		this.maybeUpdateRapid(name, pkgInfo, targetVersion);
 
@@ -133,9 +115,10 @@ class NextGenDownloader extends EventEmitter {
 
 	async queryPackageInfo(name) {
 		const pkgInfo = `${PKG_DIR}/${name}/package-info.json`;
-		if (!fs.existsSync(pkgInfo)) {
-			await this.butlerDl.download(`${PKG_URL}/${name}/package-info.json`, pkgInfo);
-		}
+		// TODO: consider caching?
+		// if (!fs.existsSync(pkgInfo)) {
+		await this.butlerDl.download(`${PKG_URL}/${name}/package-info.json`, pkgInfo);
+		// }
 		return JSON.parse(fs.readFileSync(pkgInfo));
 	}
 
@@ -157,7 +140,9 @@ class NextGenDownloader extends EventEmitter {
 	async queryRemoteVersion(urlPart, version) {
 		const baseUrl = `${urlPart}/patch/${version}.json`;
 		const versionInfoFile = `${PKG_DIR}/${baseUrl}`;
-		await this.butlerDl.download(`${PKG_URL}/${baseUrl}`, versionInfoFile);
+		if (!fs.existsSync(versionInfoFile)) {
+			await this.butlerDl.download(`${PKG_URL}/${baseUrl}`, versionInfoFile);
+		}
 		let versionInfo = JSON.parse(fs.readFileSync(versionInfoFile));
 		return {
 			version: version,
@@ -165,83 +150,83 @@ class NextGenDownloader extends EventEmitter {
 		};
 	}
 
-	async downloadPackage(name, urlPart, localVersion, targetVersion) {
+	async downloadPackage(pkgInfo, name, urlPart, localVersion, targetVersion) {
 		if (localVersion === null) {
 			const latestVersion = await this.queryLatestVersion(urlPart);
-			await this.downloadPackageFull(name, urlPart, latestVersion);
-			await this.downloadPackagePartial(name, urlPart, latestVersion, targetVersion);
+			this.emit('started', `${name}`);
+			await this.downloadPackageFull(pkgInfo, name, urlPart, latestVersion);
+			await this.downloadPackagePartial(pkgInfo, name, urlPart, latestVersion, targetVersion);
 		} else {
-			return await this.downloadPackagePartial(name, urlPart, localVersion, targetVersion);
+			return await this.downloadPackagePartial(pkgInfo, name, urlPart, localVersion, targetVersion);
 		}
 	}
 
-	async downloadPackageFull(name, urlPart, targetVersion) {
-		this.phase = PHASE_FULL_DL;
-		const targetVersionName = targetVersion['name'];
-		const dest = path.join(springPlatform.writePath, 'games', targetVersionName);
-		return await this.butlerDl.download(`${PKG_URL}/${urlPart}/full/${targetVersionName}`, dest);
+	async downloadPackageFull(pkgInfo, name, urlPart, targetVersion) {
+		const patchVersions = [{
+			fromVersion: 0,
+			toVersion: targetVersion['version'],
+		}];
+		return await this.downloadPackagePartialInternal(pkgInfo, name, urlPart, patchVersions, targetVersion);
 	}
 
-	async downloadPackagePartial(name, urlPart, localVersion, targetVersion) {
+	async downloadPackagePartial(pkgInfo, name, urlPart, localVersion, targetVersion) {
 		const localVersionID = localVersion['version'];
 		const targetVersionID = targetVersion['version'];
 
 		// assume patches exist in linear order
 		const versionDir = targetVersionID > localVersionID ? 1 : -1;
-
-		let patchJsonDls = [];
-		let destFiles = [];
+		let patchVersions = [];
 		for (let version = localVersionID; version != targetVersionID; version += versionDir) {
-			const patchJsonUrl = `${PKG_URL}/${urlPart}/patch/${version}.json`;
-			const patchJsonFile = `${PKG_DIR}/${urlPart}/patch/${version}.json`;
+			patchVersions.push({
+				fromVersion: version,
+				toVersion: version + versionDir
+			});
+		}
 
-			patchJsonDls.push(this.butlerDl.download(patchJsonUrl, patchJsonFile));
-			destFiles.push(patchJsonFile);
+		await this.downloadPackagePartialInternal(pkgInfo, name, urlPart, patchVersions, targetVersion);
+	}
+
+	async downloadPackagePartialInternal(pkgInfo, name, urlPart, patchVersions, targetVersion) {
+		let patchJsonDls = [];
+		let patchJsonFiles = [];
+		for (const patchVersion of patchVersions) {
+			const baseUrl = `${urlPart}/patch/${patchVersion.fromVersion}-${patchVersion.toVersion}.json`;
+			const patchJsonUrl = `${PKG_URL}/${baseUrl}`;
+			const patchJsonFile = `${PKG_DIR}/${baseUrl}`;
+
+			if (!fs.existsSync(patchJsonFile)) {
+				patchJsonDls.push(this.butlerDl.download(patchJsonUrl, patchJsonFile));
+			}
+			patchJsonFiles.push(patchJsonFile);
 		}
 		console.log(`Total downloads: ${patchJsonDls.length}`);
 		await Promise.all(patchJsonDls);
 
 		let patchSizes = [];
 		let patchSigSizes = [];
-		let totalSize = 0;
-		{
-			let i = 0;
-			for (let version = localVersionID; version != targetVersionID; version += versionDir) {
-				const destFile = destFiles[i++];
-				const nextVersion = version + versionDir;
-				const patchesJson = JSON.parse(fs.readFileSync(destFile));
-				let foundPatch = false;
-				for (const patch of patchesJson['patches']) {
-					if (patch['version'] === nextVersion) {
-						patchSizes.push(patch['size']);
-						patchSigSizes.push(patch['sig_size']);
-						foundPatch = true;
-						totalSize += patch['size'];
-						break;
-					}
-				}
-				if (!foundPatch) {
-					throw `Missing patch ${version} -> ${nextVersion}`;
-				}
-
-			}
+		let totalPatchSize = 0;
+		for (const patchJsonFile of patchJsonFiles) {
+			const patchesJson = JSON.parse(fs.readFileSync(patchJsonFile));
+			const size = patchesJson['size'];
+			const sig_size = patchesJson['sig_size'];
+			patchSizes.push(size);
+			patchSigSizes.push(sig_size);
+			totalPatchSize += size;
+			totalPatchSize += sig_size;
 		}
 
-		this.phase = PHASE_PATCH_DL;
-		this.totalPatchSize = totalSize;
-		this.remainingPatchSize = totalSize;
-		this.progressedPatchSize = 0;
 		this.totalPatches = patchSizes.length;
 		let patches = [];
-		let i = 0;
 		this.emit('started', `${urlPart}: patches`);
 		let downloads = [];
-		for (let version = localVersionID; version != targetVersionID; version += versionDir, i++) {
-			const nextVersion = version + versionDir;
-			const patchUrl = `${PKG_URL}/${urlPart}/patch/${version}-${nextVersion}`;
+		for (const [i, patchVersion] of patchVersions.entries()) {
+			const fromVersion = patchVersion.fromVersion;
+			const toVersion = patchVersion.toVersion;
+
+			const patchUrl = `${PKG_URL}/${urlPart}/patch/${fromVersion}-${toVersion}`;
 			const patchSigUrl = `${patchUrl}.sig`;
 
-			const patchFile = `${PKG_DIR}/${urlPart}/patch/${version}-${nextVersion}`;
+			const patchFile = `${PKG_DIR}/${urlPart}/patch/${fromVersion}-${toVersion}`;
 			const patchSigFile = `${patchFile}.sig`;
 
 			if (!fs.existsSync(patchFile)) {
@@ -252,7 +237,6 @@ class NextGenDownloader extends EventEmitter {
 				});
 			}
 
-			this.phase = null;
 			if (!fs.existsSync(patchSigFile)) {
 				downloads.push({
 					url: patchSigUrl,
@@ -260,9 +244,6 @@ class NextGenDownloader extends EventEmitter {
 					size: patchSigSizes[i],
 				});
 			}
-			this.phase = PHASE_PATCH_DL;
-			this.remainingPatchSize -= patchSizes[i];
-			this.progressedPatchSize += patchSizes[i];
 
 			patches.push(patchFile);
 		}
@@ -281,26 +262,26 @@ class NextGenDownloader extends EventEmitter {
 
 		await parallelPatchDownload.download(downloads);
 
-		// await Promise.all(downloads);
-		this.emit('progress', this.name, this.totalPatchSize, this.totalPatchSize);
 
 		this.emit('started', `${urlPart}: applying`);
-		this.phase = PHASE_PATCH_APPLY;
 		// Represent patch application in MBs to satisfy our progress display logic
-		i = 0;
-		this.remainingPatchSize = totalSize;
+		this.remainingPatchSize = totalPatchSize;
 		this.progressedPatchSize = 0;
 		let targetVersionCopy = JSON.parse(JSON.stringify(targetVersion));
-		for (let version = localVersionID; version != targetVersionID; version += versionDir, i++) {
-			console.log(`Starting patch ${version} -> ${version + versionDir}`);
-			// targetVersionCopy['patchProgress'] = '';
-			targetVersionCopy['version'] = version + versionDir;
-			await this.butlerApply.apply(patches[i], `${springPlatform.writePath}/games`);
-			this.updateLocalVersion(name, targetVersionCopy);
-			console.log(`Finished patch ${version} -> ${version + versionDir}`);
 
-			this.progressedPatchSize += patchSizes[i];
-			this.emit('progress', this.name, this.progressedPatchSize, this.totalPatchSize);
+		const repo_path = `${springPlatform.writePath}/${pkgInfo['path']}`;
+		for (const [i, patchVersion] of patchVersions.entries()) {
+			const fromVersion = patchVersion.fromVersion;
+			const toVersion = patchVersion.toVersion;
+			console.log(`Starting patch ${fromVersion} -> ${toVersion}`);
+			// targetVersionCopy['patchProgress'] = '';
+			targetVersionCopy['version'] = toVersion;
+			await this.butlerApply.apply(patches[i], repo_path);
+			this.updateLocalVersion(name, targetVersionCopy);
+			console.log(`Finished patch ${fromVersion} -> ${toVersion}`);
+
+			this.progressedPatchSize += patchSizes[i] + patchSigSizes[i];
+			this.emit('progress', this.name, this.progressedPatchSize, totalPatchSize);
 		}
 	}
 
@@ -368,7 +349,7 @@ class ParallelDownload extends EventEmitter {
 
 			const downloader = new ButlerDownload();
 
-			downloader.on('progress', (current, total) => {
+			downloader.on('progress', current => {
 				combinedProgress += current - downloadProgresses[i];
 				downloadProgresses[i] = current;
 				this.emit('progress', combinedProgress, combinedTotal);
