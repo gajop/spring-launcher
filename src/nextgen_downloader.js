@@ -12,6 +12,7 @@ const ButlerDownload = require('./butler_dl');
 const ButlerApply = require('./butler_apply');
 const springPlatform = require('./spring_platform');
 const { parse, fillChannelPlatform } = require('./nextgen_version_parse');
+const { makeParentDir } = require('./fs_utils');
 
 const isDev = false;
 const PKG_URL = isDev ? 'http://0.0.0.0:8000/pkg' : 'https://content.spring-launcher.com/pkg/';
@@ -108,7 +109,10 @@ class NextGenDownloader extends EventEmitter {
 
 		await this.downloadPackage(pkgInfo, name, urlPart, localVersion, targetVersion);
 		this.updateLocalVersion(name, targetVersion);
-		this.maybeUpdateRapid(name, pkgInfo, targetVersion);
+		if (versionID == null) {
+			// TODO: also fill this in case versionID is specified as latest
+			this.maybeUpdateRapid(pkgInfo, targetVersion);
+		}
 
 		this.emit('finished', name);
 	}
@@ -285,7 +289,7 @@ class NextGenDownloader extends EventEmitter {
 		}
 	}
 
-	async maybeUpdateRapid(name, pkgInfo, latestVersion) {
+	async maybeUpdateRapid(pkgInfo, targetVersion) {
 		const rapidTag = pkgInfo['rapid'];
 		if (rapidTag == null) {
 			return;
@@ -293,8 +297,9 @@ class NextGenDownloader extends EventEmitter {
 
 		const versionsGz = path.join(springPlatform.writePath, `rapid/repos.springrts.com/${rapidTag}/versions.gz`);
 		const fullRapidTag = `${rapidTag}:test`;
-		let archiveName = latestVersion['name'];
+		let archiveName = targetVersion['name'];
 		archiveName = archiveName.substring(0, archiveName.length - '.sdz'.length);
+		console.log(`${fullRapidTag} rapid tag now points to: ${archiveName}`);
 		const newLine = `${fullRapidTag},,,${archiveName}`;
 
 		let lines = [];
@@ -312,6 +317,7 @@ class NextGenDownloader extends EventEmitter {
 			lines.push(newLine);
 		}
 
+		makeParentDir(versionsGz);
 		const output = fs.createWriteStream(versionsGz);
 		const compress = zlib.createGzip();
 		compress.pipe(output);
