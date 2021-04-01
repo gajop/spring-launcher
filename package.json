@@ -20,7 +20,7 @@
   "build": {
     "appId": "com.springrts.launcher",
     "extraFiles": [
-      "bin/*",
+      "bin/**",
       "files/*"
     ],
     "artifactName": "${productName}-${version}.${ext}",
