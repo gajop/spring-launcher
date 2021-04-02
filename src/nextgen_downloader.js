@@ -12,7 +12,7 @@ const ButlerDownload = require('./butler_dl');
 const ButlerApply = require('./butler_apply');
 const springPlatform = require('./spring_platform');
 const { parse, fillChannelPlatform } = require('./nextgen_version_parse');
-const { makeParentDir } = require('./fs_utils');
+const { makeParentDir, makeDir } = require('./fs_utils');
 
 const isDev = false;
 const PKG_URL = isDev ? 'http://0.0.0.0:8000/pkg' : 'https://content.spring-launcher.com/pkg/';
@@ -275,6 +275,8 @@ class NextGenDownloader extends EventEmitter {
 
 		const repo_path = `${springPlatform.writePath}/${pkgInfo['path']}`;
 		for (const [i, patchVersion] of patchVersions.entries()) {
+			makeDir(repo_path);
+
 			const fromVersion = patchVersion.fromVersion;
 			const toVersion = patchVersion.toVersion;
 			console.log(`Starting patch ${fromVersion} -> ${toVersion}`);

@@ -9,8 +9,12 @@ const TEMP_DIR = `${springPlatform.writePath}/tmp`;
 
 function makeParentDir(filepath) {
 	const destinationParentDir = path.dirname(filepath);
-	if (!fs.existsSync(destinationParentDir)) {
-		fs.mkdirSync(destinationParentDir, { recursive: true });
+	makeDir(destinationParentDir);
+}
+
+function makeDir(dirpath) {
+	if (!fs.existsSync(dirpath)) {
+		fs.mkdirSync(dirpath, { recursive: true });
 	}
 }
 
@@ -36,5 +40,6 @@ function removeTemporaryFiles() {
 module.exports = {
 	getTemporaryFileName: getTemporaryFileName,
 	removeTemporaryFiles: removeTemporaryFiles,
-	makeParentDir: makeParentDir
+	makeParentDir: makeParentDir,
+	makeDir: makeDir
 };

@@ -65,6 +65,9 @@ class HttpDownloader extends EventEmitter {
 
 		const destinationTemp = getTemporaryFileName('download');
 		this.emit('started', name, 'resource');
+		// FIXME: What's going on here..? () shouldn't be preventing this. from working
+		// Is then the problem?
+		const extractor = this.extractor;
 		this.download(name, 'resource', url, destinationTemp)
 			.then(() => {
 				log.info('Finished http download');
@@ -79,7 +82,7 @@ class HttpDownloader extends EventEmitter {
 
 				this.emit('progress', `Extracting to ${destination}`, 100, 100);
 
-				this.extractor.extract(name, url, destinationTemp, destination);
+				extractor.extract(name, url, destinationTemp, destination);
 			}).catch(reason => {
 				fs.unlinkSync(destinationTemp);
 				log.info('failed', `Download failed: ${reason}`);
