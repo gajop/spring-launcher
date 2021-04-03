@@ -53,9 +53,9 @@ class NextGenDownloader extends EventEmitter {
 		const butlerDl = new ButlerDownload();
 		const butlerApply = new ButlerApply();
 
-		butlerDl.on('aborted', msg => {
-			this.emit('aborted', this.name, msg);
-		});
+		// butlerDl.on('aborted', msg => {
+		// 	this.emit('aborted', this.name, msg);
+		// });
 
 		butlerDl.on('warn', msg => {
 			log.warn(msg);
@@ -77,7 +77,7 @@ class NextGenDownloader extends EventEmitter {
 
 		const name = parsed.user + '/' + parsed.repo;
 
-		this.emit('started', `${name}: metadata`);
+		this.emit('started', `${fullName}: metadata`);
 
 		const pkgInfo = await this.queryPackageInfo(name);
 
@@ -94,20 +94,16 @@ class NextGenDownloader extends EventEmitter {
 				? this.queryRemoteVersion(urlPart, versionID)
 				: this.queryLatestVersion(urlPart)
 		);
-		console.log(JSON.stringify({
-			pkgInfo: pkgInfo,
-			localVersion: localVersion,
-			targetVersion: targetVersion
-		}, null, 2));
+
 		if (localVersion != null) {
 			if (localVersion['version'] == targetVersion['version']) {
-				console.log(`No download necessary for ${name}`);
-				this.emit('finished', name);
+				log.info(`No download necessary for ${fullName}`);
+				this.emit('finished', fullName);
 				return;
 			}
 		}
 
-		await this.downloadPackage(pkgInfo, name, urlPart, localVersion, targetVersion);
+		await this.downloadPackage(pkgInfo, fullName, name, urlPart, localVersion, targetVersion);
 		this.updateLocalVersion(name, targetVersion);
 		if (versionID == null) {
 			// TODO: also fill this in case versionID is specified as latest
@@ -154,26 +150,26 @@ class NextGenDownloader extends EventEmitter {
 		};
 	}
 
-	async downloadPackage(pkgInfo, name, urlPart, localVersion, targetVersion) {
+	async downloadPackage(pkgInfo, fullName, name, urlPart, localVersion, targetVersion) {
 		if (localVersion === null) {
 			const latestVersion = await this.queryLatestVersion(urlPart);
-			this.emit('started', `${name}`);
-			await this.downloadPackageFull(pkgInfo, name, urlPart, latestVersion);
-			await this.downloadPackagePartial(pkgInfo, name, urlPart, latestVersion, targetVersion);
+			this.emit('started', fullName);
+			await this.downloadPackageFull(pkgInfo, fullName, name, urlPart, latestVersion);
+			await this.downloadPackagePartial(pkgInfo, fullName, name, urlPart, latestVersion, targetVersion);
 		} else {
-			return await this.downloadPackagePartial(pkgInfo, name, urlPart, localVersion, targetVersion);
+			return await this.downloadPackagePartial(pkgInfo, fullName, name, urlPart, localVersion, targetVersion);
 		}
 	}
 
-	async downloadPackageFull(pkgInfo, name, urlPart, targetVersion) {
+	async downloadPackageFull(pkgInfo, fullName, name, urlPart, targetVersion) {
 		const patchVersions = [{
 			fromVersion: 0,
 			toVersion: targetVersion['version'],
 		}];
-		return await this.downloadPackagePartialInternal(pkgInfo, name, urlPart, patchVersions, targetVersion);
+		return await this.downloadPackagePartialInternal(pkgInfo, fullName, name, urlPart, patchVersions, targetVersion);
 	}
 
-	async downloadPackagePartial(pkgInfo, name, urlPart, localVersion, targetVersion) {
+	async downloadPackagePartial(pkgInfo, fullName, name, urlPart, localVersion, targetVersion) {
 		const localVersionID = localVersion['version'];
 		const targetVersionID = targetVersion['version'];
 
@@ -187,10 +183,10 @@ class NextGenDownloader extends EventEmitter {
 			});
 		}
 
-		await this.downloadPackagePartialInternal(pkgInfo, name, urlPart, patchVersions, targetVersion);
+		await this.downloadPackagePartialInternal(pkgInfo, fullName, name, urlPart, patchVersions, targetVersion);
 	}
 
-	async downloadPackagePartialInternal(pkgInfo, name, urlPart, patchVersions, targetVersion) {
+	async downloadPackagePartialInternal(pkgInfo, fullName, name, urlPart, patchVersions, targetVersion) {
 		let patchJsonDls = [];
 		let patchJsonFiles = [];
 		for (const patchVersion of patchVersions) {
@@ -254,11 +250,11 @@ class NextGenDownloader extends EventEmitter {
 
 		const parallelPatchDownload = new ParallelDownload();
 		parallelPatchDownload.on('progress', (current, total) => {
-			this.emit('progress', this.name, current, total);
+			this.emit('progress', fullName, current, total);
 		});
 		parallelPatchDownload.on('aborted', msg => {
 			// TODO: abort should just act as if rejected?
-			this.emit('aborted', this.name, msg);
+			this.emit('aborted', fullName, msg);
 		});
 		parallelPatchDownload.on('warn', msg => {
 			log.warn(msg);
@@ -287,7 +283,7 @@ class NextGenDownloader extends EventEmitter {
 			console.log(`Finished patch ${fromVersion} -> ${toVersion}`);
 
 			this.progressedPatchSize += patchSizes[i] + patchSigSizes[i];
-			this.emit('progress', this.name, this.progressedPatchSize, totalPatchSize);
+			this.emit('progress', fullName, this.progressedPatchSize, totalPatchSize);
 		}
 	}
 
@@ -363,10 +359,10 @@ class ParallelDownload extends EventEmitter {
 				this.emit('progress', combinedProgress, combinedTotal);
 			});
 
-			downloader.on('aborted', msg => {
-				// TODO: abort should just act as if rejected?
-				this.emit('aborted', this.name, msg);
-			});
+			// downloader.on('aborted', msg => {
+			// 	// TODO: abort should just act as if rejected?
+			// 	this.emit('aborted', this.name, msg);
+			// });
 
 			downloader.on('warn', msg => {
 				log.warn(msg);

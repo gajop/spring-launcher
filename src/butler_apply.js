@@ -69,13 +69,13 @@ class ButlerApply extends EventEmitter {
 					this.emit('progress', total, total);
 					resolve();
 				} else {
-					reject('failed', `Download failed: ${code}`);
+					reject(`Applying patch failed with : ${code}`);
 				}
 			});
 
 			process.on('error', error => {
 				finished = true;
-				reject('failed', `Failed to launch butler with error: ${error}`);
+				reject(`Failed to launch butler with error: ${error}`);
 			});
 
 			this.process = process;
