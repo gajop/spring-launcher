@@ -143,6 +143,8 @@ class Wizard extends EventEmitter {
 		this.started = false;
 		this.steps = steps;
 		this.enabled = true;
+
+		this.emit('stepsGenerated', this.steps);
 	}
 
 	setEnabled(enabled) {

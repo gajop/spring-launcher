@@ -4,6 +4,7 @@ const { log } = require('./spring_log');
 const { gui } = require('./launcher_gui');
 const springDownloader = require('./spring_downloader');
 const { wizard } = require('./launcher_wizard');
+const NextGenDownloader = require('./nextgen_downloader');
 
 springDownloader.on('started', (downloadItem, type, args) => {
 	log.info(`Download started: ${downloadItem}, ${type}, ${args}`);
@@ -67,4 +68,18 @@ springDownloader.on('failed', (downloadItem, msg) => {
 		gui.send('error', msg);
 		wizard.setEnabled(false);
 	}
+});
+
+wizard.on('stepsGenerated', async steps => {
+	let promises = [];
+	for (const step of steps) {
+		if (step.name === 'nextgen') {
+			const nextGen = new NextGenDownloader();
+			promises.push(nextGen.downloadMetadata(step.item));
+		}
+	}
+
+	return await Promise.all(promises).catch(err => {
+		log.warn(`Couldn't fetch early metadata: ${err}`);
+	});
 });

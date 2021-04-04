@@ -78,9 +78,7 @@ class NextGenDownloader extends EventEmitter {
 
 	async downloadInternal(fullName) {
 		let parsed = parse(fullName);
-
 		const name = parsed.user + '/' + parsed.repo;
-
 		this.emit('started', `${fullName}: metadata`);
 
 		const pkgInfo = await this.queryPackageInfo(name);
@@ -89,7 +87,6 @@ class NextGenDownloader extends EventEmitter {
 		const channel = parsed.channel;
 		const platform = parsed.platform;
 		const versionID = parsed.version;
-
 		const urlPart = `${name}/${channel}/${platform}`;
 
 		const localVersion = this.queryLocalVersion(name);
@@ -115,6 +112,35 @@ class NextGenDownloader extends EventEmitter {
 		}
 
 		this.emit('finished', name);
+	}
+
+	async downloadMetadata(fullName) {
+		await this.downloadMetadataInternal(fullName).catch(err => {
+			log.error(err);
+			log.info(typeof err);
+			throw err;
+		});
+	}
+
+	// DRY this and downloadInternal
+	async downloadMetadataInternal(fullName) {
+		let parsed = parse(fullName);
+		const name = parsed.user + '/' + parsed.repo;
+		this.emit('started', `${fullName}: metadata`);
+
+		const pkgInfo = await this.queryPackageInfo(name);
+
+		parsed = fillChannelPlatform(parsed, pkgInfo);
+		const channel = parsed.channel;
+		const platform = parsed.platform;
+		const versionID = parsed.version;
+		const urlPart = `${name}/${channel}/${platform}`;
+
+		await (
+			versionID != null
+				? this.queryRemoteVersion(urlPart, versionID)
+				: this.queryLatestVersion(urlPart)
+		);
 	}
 
 	async queryPackageInfo(name) {
@@ -152,18 +178,44 @@ class NextGenDownloader extends EventEmitter {
 			}
 		}
 
-		if (shouldQueryRemote) {
-			await this.butlerDl.download(`${PKG_URL}/${baseUrl}`, localFile);
+		while (true) {
+			if (shouldQueryRemote) {
+				await this.butlerDl.download(`${PKG_URL}/${baseUrl}`, localFile);
+			}
+			try {
+				return JSON.parse(fs.readFileSync(localFile));
+			} catch (err) {
+				if (shouldQueryRemote) {
+					// we already queried once, nothing we can do
+					throw err;
+				} else {
+					// try to query the file again
+					shouldQueryRemote = true;
+				}
+			}
 		}
-		return JSON.parse(fs.readFileSync(localFile));
 	}
 
 	async queryFileIfNotExist(baseUrl) {
 		const localFile = `${PKG_DIR}/${baseUrl}`;
-		if (!fs.existsSync(localFile)) {
-			await this.butlerDl.download(`${PKG_URL}/${baseUrl}`, localFile);
+		let shouldQueryRemote = !fs.existsSync(localFile);
+
+		while (true) {
+			if (shouldQueryRemote) {
+				await this.butlerDl.download(`${PKG_URL}/${baseUrl}`, localFile);
+			}
+			try {
+				return JSON.parse(fs.readFileSync(localFile));
+			} catch (err) {
+				if (shouldQueryRemote) {
+					// we already queried once, nothing we can do
+					throw err;
+				} else {
+					// try to query the file again
+					shouldQueryRemote = true;
+				}
+			}
 		}
-		return JSON.parse(fs.readFileSync(localFile));
 	}
 
 	async downloadPackage(pkgInfo, fullName, name, urlPart, localVersion, targetVersion) {
@@ -392,4 +444,4 @@ class ParallelDownload extends EventEmitter {
 }
 
 
-module.exports = new NextGenDownloader();
+module.exports = NextGenDownloader;
