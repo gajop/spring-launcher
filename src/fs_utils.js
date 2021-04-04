@@ -21,11 +21,11 @@ function makeDir(dirpath) {
 let tempCounter = 0;
 function getTemporaryFileName(baseName) {
 	while (true) {
+		tempCounter++;
 		const temp = path.join(TEMP_DIR, `${baseName}.${tempCounter}`);
 		if (!fs.existsSync(temp)) {
 			return temp;
 		}
-		tempCounter++;
 	}
 	// unreachable
 }
