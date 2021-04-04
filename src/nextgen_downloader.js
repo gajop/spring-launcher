@@ -18,6 +18,9 @@ const isDev = false;
 const PKG_URL = isDev ? 'http://0.0.0.0:8000/pkg' : 'https://content.spring-launcher.com/pkg/';
 const PKG_DIR = `${springPlatform.writePath}/pkgs`;
 
+const PKG_INFO_CACHE_TIME = 3600;
+const LATEST_VERSION_CACHE_TIME = 300;
+
 // TODO 3rd April:
 // Support downloading based on Spring path (game, map or engine full name)
 // Fix interrupting a patch-apply resulting in incorrect local version information (might lag by one)
@@ -50,19 +53,20 @@ class NextGenDownloader extends EventEmitter {
 		*/
 
 
-		const butlerDl = new ButlerDownload();
-		const butlerApply = new ButlerApply();
+		this.butlerDl = new ButlerDownload();
+		this.butlerApply = new ButlerApply();
 
-		// butlerDl.on('aborted', msg => {
+		// this.butlerDl.on('aborted', msg => {
 		// 	this.emit('aborted', this.name, msg);
 		// });
 
-		butlerDl.on('warn', msg => {
+		this.butlerDl.on('warn', msg => {
 			log.warn(msg);
 		});
 
-		this.butlerDl = butlerDl;
-		this.butlerApply = butlerApply;
+		this.butlerApply.on('warn', msg => {
+			log.warn(msg);
+		});
 	}
 
 	async download(fullName) {
@@ -114,12 +118,7 @@ class NextGenDownloader extends EventEmitter {
 	}
 
 	async queryPackageInfo(name) {
-		const pkgInfo = `${PKG_DIR}/${name}/package-info.json`;
-		// TODO: consider caching?
-		// if (!fs.existsSync(pkgInfo)) {
-		await this.butlerDl.download(`${PKG_URL}/${name}/package-info.json`, pkgInfo);
-		// }
-		return JSON.parse(fs.readFileSync(pkgInfo));
+		return this.queryWithCache(`${name}/package-info.json`, PKG_INFO_CACHE_TIME);
 	}
 
 	queryLocalVersion(name) {
@@ -131,23 +130,40 @@ class NextGenDownloader extends EventEmitter {
 	}
 
 	async queryLatestVersion(urlPart) {
-		const baseUrl = `${urlPart}/latest.json`;
-		const versionInfo = `${PKG_DIR}/${baseUrl}`;
-		await this.butlerDl.download(`${PKG_URL}/${baseUrl}`, versionInfo);
-		return JSON.parse(fs.readFileSync(versionInfo));
+		return this.queryWithCache(`${urlPart}/latest.json`, LATEST_VERSION_CACHE_TIME);
 	}
 
 	async queryRemoteVersion(urlPart, version) {
-		const baseUrl = `${urlPart}/patch/${version}.json`;
-		const versionInfoFile = `${PKG_DIR}/${baseUrl}`;
-		if (!fs.existsSync(versionInfoFile)) {
-			await this.butlerDl.download(`${PKG_URL}/${baseUrl}`, versionInfoFile);
-		}
-		let versionInfo = JSON.parse(fs.readFileSync(versionInfoFile));
+		const versionInfo = this.queryFileIfNotExist(`${urlPart}/patch/${version}.json`);
 		return {
 			version: version,
 			name: versionInfo['name']
 		};
+	}
+
+	async queryWithCache(baseUrl, cacheTime) {
+		const localFile = `${PKG_DIR}/${baseUrl}`;
+		let shouldQueryRemote = true;
+		if (fs.existsSync(localFile)) {
+			const stat = fs.statSync(localFile);
+			const now = new Date();
+			if (now - stat.mtime < cacheTime * 1000) {
+				shouldQueryRemote = false;
+			}
+		}
+
+		if (shouldQueryRemote) {
+			await this.butlerDl.download(`${PKG_URL}/${baseUrl}`, localFile);
+		}
+		return JSON.parse(fs.readFileSync(localFile));
+	}
+
+	async queryFileIfNotExist(baseUrl) {
+		const localFile = `${PKG_DIR}/${baseUrl}`;
+		if (!fs.existsSync(localFile)) {
+			await this.butlerDl.download(`${PKG_URL}/${baseUrl}`, localFile);
+		}
+		return JSON.parse(fs.readFileSync(localFile));
 	}
 
 	async downloadPackage(pkgInfo, fullName, name, urlPart, localVersion, targetVersion) {
@@ -365,7 +381,7 @@ class ParallelDownload extends EventEmitter {
 			// });
 
 			downloader.on('warn', msg => {
-				log.warn(msg);
+				log.warn(`${download}: ${msg}`);
 			});
 
 			promises.push(downloader.download(url, path));
