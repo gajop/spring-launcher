@@ -99,6 +99,15 @@ class NextGenDownloader extends EventEmitter {
 		if (localVersion != null) {
 			if (localVersion['version'] == targetVersion['version']) {
 				log.info(`No download necessary for ${fullName}`);
+
+				const rapidTag = pkgInfo['rapid'];
+				if (rapidTag != null && versionID == null) {
+					const versionsGz = path.join(springPlatform.writePath, `rapid/repos.springrts.com/${rapidTag}/versions.gz`);
+					if (!fs.existsSync(versionsGz)) {
+						this.maybeUpdateRapid(pkgInfo, targetVersion);
+					}
+				}
+
 				this.emit('finished', fullName);
 				return;
 			}

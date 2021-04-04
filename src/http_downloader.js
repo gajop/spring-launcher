@@ -84,7 +84,15 @@ class HttpDownloader extends EventEmitter {
 
 				extractor.extract(name, url, destinationTemp, destination);
 			}).catch(reason => {
-				fs.unlinkSync(destinationTemp);
+				if (fs.existsSync(destinationTemp)) {
+					try {
+						fs.unlinkSync(destinationTemp);
+					} catch (err) {
+						if (fs.existsSync(destinationTemp)) {
+							log.error(`Failed to cleanup stale download: ${destinationTemp}`);
+						}
+					}
+				}
 				log.info('failed', `Download failed: ${reason}`);
 				this.emit('failed', this.name, reason);
 			});
