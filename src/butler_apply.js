@@ -3,19 +3,24 @@
 const { spawn } = require('child_process');
 const EventEmitter = require('events');
 const readline = require('readline');
+const path = require('path');
+const fs = require('fs');
 
 const log = require('electron-log');
 
 const { makeParentDir, getTemporaryFileName, TMP_DIR } = require('./fs_utils');
 const springPlatform = require('./spring_platform');
 
+const APPLY_DIR = path.join(TMP_DIR, 'patch_apply');
 class ButlerApply extends EventEmitter {
 
 	apply(patch, target) {
 		return new Promise((resolve, reject) => {
 			const tmpDestination = getTemporaryFileName('download');
 			makeParentDir(tmpDestination);
-			const args = ['-j', 'apply', `--staging-dir=${TMP_DIR}`, patch, target];
+			fs.rmdirSync(APPLY_DIR, { recursive: true });
+
+			const args = ['-j', 'apply', `--staging-dir=${APPLY_DIR}`, patch, target];
 			const process = spawn(springPlatform.butlerPath, args);
 			this.emit('started', args.join(' '));
 

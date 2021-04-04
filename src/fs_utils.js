@@ -31,8 +31,7 @@ function getTemporaryFileName(baseName) {
 }
 
 function removeTemporaryFiles() {
-	fs.readdirSync(TMP_DIR)
-		.forEach(file => fs.unlinkSync(path.join(TMP_DIR, file)));
+	fs.rmdirSync(TMP_DIR, { recursive: true });
 
 }
 
