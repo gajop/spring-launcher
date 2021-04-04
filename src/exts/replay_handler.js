@@ -1,4 +1,3 @@
-const fsPromises = require('fs').promises;
 const path = require('path');
 
 const { DemoParser } = require('sdfz-demo-parser');
@@ -8,18 +7,17 @@ const springPlatform = require('../spring_platform');
 
 bridge.on('ReadReplayInfo', async command => {
 	const demoPath = path.join(springPlatform.writePath, command.relativePath);
-	const sdfz = await fsPromises.readFile(demoPath);
 
 	const parser = new DemoParser();
 
-	const demo = await parser.parseDemo(sdfz);
+	const demo = await parser.parseDemo(demoPath);
 
 	bridge.send('ReplayInfo', {
-		relativePath : command.relativePath,
+		relativePath: command.relativePath,
 		engine: demo.header.versionString,
-		game: demo.script.gameSettings.gametype,
-		map: demo.script.gameSettings.mapname
-		// TODO: missing textual representation of start script
+		game: demo.info.hostSettings.gametype,
+		map: demo.info.hostSettings.mapname,
+		// TODO: add textual representation of start script? seems unnecessary?
 		// startScript: demo.script
 	});
 });
