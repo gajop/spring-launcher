@@ -5,7 +5,7 @@ const path = require('path');
 
 const springPlatform = require('./spring_platform');
 
-const TEMP_DIR = `${springPlatform.writePath}/tmp`;
+const TMP_DIR = `${springPlatform.writePath}/tmp`;
 
 function makeParentDir(filepath) {
 	const destinationParentDir = path.dirname(filepath);
@@ -22,7 +22,7 @@ let tempCounter = 0;
 function getTemporaryFileName(baseName) {
 	while (true) {
 		tempCounter++;
-		const temp = path.join(TEMP_DIR, `${baseName}.${tempCounter}`);
+		const temp = path.join(TMP_DIR, `${baseName}.${tempCounter}`);
 		if (!fs.existsSync(temp)) {
 			return temp;
 		}
@@ -31,8 +31,8 @@ function getTemporaryFileName(baseName) {
 }
 
 function removeTemporaryFiles() {
-	fs.readdirSync(TEMP_DIR)
-		.forEach(file => fs.unlinkSync(path.join(TEMP_DIR, file)));
+	fs.readdirSync(TMP_DIR)
+		.forEach(file => fs.unlinkSync(path.join(TMP_DIR, file)));
 
 }
 
@@ -41,5 +41,6 @@ module.exports = {
 	getTemporaryFileName: getTemporaryFileName,
 	removeTemporaryFiles: removeTemporaryFiles,
 	makeParentDir: makeParentDir,
-	makeDir: makeDir
+	makeDir: makeDir,
+	TMP_DIR: TMP_DIR
 };

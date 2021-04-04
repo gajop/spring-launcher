@@ -6,7 +6,7 @@ const readline = require('readline');
 
 const log = require('electron-log');
 
-const { makeParentDir, getTemporaryFileName } = require('./fs_utils');
+const { makeParentDir, getTemporaryFileName, TMP_DIR } = require('./fs_utils');
 const springPlatform = require('./spring_platform');
 
 class ButlerApply extends EventEmitter {
@@ -15,7 +15,7 @@ class ButlerApply extends EventEmitter {
 		return new Promise((resolve, reject) => {
 			const tmpDestination = getTemporaryFileName('download');
 			makeParentDir(tmpDestination);
-			const args = ['-j', 'apply', '--staging-dir=tmp', patch, target];
+			const args = ['-j', 'apply', `--staging-dir=${TMP_DIR}`, patch, target];
 			const process = spawn(springPlatform.butlerPath, args);
 			this.emit('started', args.join(' '));
 
