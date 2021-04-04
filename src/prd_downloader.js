@@ -6,8 +6,9 @@ const EventEmitter = require('events');
 const log = require('electron-log');
 
 const springPlatform = require('./spring_platform');
-const { getTouchedByNextgen, clearTouchedByNextgen } = require('./nextgen_downloader');
+const { isTouchedByNextgen, setTouchedByNextgen } = require('./nextgen_downloader');
 const fs = require('fs');
+const path = require('path');
 
 class PrdDownloader extends EventEmitter {
 	constructor() {
@@ -27,14 +28,6 @@ class PrdDownloader extends EventEmitter {
 	}
 
 	download_package(name, type, args) {
-		const touchedFiles = getTouchedByNextgen();
-		for (const versionsGz of touchedFiles) {
-			fs.unlinkSync(versionsGz);
-		}
-		if (touchedFiles.length > 0) {
-			clearTouchedByNextgen();
-		}
-
 		let finished = false;
 		const prd = spawn(springPlatform.prDownloaderPath, args);
 		this.emit('started', name, type, args);
@@ -94,6 +87,15 @@ class PrdDownloader extends EventEmitter {
 	}
 
 	downloadGame(gameName) {
+		if (gameName.includes(':')) {
+			const rapidTag = gameName.split(':')[0];
+			const versionsGz = path.join(springPlatform.writePath, `rapid/repos.springrts.com/${rapidTag}/versions.gz`);
+			if (isTouchedByNextgen(versionsGz)) {
+				fs.unlinkSync(versionsGz);
+				setTouchedByNextgen(versionsGz, false);
+			}
+		}
+
 		this.download_package(gameName, 'game', ['--filesystem-writepath', springPlatform.writePath, '--download-game', gameName]);
 	}
 
