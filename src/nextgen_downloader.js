@@ -362,6 +362,8 @@ class NextGenDownloader extends EventEmitter {
 		}
 
 		const versionsGz = path.join(springPlatform.writePath, `rapid/repos.springrts.com/${rapidTag}/versions.gz`);
+		setTouchedByNextgen(versionsGz, true);
+
 		const fullRapidTag = `${rapidTag}:test`;
 		let archiveName = targetVersion['name'];
 		archiveName = archiveName.substring(0, archiveName.length - '.sdz'.length);
@@ -443,5 +445,52 @@ class ParallelDownload extends EventEmitter {
 	}
 }
 
+function setTouchedByNextgen(versionsGz, isTouched) {
+	let touchedFiles = [];
+	const touchedFilesRegistry = `${PKG_DIR}/touched_rapid.json`;
+	if (fs.existsSync(touchedFilesRegistry)) {
+		touchedFiles = JSON.parse(fs.readFileSync(touchedFilesRegistry));
+	}
+	if (isTouched) {
+		touchedFiles.push(versionsGz);
+	} else {
+		const index = touchedFiles.indexOf(versionsGz);
+		if (index > -1) {
+			touchedFiles.splice(index, 1);
+		}
+	}
 
-module.exports = NextGenDownloader;
+	fs.writeFileSync(touchedFilesRegistry, JSON.stringify(touchedFiles));
+}
+
+function clearTouchedByNextgen() {
+	const touchedFilesRegistry = `${PKG_DIR}/touched_rapid.json`;
+	if (fs.existsSync(touchedFilesRegistry)) {
+		fs.unlinkSync(touchedFilesRegistry);
+	}
+}
+
+function isTouchedByNextgen(versionsGz) {
+	return getTouchedByNextgen().includes(versionsGz);
+}
+
+function getTouchedByNextgen() {
+	const touchedFilesRegistry = `${PKG_DIR}/touched_rapid.json`;
+	if (!fs.existsSync(touchedFilesRegistry)) {
+		return [];
+	}
+
+	try {
+		return JSON.parse(fs.readFileSync(touchedFilesRegistry));
+	} catch (err) {
+		return [];
+	}
+}
+
+module.exports = {
+	NextGenDownloader: NextGenDownloader,
+	setTouchedByNextgen: setTouchedByNextgen,
+	getTouchedByNextgen: getTouchedByNextgen,
+	isTouchedByNextgen: isTouchedByNextgen,
+	clearTouchedByNextgen: clearTouchedByNextgen,
+};

@@ -6,6 +6,8 @@ const EventEmitter = require('events');
 const log = require('electron-log');
 
 const springPlatform = require('./spring_platform');
+const { getTouchedByNextgen, clearTouchedByNextgen } = require('./nextgen_downloader');
+const fs = require('fs');
 
 class PrdDownloader extends EventEmitter {
 	constructor() {
@@ -25,6 +27,14 @@ class PrdDownloader extends EventEmitter {
 	}
 
 	download_package(name, type, args) {
+		const touchedFiles = getTouchedByNextgen();
+		for (const versionsGz of touchedFiles) {
+			fs.unlinkSync(versionsGz);
+		}
+		if (touchedFiles.length > 0) {
+			clearTouchedByNextgen();
+		}
+
 		let finished = false;
 		const prd = spawn(springPlatform.prDownloaderPath, args);
 		this.emit('started', name, type, args);

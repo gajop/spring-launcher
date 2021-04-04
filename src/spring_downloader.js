@@ -6,7 +6,7 @@ const log = require('electron-log');
 
 const prdDownloader = require('./prd_downloader');
 const httpDownloader = require('./http_downloader');
-const NextGenDownloader = require('./nextgen_downloader');
+const { NextGenDownloader } = require('./nextgen_downloader');
 const nextGenDownloader = new NextGenDownloader();
 
 function getDownloader(name) {

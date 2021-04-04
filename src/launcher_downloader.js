@@ -4,7 +4,7 @@ const { log } = require('./spring_log');
 const { gui } = require('./launcher_gui');
 const springDownloader = require('./spring_downloader');
 const { wizard } = require('./launcher_wizard');
-const NextGenDownloader = require('./nextgen_downloader');
+const { NextGenDownloader } = require('./nextgen_downloader');
 
 springDownloader.on('started', (downloadItem, type, args) => {
 	log.info(`Download started: ${downloadItem}, ${type}, ${args}`);
