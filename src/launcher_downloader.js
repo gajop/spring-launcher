@@ -79,7 +79,9 @@ wizard.on('stepsGenerated', async steps => {
 		}
 	}
 
-	return await Promise.all(promises).catch(err => {
+	try {
+		return await Promise.all(promises);
+	} catch (err) {
 		log.warn(`Couldn't fetch early metadata: ${err}`);
-	});
+	}
 });
