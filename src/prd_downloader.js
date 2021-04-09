@@ -17,7 +17,7 @@ class PrdDownloader extends EventEmitter {
 		this.missingPattern = new RegExp('.*no engine.*|.*no mirrors.*|.*no game found.*|.*no map found.*|.*error occured while downloading.*');
 	}
 
-	error_check(name, line) {
+	errorCheck(name, line) {
 		if (line.startsWith('[Error]')) {
 			if (line.toLowerCase().match(this.missingPattern)) {
 				this.emit('failed', name, line);
@@ -27,10 +27,10 @@ class PrdDownloader extends EventEmitter {
 		return false;
 	}
 
-	download_package(name, type, args) {
+	downloadPackage(name, args) {
 		let finished = false;
 		const prd = spawn(springPlatform.prDownloaderPath, args);
-		this.emit('started', name, type, args);
+		this.emit('started', name);
 
 		prd.stdout.on('data', (data) => {
 			const line = data.toString();
@@ -45,7 +45,7 @@ class PrdDownloader extends EventEmitter {
 				current = parseInt(current);
 				total = parseInt(total);
 				this.emit('progress', name, current, total);
-			} else if (this.error_check(name, line)) {
+			} else if (this.errorCheck(name, line)) {
 				finished = true;
 			} else if (line.startsWith('[Info]')) {
 				this.emit('info', name, line);
@@ -55,7 +55,7 @@ class PrdDownloader extends EventEmitter {
 		prd.stderr.on('data', (data) => {
 			const line = data.toString();
 			log.warn(line);
-			if (this.error_check(name, line)) {
+			if (this.errorCheck(name, line)) {
 				finished = true;
 			}
 		});
@@ -83,7 +83,7 @@ class PrdDownloader extends EventEmitter {
 
 
 	downloadEngine(engineName) {
-		this.download_package(engineName, 'engine', ['--filesystem-writepath', springPlatform.writePath, '--download-engine', engineName]);
+		this.downloadPackage(engineName, ['--filesystem-writepath', springPlatform.writePath, '--download-engine', engineName]);
 	}
 
 	downloadGame(gameName) {
@@ -96,11 +96,11 @@ class PrdDownloader extends EventEmitter {
 			}
 		}
 
-		this.download_package(gameName, 'game', ['--filesystem-writepath', springPlatform.writePath, '--download-game', gameName]);
+		this.downloadPackage(gameName, ['--filesystem-writepath', springPlatform.writePath, '--download-game', gameName]);
 	}
 
 	downloadMap(mapName) {
-		this.download_package(mapName, 'map', ['--filesystem-writepath', springPlatform.writePath, '--download-map', mapName]);
+		this.downloadPackage(mapName, ['--filesystem-writepath', springPlatform.writePath, '--download-map', mapName]);
 	}
 
 	downloadResource(resource) {

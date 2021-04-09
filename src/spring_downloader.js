@@ -32,15 +32,15 @@ class SpringDownloader extends EventEmitter {
 
 		let downloaders = [prdDownloader, httpDownloader, nextGenDownloader];
 		for (const downloader of downloaders) {
-			downloader.on('started', (downloadItem, type, args) => {
-				this.emit('started', downloadItem, type, args);
+			downloader.on('started', downloadItem => {
+				this.emit('started', downloadItem);
 			});
 
 			downloader.on('progress', (downloadItem, current, total) => {
 				this.emit('progress', downloadItem, current, total);
 			});
 
-			downloader.on('finished', (downloadItem) => {
+			downloader.on('finished', downloadItem => {
 				currentDownloader = null;
 				this.emit('finished', downloadItem);
 			});

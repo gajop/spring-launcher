@@ -6,10 +6,10 @@ const springDownloader = require('./spring_downloader');
 const { wizard } = require('./launcher_wizard');
 const { NextGenDownloader } = require('./nextgen_downloader');
 
-springDownloader.on('started', (downloadItem, type, args) => {
-	log.info(`Download started: ${downloadItem}, ${type}, ${args}`);
+springDownloader.on('started', downloadItem => {
+	log.info(`Download started: ${downloadItem}`);
 	if (wizard.isActive) {
-		gui.send('dl-started', downloadItem, type, args);
+		gui.send('dl-started', downloadItem);
 	}
 });
 

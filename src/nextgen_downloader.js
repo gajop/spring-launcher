@@ -294,7 +294,7 @@ class NextGenDownloader extends EventEmitter {
 
 		this.totalPatches = patchSizes.length;
 		let patches = [];
-		this.emit('started', `${urlPart}: patches`);
+		this.emit('started', fullName);
 		let downloads = [];
 		for (const [i, patchVersion] of patchVersions.entries()) {
 			const fromVersion = patchVersion.fromVersion;

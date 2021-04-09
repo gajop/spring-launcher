@@ -64,7 +64,7 @@ class HttpDownloader extends EventEmitter {
 		}
 
 		const destinationTemp = getTemporaryFileName('download');
-		this.emit('started', name, 'resource');
+		this.emit('started', name);
 		// FIXME: What's going on here..? () shouldn't be preventing this. from working
 		// Is then the problem?
 		const extractor = this.extractor;
