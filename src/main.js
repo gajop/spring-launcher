@@ -78,8 +78,6 @@ autoUpdater.on('update-downloaded', () => {
 
 autoUpdater.on('error', error => {
 	log.error(`Application failed to self-update. Error: ${error}`);
-	log.info('Proceeding to next step.');
-	wizard.nextStep();
 });
 
 function maybeSetConfig(cfgName) {
