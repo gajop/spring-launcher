@@ -32,6 +32,8 @@ const LATEST_VERSION_CACHE_TIME = 300;
 // Allow custom path (not just game)
 // sync -> async for all IO operations?
 
+const SYSTEM_VERSION = 1;
+
 class NextGenDownloader extends EventEmitter {
 	constructor() {
 		super();
@@ -52,6 +54,7 @@ class NextGenDownloader extends EventEmitter {
 		}
 		*/
 
+		this.systemVersionCheck();
 
 		this.butlerDl = new ButlerDownload();
 		this.butlerApply = new ButlerApply();
@@ -67,6 +70,41 @@ class NextGenDownloader extends EventEmitter {
 		this.butlerApply.on('warn', msg => {
 			log.warn(msg);
 		});
+	}
+
+	systemVersionCheck() {
+		const existingVersion = this.getSystemVersion();
+
+		if (existingVersion == SYSTEM_VERSION) {
+			return;
+		}
+
+		log.info(`System upgrade: ${existingVersion} -> ${SYSTEM_VERSION}`);
+
+		if (fs.existsSync(PKG_DIR)) {
+			fs.rmdirSync(PKG_DIR, { recursive: true });
+		}
+		fs.mkdirSync(PKG_DIR);
+
+		const systemVersionJson = path.join(PKG_DIR, 'system.json');
+		fs.writeFileSync(systemVersionJson, JSON.stringify({
+			version: SYSTEM_VERSION
+		}));
+	}
+
+	getSystemVersion() {
+		const systemVersionJson = path.join(PKG_DIR, 'system.json');
+		if (!fs.existsSync(systemVersionJson)) {
+			return 0;
+		}
+
+		try {
+			return JSON.parse(fs.readFileSync(systemVersionJson))['version'];
+		} catch (err) {
+			log.info(`Failed to parse ${systemVersionJson}, resetting`);
+			fs.unlinkSync(systemVersionJson);
+			return 0;
+		}
 	}
 
 	async download(fullName) {
@@ -340,7 +378,7 @@ class NextGenDownloader extends EventEmitter {
 		await parallelPatchDownload.download(downloads);
 
 
-		this.emit('started', `${urlPart}: applying`);
+		this.emit('started', `${fullName}: applying`);
 		// Represent patch application in MBs to satisfy our progress display logic
 		this.remainingPatchSize = totalPatchSize;
 		this.progressedPatchSize = 0;

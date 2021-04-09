@@ -17,8 +17,8 @@ class HttpDownloader extends EventEmitter {
 
 		const butlerDl = new ButlerDownload();
 
-		butlerDl.on('started', args => {
-			this.emit('started', this.name, this.type, args);
+		butlerDl.on('started', () => {
+			this.emit('started', this.name);
 		});
 
 		butlerDl.on('progress', (current, total) => {
