@@ -5,7 +5,7 @@ const path = require('path');
 
 const springPlatform = require('./spring_platform');
 
-const TMP_DIR = `${springPlatform.writePath}/tmp`;
+const TMP_DIR = path.join(springPlatform.writePath, 'tmp');
 
 function makeParentDir(filepath) {
 	const destinationParentDir = path.dirname(filepath);
@@ -31,8 +31,9 @@ function getTemporaryFileName(baseName) {
 }
 
 function removeTemporaryFiles() {
-	fs.rmdirSync(TMP_DIR, { recursive: true });
-
+	if (fs.existsSync(TMP_DIR)) {
+		fs.rmdirSync(TMP_DIR, { recursive: true });
+	}
 }
 
 
