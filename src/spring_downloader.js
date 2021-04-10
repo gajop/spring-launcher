@@ -28,33 +28,46 @@ function getDownloader(name) {
 
 let currentDownloader = null;
 
+let nextgenToSpringMapping = {
+};
+
 class SpringDownloader extends EventEmitter {
 	constructor() {
 		super();
 
 		let downloaders = [prdDownloader, httpDownloader, nextGenDownloader];
 		for (const downloader of downloaders) {
+			const getMapped = (downloadItem) => {
+				if (downloader !== nextGenDownloader) {
+					return downloadItem;
+				}
+				let mapped = nextgenToSpringMapping[downloadItem];
+				return mapped != null ? mapped : downloadItem;
+			};
 			downloader.on('started', downloadItem => {
-				this.emit('started', downloadItem);
+				this.emit('started', getMapped(downloadItem));
 			});
 
 			downloader.on('progress', (downloadItem, current, total) => {
-				this.emit('progress', downloadItem, current, total);
+				this.emit('progress', getMapped(downloadItem), current, total);
 			});
 
 			downloader.on('finished', downloadItem => {
 				currentDownloader = null;
-				this.emit('finished', downloadItem);
+				this.emit('finished', getMapped(downloadItem));
+				delete nextgenToSpringMapping[downloadItem];
 			});
 
 			downloader.on('failed', (downloadItem, msg) => {
 				currentDownloader = null;
-				this.emit('failed', downloadItem, msg);
+				this.emit('failed', getMapped(downloadItem), msg);
+				delete nextgenToSpringMapping[downloadItem];
 			});
 
 			downloader.on('aborted', (downloadItem, msg) => {
 				currentDownloader = null;
-				this.emit('aborted', downloadItem, msg);
+				this.emit('aborted', getMapped(downloadItem), msg);
+				delete nextgenToSpringMapping[downloadItem];
 			});
 		}
 	}
@@ -79,6 +92,7 @@ class SpringDownloader extends EventEmitter {
 			return;
 		}
 
+		nextgenToSpringMapping[nextgenName] = gameName;
 		nextGenDownloader.download(nextgenName);
 	}
 
