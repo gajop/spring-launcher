@@ -21,6 +21,7 @@ const configDefault = {
 	'no_downloads': false,
 	'no_start_script': false,
 	'load_dev_exts': false,
+	'route_prd_to_nextgen': false,
 
 	'downloads': {
 		'games': [],

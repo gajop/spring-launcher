@@ -50,6 +50,7 @@
     "electron-settings": "^3.2.0",
     "electron-updater": "^4.3.5",
     "extract-zip": "^2.0.1",
+    "got": "^11.8.2",
     "node-7z": "^2.1.2",
     "sdfz-demo-parser": "^1.4.1",
     "yargs": "^15.4.1"

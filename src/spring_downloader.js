@@ -6,6 +6,8 @@ const log = require('electron-log');
 
 const prdDownloader = require('./prd_downloader');
 const httpDownloader = require('./http_downloader');
+const { config } = require('./launcher_config');
+const { springToNextgen } = require('./nextgen_spring_compat');
 const { NextGenDownloader } = require('./nextgen_downloader');
 const nextGenDownloader = new NextGenDownloader();
 
@@ -62,9 +64,22 @@ class SpringDownloader extends EventEmitter {
 		currentDownloader = prdDownloader;
 	}
 
-	downloadGame(gameName) {
-		prdDownloader.downloadGame(gameName);
-		currentDownloader = prdDownloader;
+	async downloadGame(gameName) {
+		if (!config.route_prd_to_nextgen) {
+			prdDownloader.downloadGame(gameName);
+			currentDownloader = prdDownloader;
+			return;
+		}
+
+		const nextgenName = await springToNextgen(gameName);
+		if (nextgenName == null) {
+			log.warn(`Cannot find ${gameName} on nextgen. Fallback to prd`);
+			prdDownloader.downloadGame(gameName);
+			currentDownloader = prdDownloader;
+			return;
+		}
+
+		this.nextGenDownloader.download(nextgenName);
 	}
 
 	downloadMap(mapName) {

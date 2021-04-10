@@ -15,7 +15,8 @@ const { parse, fillChannelPlatform } = require('./nextgen_version_parse');
 const { makeParentDir, makeDir } = require('./fs_utils');
 
 const isDev = false;
-const PKG_URL = isDev ? 'http://0.0.0.0:8000/pkg' : 'https://content.spring-launcher.com/pkg/';
+const PKG_URL = isDev ? 'http://0.0.0.0:8000/pkg' : 'https://content.spring-launcher.com/pkg';
+const FALLBACK_URL = isDev ? PKG_URL : 'https://spring-launcher.ams3.digitaloceanspaces.com/pkg';
 const PKG_DIR = `${springPlatform.writePath}/pkgs`;
 
 const PKG_INFO_CACHE_TIME = 3600;
@@ -108,10 +109,12 @@ class NextGenDownloader extends EventEmitter {
 	}
 
 	async download(fullName) {
-		await this.downloadInternal(fullName).catch(err => {
+		try {
+			await this.downloadInternal(fullName);
+		} catch (err) {
 			this.emit('failed', fullName, `Download failed ${fullName}`);
 			log.error(err);
-		});
+		}
 	}
 
 	async downloadInternal(fullName) {
@@ -227,7 +230,7 @@ class NextGenDownloader extends EventEmitter {
 
 		while (true) {
 			if (shouldQueryRemote) {
-				await this.butlerDl.download(`${PKG_URL}/${baseUrl}`, localFile);
+				await downloadFileWithFallback(this.butlerDl, baseUrl, localFile);
 			}
 			try {
 				return JSON.parse(fs.readFileSync(localFile));
@@ -249,7 +252,7 @@ class NextGenDownloader extends EventEmitter {
 
 		while (true) {
 			if (shouldQueryRemote) {
-				await this.butlerDl.download(`${PKG_URL}/${baseUrl}`, localFile);
+				await downloadFileWithFallback(this.butlerDl, baseUrl, localFile);
 			}
 			try {
 				return JSON.parse(fs.readFileSync(localFile));
@@ -305,16 +308,15 @@ class NextGenDownloader extends EventEmitter {
 		let patchJsonDls = [];
 		let patchJsonFiles = [];
 		for (const patchVersion of patchVersions) {
-			const baseUrl = `${urlPart}/patch/${patchVersion.fromVersion}-${patchVersion.toVersion}.json`;
-			const patchJsonUrl = `${PKG_URL}/${baseUrl}`;
-			const patchJsonFile = `${PKG_DIR}/${baseUrl}`;
+			const patchJsonUrl = `${urlPart}/patch/${patchVersion.fromVersion}-${patchVersion.toVersion}.json`;
+			const patchJsonFile = `${PKG_DIR}/${patchJsonUrl}`;
 
 			if (!fs.existsSync(patchJsonFile)) {
-				patchJsonDls.push(this.butlerDl.download(patchJsonUrl, patchJsonFile));
+				patchJsonDls.push(downloadFileWithFallback(this.butlerDl, patchJsonUrl, patchJsonFile));
 			}
 			patchJsonFiles.push(patchJsonFile);
 		}
-		console.log(`Total downloads: ${patchJsonDls.length}`);
+		console.log(`${patchJsonDls.length} patches to download`);
 		await Promise.all(patchJsonDls);
 
 		let patchSizes = [];
@@ -338,7 +340,7 @@ class NextGenDownloader extends EventEmitter {
 			const fromVersion = patchVersion.fromVersion;
 			const toVersion = patchVersion.toVersion;
 
-			const patchUrl = `${PKG_URL}/${urlPart}/patch/${fromVersion}-${toVersion}`;
+			const patchUrl = `${urlPart}/patch/${fromVersion}-${toVersion}`;
 			const patchSigUrl = `${patchUrl}.sig`;
 
 			const patchFile = `${PKG_DIR}/${urlPart}/patch/${fromVersion}-${toVersion}`;
@@ -452,6 +454,16 @@ class NextGenDownloader extends EventEmitter {
 	}
 }
 
+async function downloadFileWithFallback(butlerDl, baseUrl, file) {
+	try {
+		return await butlerDl.download(`${PKG_URL}/${baseUrl}`, file);
+	} catch (err) {
+		log.warn(`Primary url download failed ${PKG_URL}/${baseUrl} -> ${file}. Retrying with fallback: ${FALLBACK_URL}/${baseUrl}`);
+		return await butlerDl.download(`${FALLBACK_URL}/${baseUrl}`, file);
+	}
+}
+
+
 class ParallelDownload extends EventEmitter {
 	async download(downloads) {
 		let promises = [];
@@ -485,7 +497,7 @@ class ParallelDownload extends EventEmitter {
 				log.warn(`${download}: ${msg}`);
 			});
 
-			promises.push(downloader.download(url, path));
+			promises.push(downloadFileWithFallback(downloader, url, path));
 		}
 
 		return Promise.all(promises);
