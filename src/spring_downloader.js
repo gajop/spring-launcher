@@ -79,7 +79,7 @@ class SpringDownloader extends EventEmitter {
 			return;
 		}
 
-		this.nextGenDownloader.download(nextgenName);
+		nextGenDownloader.download(nextgenName);
 	}
 
 	downloadMap(mapName) {
