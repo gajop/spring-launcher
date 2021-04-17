@@ -33,7 +33,7 @@ const LATEST_VERSION_CACHE_TIME = 300;
 // Allow custom path (not just game)
 // sync -> async for all IO operations?
 
-const SYSTEM_VERSION = 2;
+const SYSTEM_VERSION = 3;
 
 class NextGenDownloader extends EventEmitter {
 	constructor() {
