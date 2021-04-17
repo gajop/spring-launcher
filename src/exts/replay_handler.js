@@ -14,12 +14,15 @@ bridge.on('ReadReplayInfo', async command => {
 
 	const demo = await parser.parseDemo(sdfz);
 
-	bridge.send('ReplayInfo', {
+	const info = {
 		relativePath : command.relativePath,
 		engine: demo.header.versionString,
 		game: demo.script.gameSettings.gametype,
-		map: demo.script.gameSettings.mapname
-		// TODO: missing textual representation of start script
-		// startScript: demo.script
-	});
+		map: demo.script.gameSettings.mapname,
+		// TODO: We're passing only the allyTeams part of the script, because
+		// that's all we need in BAR/Chobby. Do we need to pass more ?
+		allyTeams: demo.script.allyTeams,
+		gameTime: demo.header.gameTime
+	};
+	bridge.send('ReplayInfo', info);
 });
