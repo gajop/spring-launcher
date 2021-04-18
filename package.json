@@ -52,6 +52,7 @@
     "extract-zip": "^2.0.1",
     "got": "^11.8.2",
     "node-7z": "^2.1.2",
+    "octonode": "^0.10.2",
     "sdfz-demo-parser": "^1.4.1",
     "spring-map-parser": "^2.0.0",
     "yargs": "^15.4.1"
