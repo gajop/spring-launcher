@@ -1,7 +1,3 @@
-// THIS MODULE IS TEMPORARY DISABLED
-
-/*
-
 const path = require('path');
 
 const { MapParser } = require('spring-map-parser');
@@ -22,7 +18,7 @@ bridge.on('ParseMiniMap', async command => {
 	}
 	try {
 		concurrentCalls++;
-		await map.miniMap.toFile(destinationPath);
+		await map.miniMap.writeAsync(destinationPath);
 	} finally {
 		concurrentCalls--;
 	}
@@ -32,5 +28,3 @@ bridge.on('ParseMiniMap', async command => {
 		destinationPath: destinationPath
 	});
 });
-
-*/
