@@ -8,15 +8,8 @@ const github = require('octonode');
 
 const { log, logPath } = require('./spring_log');
 
-// such security, much wow
-const sec = [
-	'ghp',
-	'_j1npS8i',
-	'jzzVLSsJ',
-	'R0NBQVM',
-	'pjUWN1Fi4WdO7n'
-];
-const github_access_token = sec.join('');
+const github_access_token = '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';
+
 
 function upload_ask() {
 	// TODO: probably should disable the UI while this is being done
@@ -68,7 +61,7 @@ function uploadToGithub() {
 	const ghrepo = github_client.repo('Spring-SpringBoard/Logs');
 	return ghrepo.issueAsync({
 		'title': `spring-launcher log: ${config.title}`,
-		'body': '```' + fs.readFileSync(logPath).toString() + '```',
+		'body': fs.readFileSync(logPath).toString(),
 	}).then(obj => {
 		return { 'url': obj[0].html_url };
 	});
@@ -141,7 +134,6 @@ function after_upload(response, resolve, reject) {
 function failed_to_upload(msg) {
 	const errMsg = `Failed to upload log, copy and upload the log manually.\nReason: ${String(msg)}.`;
 	log.error(errMsg);
-	log.error(msg);
 	dialog.showMessageBox({
 		'type': 'error',
 		'buttons': ['OK'],
