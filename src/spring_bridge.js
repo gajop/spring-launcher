@@ -74,6 +74,7 @@ class Bridge extends EventEmitter {
 			// log.debug('bridge: not connected to Spring: cannot send command.');
 			return;
 		}
+		log.debug('launcher->spring', name, command);
 
 		if (command == undefined) {
 			command = {};
@@ -82,7 +83,6 @@ class Bridge extends EventEmitter {
 			name: name,
 			command: command
 		});
-		log.debug('launcher->spring', json);
 		this.socket.write(json + '\n');
 	}
 
