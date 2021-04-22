@@ -17,7 +17,7 @@ bridge.on('ReadReplayInfo', async command => {
 			engine: demo.header.versionString,
 			game: demo.info.hostSettings.gametype,
 			map: demo.info.hostSettings.mapname,
-			players: demo.info.players,
+			players: demo.info.players.concat(demo.info.ais),
 			gameTime: demo.header.gameTime
 		};
 
