@@ -55,7 +55,26 @@ app.on('ready', () => {
 	}, 1000);
 });
 
+function wrapEmitterLogs(emitter) {
+	emitter.on('log', (level, msg) => {
+		if (level === 'debug') {
+			log.debug(msg);
+		} else if (level === 'info') {
+			log.info(msg);
+		} else if (level === 'warn') {
+			log.warn(msg);
+		} else if (level === 'error') {
+			log.error(msg);
+		} else if (level === 'verbose') {
+			log.verbose(msg);
+		} else if (level === 'silly') {
+			log.silly(msg);
+		}
+	});
+}
+
 module.exports = {
 	log: log,
-	logPath: logPath
+	logPath: logPath,
+	wrapEmitterLogs: wrapEmitterLogs
 };

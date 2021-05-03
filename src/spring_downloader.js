@@ -2,14 +2,16 @@
 
 const EventEmitter = require('events');
 
-const log = require('electron-log');
+const { NextGenDownloader, springToNextgen } = require('spring-nextgen-dl');
 
+const { log, wrapEmitterLogs } = require('./spring_log');
 const prdDownloader = require('./prd_downloader');
 const httpDownloader = require('./http_downloader');
 const { config } = require('./launcher_config');
-const { springToNextgen } = require('./nextgen_spring_compat');
-const { NextGenDownloader } = require('./nextgen_downloader');
-const nextGenDownloader = new NextGenDownloader();
+const springPlatform = require('./spring_platform');
+
+const nextGenDownloader = new NextGenDownloader(springPlatform.butlerPath, springPlatform.writePath);
+wrapEmitterLogs(nextGenDownloader);
 
 function getDownloader(name) {
 	let url;
@@ -84,8 +86,11 @@ class SpringDownloader extends EventEmitter {
 			return;
 		}
 
-		const nextgenName = await springToNextgen(gameName);
-		if (nextgenName == null) {
+		let nextgenName;
+		try {
+			nextgenName = await springToNextgen(gameName);
+		} catch (err) {
+			log.warn(err);
 			log.warn(`Cannot find ${gameName} on nextgen. Fallback to prd`);
 			prdDownloader.downloadGame(gameName);
 			currentDownloader = prdDownloader;

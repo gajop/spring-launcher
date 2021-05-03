@@ -48,7 +48,6 @@ var currentConfig;
 
 function canUse(config) {
 	if (config.package.platform != 'all') {
-		log.info('process.platform', process.platform, config.package.platform);
 		if (config.package.platform != process.platform) {
 			return false;
 		}
@@ -136,8 +135,7 @@ const proxy = new Proxy({
 	getConfigObj: function () {
 		return currentConfig;
 	}
-},
-{
+}, {
 	get: function (target, name) {
 		if (target[name] != undefined) {
 			return target[name];

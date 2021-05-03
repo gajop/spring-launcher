@@ -1,10 +1,12 @@
 'use strict';
 
-const { log } = require('./spring_log');
+const { NextGenDownloader } = require('spring-nextgen-dl');
+
+const { log, wrapEmitterLogs } = require('./spring_log');
 const { gui } = require('./launcher_gui');
 const springDownloader = require('./spring_downloader');
 const { wizard } = require('./launcher_wizard');
-const { NextGenDownloader } = require('./nextgen_downloader');
+const springPlatform = require('./spring_platform');
 
 springDownloader.on('started', downloadItem => {
 	log.info(`Download started: ${downloadItem}`);
@@ -74,8 +76,9 @@ wizard.on('stepsGenerated', async steps => {
 	let promises = [];
 	for (const step of steps) {
 		if (step.name === 'nextgen') {
-			const nextGen = new NextGenDownloader();
-			promises.push(nextGen.downloadMetadata(step.item));
+			const nextGenDownloader = new NextGenDownloader(springPlatform.butlerPath, springPlatform.writePath);
+			wrapEmitterLogs(nextGenDownloader);
+			promises.push(nextGenDownloader.downloadMetadata(step.item));
 		}
 	}
 

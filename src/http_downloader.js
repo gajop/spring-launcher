@@ -4,9 +4,10 @@ const EventEmitter = require('events');
 const fs = require('fs');
 const path = require('path');
 
+const { Butler } = require('spring-nextgen-dl');
+
 const springPlatform = require('./spring_platform');
-const ButlerDownload = require('./butler_dl');
-const { log } = require('./spring_log');
+const { log, wrapEmitterLogs } = require('./spring_log');
 const Extractor = require('./extractor');
 const { makeParentDir, getTemporaryFileName, removeTemporaryFiles } = require('./fs_utils');
 
@@ -15,25 +16,23 @@ class HttpDownloader extends EventEmitter {
 	constructor() {
 		super();
 
-		const butlerDl = new ButlerDownload();
+		const butler = new Butler();
 
-		butlerDl.on('started', () => {
+		butler.on('started', () => {
 			this.emit('started', this.name);
 		});
 
-		butlerDl.on('progress', (current, total) => {
+		butler.on('progress', (current, total) => {
 			this.emit('progress', this.name, current, total);
 		});
 
-		butlerDl.on('aborted', msg => {
+		butler.on('aborted', msg => {
 			this.emit('aborted', this.name, msg);
 		});
 
-		butlerDl.on('warn', msg => {
-			log.warn(msg);
-		});
+		wrapEmitterLogs(butler);
 
-		this.butlerDl = butlerDl;
+		this.butler = butler;
 
 		try {
 			removeTemporaryFiles();
@@ -101,11 +100,11 @@ class HttpDownloader extends EventEmitter {
 	download(name, type, url, downloadPath) {
 		this.name = name;
 		this.type = type;
-		return this.butlerDl.download(url, downloadPath);
+		return this.butler.download(url, downloadPath);
 	}
 
 	stopDownload() {
-		this.butlerDl.stopDownload();
+		this.butler.stopDownload();
 	}
 }
 

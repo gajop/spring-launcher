@@ -4,9 +4,9 @@ const { spawn } = require('child_process');
 const EventEmitter = require('events');
 
 const log = require('electron-log');
+const { NextGenRapidCompat } = require('spring-nextgen-dl');
 
 const springPlatform = require('./spring_platform');
-const { isTouchedByNextgen, setTouchedByNextgen } = require('./nextgen_downloader');
 const fs = require('fs');
 const path = require('path');
 
@@ -15,6 +15,8 @@ class PrdDownloader extends EventEmitter {
 		super();
 		this.progressPattern = new RegExp('[0-9]+/[0-9]+');
 		this.missingPattern = new RegExp('.*no engine.*|.*no mirrors.*|.*no game found.*|.*no map found.*|.*error occured while downloading.*');
+
+		this.nextGenRapidCompat = new NextGenRapidCompat(springPlatform.writePath);
 	}
 
 	errorCheck(name, line) {
@@ -90,9 +92,9 @@ class PrdDownloader extends EventEmitter {
 		if (gameName.includes(':')) {
 			const rapidTag = gameName.split(':')[0];
 			const versionsGz = path.join(springPlatform.writePath, `rapid/repos.springrts.com/${rapidTag}/versions.gz`);
-			if (isTouchedByNextgen(versionsGz)) {
+			if (this.nextGenRapidCompat.isTouchedByNextgen(versionsGz)) {
 				fs.unlinkSync(versionsGz);
-				setTouchedByNextgen(versionsGz, false);
+				this.nextGenRapidCompat.setTouchedByNextgen(versionsGz, false);
 			}
 		}
 
