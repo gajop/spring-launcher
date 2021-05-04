@@ -12,6 +12,8 @@ const springPlatform = require('./spring_platform');
 const { config } = require('./launcher_config');
 const { springsettings } = require('./springsettings');
 
+const { gui } = require('./launcher_gui');
+
 const { bridge } = require('./spring_bridge');
 let address;
 let port;
@@ -149,9 +151,18 @@ class Launcher extends EventEmitter {
 			outputMode = 'inherit';
 		}
 
+		// If the main window has a restricted resize, the child process window (Spring) will inherit this property
+		// Since we don't want to impose such restriction to Spring, we explicitly make it resizable before launching
+		const oldResizable = gui.getMainWindow().resizable;
+		gui.getMainWindow().resizable = true;
+
 		log.info(`Launching Spring with command: ${enginePath} ${args.join(' ')}`);
 		const spring = spawn(enginePath, args,
 			{ stdio: outputMode, stderr: outputMode, windowsHide: false });
+
+		// After launching we toggle back resizable since it will no longer impact the child process window
+		gui.getMainWindow().resizable = oldResizable;
+
 		this.state = 'running';
 
 		spring.on('close', (code) => {
