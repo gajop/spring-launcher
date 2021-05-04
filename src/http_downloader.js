@@ -16,7 +16,7 @@ class HttpDownloader extends EventEmitter {
 	constructor() {
 		super();
 
-		const butler = new Butler();
+		const butler = new Butler(springPlatform.butlerPath, path.join(springPlatform.writePath, 'tmp'));
 
 		butler.on('started', () => {
 			this.emit('started', this.name);
@@ -93,6 +93,7 @@ class HttpDownloader extends EventEmitter {
 					}
 				}
 				log.info('failed', `Download failed: ${reason}`);
+				log.error(reason);
 				this.emit('failed', this.name, reason);
 			});
 	}
@@ -100,7 +101,7 @@ class HttpDownloader extends EventEmitter {
 	download(name, type, url, downloadPath) {
 		this.name = name;
 		this.type = type;
-		return this.butler.download(url, downloadPath);
+		return this.butler.download(url.href, downloadPath);
 	}
 
 	stopDownload() {
