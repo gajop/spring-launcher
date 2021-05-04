@@ -52,11 +52,12 @@
     "extract-zip": "^2.0.1",
     "node-7z": "^2.1.2",
     "sdfz-demo-parser": "^4.1.2",
+    "spring-map-parser": "^2.1.0",
     "spring-nextgen-dl": "^0.2.3",
     "yargs": "^15.4.1"
   },
   "devDependencies": {
-    "electron": "^11.1.1",
+    "electron": "^11.4.4",
     "electron-builder": "^22.9.1",
     "eslint": "^6.8.0",
     "jest": "^26.6.3"

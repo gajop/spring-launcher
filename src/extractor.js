@@ -6,9 +6,7 @@ const path = require('path');
 
 const extractZip = require('extract-zip');
 
-let { path7za } = require('7zip-bin');
-// A terrible hack indeed
-path7za = path7za.replace('app.asar', 'app.asar.unpacked');
+const { path7za } = require('./path_7za');
 const { extractFull: extract7z } = require('node-7z');
 
 const { log } = require('./spring_log');

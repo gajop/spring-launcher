@@ -16,7 +16,14 @@ log.catchErrors({
 			// Empty on purpose
 		}
 
-		gui.send('error', 'Something went wrong :( Please upload the log.');
+		log.error('Unexpected error occurred.');
+		log.error(err);
+		try {
+			gui.send('error', 'Something went wrong :( Please upload the log.');
+		} catch (errGui) {
+			log.error('Failed to broadcast error to GUI');
+			log.error(errGui);
+		}
 	}
 
 	// Alternatively/Additionally we should consider streamlining the log upload process
