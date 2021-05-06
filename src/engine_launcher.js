@@ -161,7 +161,7 @@ class Launcher extends EventEmitter {
 			{ stdio: outputMode, stderr: outputMode, windowsHide: false });
 
 		// After launching we toggle back resizable since it will no longer impact the child process window
-		// gui.getMainWindow().resizable = oldResizable;
+		gui.getMainWindow().resizable = oldResizable;
 
 		this.state = 'running';
 
