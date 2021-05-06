@@ -1,4 +1,5 @@
 const path = require('path');
+const fs = require('fs');
 
 const { MapParser } = require('spring-map-parser');
 
@@ -12,6 +13,11 @@ let concurrentCalls = 0;
 bridge.on('ParseMiniMap', async command => {
 	const destinationPath = path.join(springPlatform.writePath, command.destination);
 	const miniMapSize = command.miniMapSize || 4;
+
+	if (!fs.existsSync(path7za)) {
+		log.error(`Failed to find 7za at: ${path7za}, minimap cannot be parsed`);
+		return;
+	}
 
 	while (concurrentCalls > 0) {
 		await new Promise(resolve => setTimeout(resolve, 1000));
