@@ -9,7 +9,7 @@ const { config } = require('./launcher_config');
 const { gui } = require('./launcher_gui');
 const updater = require('./updater');
 const springDownloader = require('./spring_downloader');
-const launcher = require('./engine_launcher');
+const { launcher } = require('./engine_launcher');
 
 const path = require('path');
 const springPlatform = require('./spring_platform');

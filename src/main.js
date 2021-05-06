@@ -23,7 +23,7 @@ const { generateAndBroadcastWizard } = require('./launcher_wizard_util');
 const autoUpdater = require('./updater');
 // TODO: Despite not using it in this file, we have to require spring_api here
 require('./spring_api');
-const launcher = require('./engine_launcher');
+const { launcher } = require('./engine_launcher');
 const { writePath } = require('./spring_platform');
 const log_uploader = require('./log_uploader');
 const file_opener = require('./file_opener');

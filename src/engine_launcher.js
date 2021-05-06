@@ -55,7 +55,7 @@ function generateScriptTXT() {
 	IsHost = 1;
 	MapName = ${config.launch.map};
 	NumPlayers = 2;
-    NumUsers = 2;
+	NumUsers = 2;
 	GameStartDelay = 0;
 
 	${extraGameOptions}
@@ -72,9 +72,9 @@ function generateScriptTXT() {
 
 	[ModOptions]
 	{
-    _sl_address = ${address};
-    _sl_port = ${port};
-    _sl_write_path = ${springPlatform.writePath};
+	_sl_address = ${address};
+	_sl_port = ${port};
+	_sl_write_path = ${springPlatform.writePath};
 	_sl_launcher_version = ${app.getVersion()};
 	${extraModOptions}
 	}
@@ -204,4 +204,7 @@ class Launcher extends EventEmitter {
 
 const launcher = new Launcher();
 
-module.exports = launcher;
+module.exports = {
+	Launcher: Launcher,
+	launcher: launcher
+};
