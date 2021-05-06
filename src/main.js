@@ -15,6 +15,7 @@ const { log } = require('./spring_log');
 require('./error_handling');
 const { config } = require('./launcher_config');
 const { gui } = require('./launcher_gui');
+require('./worker/window');
 const { wizard } = require('./launcher_wizard');
 // Setup downloader bindings
 require('./launcher_downloader');
