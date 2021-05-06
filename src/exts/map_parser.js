@@ -6,7 +6,7 @@ const { MapParser } = require('spring-map-parser');
 const { bridge } = require('../spring_api');
 const { log } = require('../spring_log');
 const springPlatform = require('../spring_platform');
-const { path7za } = require('../path_7za');
+const path7za = require('../path_7za');
 
 let concurrentCalls = 0;
 

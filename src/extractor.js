@@ -6,7 +6,7 @@ const path = require('path');
 
 const extractZip = require('extract-zip');
 
-const { path7za } = require('./path_7za');
+const path7za = require('./path_7za');
 const { extractFull: extract7z } = require('node-7z');
 
 const { log } = require('./spring_log');
