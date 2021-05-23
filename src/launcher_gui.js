@@ -1,10 +1,15 @@
 'use strict';
 
 const electron = require('electron');
-const { app, BrowserWindow, Menu, Tray } = electron;
+const { app, dialog, BrowserWindow, Menu, Tray } = electron;
 const isDev = require('electron-is-dev');
+const { join, parse } = require('path');
+const fs = require('fs');
+const url = require('url');
 
 const { config } = require('./launcher_config');
+const argv = require('./launcher_args');
+const springPlatform = require('./spring_platform');
 
 let mainWindow;
 let tray;
@@ -20,7 +25,39 @@ app.on('second-instance', () => {
 	}
 });
 
-app.prependListener('ready', () => {
+function startReplayHeadless(replayFile) {
+	// TODO: when we support downloading assets (map/game/engine) we might
+	// need to show the GUI anyway, to provide feedback on the
+	// downloads/ask for user confirmation.
+
+	function checkFileExists(file, errorMsg) {
+		if (!fs.existsSync(file)) {
+			dialog.showMessageBoxSync(null, {message: errorMsg});
+			app.quit();
+		}
+	}
+
+	const { launcher } = require('./engine_launcher');
+
+	const replayPath = decodeURI(url.parse(replayFile).pathname);
+
+	checkFileExists(replayPath, `Demo file not found: ${replayPath}`);
+
+	const engineName = parse(replayPath).name.split('_').pop().toLowerCase();
+
+	const enginePath = join(
+		springPlatform.writePath,
+		'engine',
+		engineName,
+		springPlatform.springBin
+	);
+
+	checkFileExists(enginePath, `Engine not found: ${engineName}`);
+
+	launcher.launchSpring(enginePath, [replayPath]);
+}
+
+function startGUI() {
 	const { wizard } = require('./launcher_wizard');
 
 	const display = electron.screen.getPrimaryDisplay();
@@ -59,10 +96,10 @@ app.prependListener('ready', () => {
 	var template = [
 		// TODO: About dialog that shows URL, author, version, etc.
 		// {
-		//   role: 'about',
-		//   click: () => {
-		//     log.info("About clicked");
-		//   }
+		//	 role: 'about',
+		//	 click: () => {
+		//	   log.info("About clicked");
+		//	 }
 		// },
 		{
 			// TODO: Proper "show/hide"
@@ -104,6 +141,14 @@ app.prependListener('ready', () => {
 			gui.send('wizard-stopped');
 		}
 	});
+}
+
+app.prependListener('ready', () => {
+	if (argv.replayFile) {
+		startReplayHeadless(argv.replayFile);
+	} else {
+		startGUI();
+	}
 });
 
 class GUI {
