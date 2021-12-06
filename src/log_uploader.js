@@ -4,35 +4,48 @@ const { dialog, clipboard } = require('electron');
 const { config } = require('./launcher_config');
 const fs = require('fs');
 
-const github = require('octonode');
+const GistClient = require("gist-client")
 const got = require('got');
 
 const { log, logPath } = require('./spring_log');
 
+function s2b(str) {
+	const bytes = new Uint8Array(str.length / 2);
+	for (let i = 0; i !== bytes.length; i++) {
+		bytes[i] = parseInt(str.substr(i * 2, 2), 16);
+	}
+	return bytes;
+}
+
 // such security, much wow
 const sec = [
-	'ghp',
-	'_j1npS8i',
-	'jzzVLSsJ',
-	'R0NBQVM',
-	'pjUWN1Fi4WdO7n'
+	'6768705F',
+	'5A516C63',
+	'36434D7A',
+	'64763467',
+	'635A3537',
+	'7969424C',
+	'53346F69',
+	'434B6D63',
+	'7A763178',
+	'64525575'
 ];
-const github_access_token = sec.join('');
 
+const github_access_token = new TextDecoder().decode(s2b(sec.join('')));
 
 function upload_ask() {
 	// TODO: probably should disable the UI while this is being done
 	const dialogBtns = ['Yes (Upload)', 'No'];
 
-	const github_log_repo = config.github_log_repo;
-	const shouldUploadWithGithub = github_log_repo != null && github_log_repo != '';
-	const uploadDestination = shouldUploadWithGithub ? `https://github.com/${github_log_repo}` : 'https://log.springrts.com';
+	const github_gist_account = config.github_gist_account;
+	const shouldUploadWithGithub = github_gist_account != null && github_gist_account != '';
+	const uploadDestination = shouldUploadWithGithub ? `https://gist.github.com/${github_gist_account}` : 'https://log.springrts.com';
 
 	dialog.showMessageBox({
 		'type': 'info',
 		'buttons': dialogBtns,
 		'title': 'Upload log',
-		'message': `Do you want to upload your log to ${uploadDestination} ? All information will be public.`
+		'message': `Do you want to upload your log to ${uploadDestination}? Log information like hardware config and game path will be available to anyone you share the resulting URL with.`
 	}).then(result => {
 		const response = result.response;
 		log.info('User wants to upload? ', dialogBtns[response]);
@@ -59,24 +72,33 @@ function upload_ask() {
 }
 
 function upload() {
-	const github_log_repo = config.github_log_repo;
-	const shouldUploadWithGithub = github_log_repo != null && github_log_repo != '';
+	const github_gist_account = config.github_gist_account;
+	const shouldUploadWithGithub = github_gist_account != null && github_gist_account != '';
 
 	return shouldUploadWithGithub ? uploadToGithub() : uploadToSpringRTS();
 }
 
 function uploadToGithub() {
-	const github_client = github.client(github_access_token);
-	const ghrepo = github_client.repo('Spring-SpringBoard/Logs');
-	return ghrepo.issueAsync({
-		'title': `spring-launcher log: ${config.title}`,
-		'body': '```' + fs.readFileSync(logPath).toString() + '```',
-	}).then(obj => {
-		return { 'url': obj[0].html_url };
+	var content = {
+		description: '',
+		files: {
+			'infolog.txt': {
+				'content': fs.readFileSync(logPath).toString(),
+			}
+		}
+	};
+
+	const gistClient = new GistClient()
+
+	gistClient.setToken(github_access_token)
+
+	return gistClient.create(content).then(newGist => {
+		//console.log(newGist)
+		return { 'url': newGist.html_url };
 	});
 }
 
-function uploadToSpringRTS() {
+function uploadToSpringRTS() { // It's dead, Jim
 	return new Promise((resolve, reject) => {
 		log.info('Uploading...');
 		const fileData = fs.readFileSync(logPath).toString();

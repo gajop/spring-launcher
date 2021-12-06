@@ -22,7 +22,7 @@ const configDefault = {
 	'no_start_script': false,
 	'load_dev_exts': false,
 	'route_prd_to_nextgen': false,
-	'github_log_repo': null,
+	'github_gist_account': null,
 
 	'downloads': {
 		'games': [],
