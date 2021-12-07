@@ -23,9 +23,8 @@ const configDefault = {
 	'load_dev_exts': false,
 	'route_prd_to_nextgen': false,
 
-	// Logs can be uploaded either to S3 (default) or to Gist, depending on which parameter is specified:
-	'logs_s3_bucket': null,
-	'logs_github_gist_account': null,
+	// Possible values are 's3' (default), 'gist', 'spring'
+	'logs_upload_location': null,
 
 	'downloads': {
 		'games': [],

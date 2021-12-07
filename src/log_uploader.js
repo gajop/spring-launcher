@@ -10,11 +10,14 @@ const got = require('got');
 
 const { log, logPath } = require('./spring_log');
 
-const logs_s3_bucket = config.logs_s3_bucket;
-const logs_github_gist_account = config.logs_github_gist_account;
+const logs_upload_location = config.logs_upload_location;
 
-const shouldUploadWithS3 = logs_s3_bucket != null && logs_s3_bucket != '';
-const shouldUploadWithGithub = logs_github_gist_account != null && logs_github_gist_account != '';
+const logs_s3_bucket = 'bar-infologs'
+const logs_github_gist_account = 'beyond-all-reason'
+
+const shouldUploadWithSpring = logs_upload_location != null && logs_upload_location == 'spring';
+const shouldUploadWithGithub = logs_upload_location != null && logs_upload_location == 'gist';
+//const shouldUploadWithS3 = logs_upload_location != null && logs_upload_location == 's3';
 
 function s2b(str) {
 	const bytes = new Uint8Array(str.length / 2);
@@ -59,7 +62,7 @@ function upload_ask() {
 	// TODO: probably should disable the UI while this is being done
 	const dialogBtns = ['Yes, upload', 'No'];
 
-	const uploadDestination = shouldUploadWithS3 ? `https://${logs_s3_bucket}.s3.amazonaws.com/` : (shouldUploadWithGithub ? `https://gist.github.com/${logs_github_gist_account}` : 'https://log.springrts.com');
+	const uploadDestination = shouldUploadWithSpring ? 'https://log.springrts.com' : (shouldUploadWithGithub ? `https://gist.github.com/${logs_github_gist_account}` : `https://${logs_s3_bucket}.s3.amazonaws.com/`);
 
 	dialog.showMessageBox({
 		'type': 'info',
@@ -75,7 +78,7 @@ function upload_ask() {
 			return;
 		}
 
-		(shouldUploadWithS3 ? uploadToS3() : (shouldUploadWithGithub ? uploadToGithub() : uploadToSpringRTS()))
+		(shouldUploadWithSpring ? uploadToSpringRTS() : (shouldUploadWithGithub ? uploadToGithub() : uploadToS3()))
 			.then(obj => {
 				clipboard.clear();
 				clipboard.writeText(obj.url);
@@ -95,7 +98,7 @@ function upload_ask() {
 }
 
 function upload() {
-	return shouldUploadWithS3 ? uploadToS3() : (shouldUploadWithGithub ? uploadToGithub() : uploadToSpringRTS());
+	return shouldUploadWithSpring ? uploadToSpringRTS() : (shouldUploadWithGithub ? uploadToGithub() : uploadToS3());
 }
 
 function uploadToS3() {
