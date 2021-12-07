@@ -21,7 +21,7 @@ log.transports.console = (msg) => {
 	}
 };
 
-const logPath = `${springPlatform.writePath}/spring-launcher.log`;
+const logPath = `${springPlatform.writePath}/infolog.txt`; // Who needs spring-launcher.log anyway?
 const { existsSync, unlinkSync } = require('fs');
 if (existsSync(logPath)) {
 	unlinkSync(logPath);
