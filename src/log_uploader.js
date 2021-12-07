@@ -4,10 +4,17 @@ const { dialog, clipboard } = require('electron');
 const { config } = require('./launcher_config');
 const fs = require('fs');
 
+const AWS = require('aws-sdk');
 const GistClient = require("gist-client")
 const got = require('got');
 
 const { log, logPath } = require('./spring_log');
+
+const logs_s3_bucket = config.logs_s3_bucket;
+const logs_github_gist_account = config.logs_github_gist_account;
+
+const shouldUploadWithS3 = logs_s3_bucket != null && logs_s3_bucket != '';
+const shouldUploadWithGithub = logs_github_gist_account != null && logs_github_gist_account != '';
 
 function s2b(str) {
 	const bytes = new Uint8Array(str.length / 2);
@@ -18,34 +25,49 @@ function s2b(str) {
 }
 
 // such security, much wow
-const sec = [
-	'6768705F',
-	'5A516C63',
-	'36434D7A',
-	'64763467',
-	'635A3537',
-	'7969424C',
-	'53346F69',
-	'434B6D63',
-	'7A763178',
-	'64525575'
+const a1 = [
+	'414B494133',
+	'5843505A41',
+	'51414B424C',
+	'4D52545747'
 ];
 
-const github_access_token = new TextDecoder().decode(s2b(sec.join('')));
+const a2 = [
+	'6939487543',
+	'386B497255',
+	'673149596A',
+	'48692B6C6A',
+	'33786D734D',
+	'434A5A6D66',
+	'4A4F415875',
+	'7A5543574A'
+];
+
+const gh = [
+	'6768705F5A516C63',
+	'36434D7A64763467',
+	'635A35377969424C',
+	'53346F69434B6D63',
+	'7A76317864525575'
+];
+
+const aws_id = new TextDecoder().decode(s2b(a1.join('')));
+const aws_secret = new TextDecoder().decode(s2b(a2.join('')));
+const github_access_token = new TextDecoder().decode(s2b(gh.join('')));
 
 function upload_ask() {
 	// TODO: probably should disable the UI while this is being done
-	const dialogBtns = ['Yes (Upload)', 'No'];
+	const dialogBtns = ['Yes, upload', 'No'];
 
-	const github_gist_account = config.github_gist_account;
-	const shouldUploadWithGithub = github_gist_account != null && github_gist_account != '';
-	const uploadDestination = shouldUploadWithGithub ? `https://gist.github.com/${github_gist_account}` : 'https://log.springrts.com';
+	const uploadDestination = shouldUploadWithS3 ? `https://${logs_s3_bucket}.s3.amazonaws.com/` : (shouldUploadWithGithub ? `https://gist.github.com/${logs_github_gist_account}` : 'https://log.springrts.com');
 
 	dialog.showMessageBox({
 		'type': 'info',
 		'buttons': dialogBtns,
 		'title': 'Upload log',
-		'message': `Do you want to upload your log to ${uploadDestination}? Log information like hardware config and game path will be available to anyone you share the resulting URL with.`
+		'message': 'Do you want to upload your log to:\n'
+			+ `${uploadDestination} ?\n`
+			+ 'Log information like hardware config and game path will be available to anyone you share the resulting URL with.'
 	}).then(result => {
 		const response = result.response;
 		log.info('User wants to upload? ', dialogBtns[response]);
@@ -53,12 +75,13 @@ function upload_ask() {
 			return;
 		}
 
-		(shouldUploadWithGithub ? uploadToGithub() : uploadToSpringRTS())
+		(shouldUploadWithS3 ? uploadToS3() : (shouldUploadWithGithub ? uploadToGithub() : uploadToSpringRTS()))
 			.then(obj => {
 				clipboard.clear();
 				clipboard.writeText(obj.url);
-				const msg = `Your log has been uploaded to: ${obj.url}` +
-                    '\n(Copied to clipboard)';
+				const msg = 'Your log has been uploaded to:\n'
+					+ `${obj.url}\n`
+					+ '(Copied to clipboard)';
 				dialog.showMessageBox({
 					'type': 'info',
 					'buttons': ['OK'],
@@ -72,17 +95,42 @@ function upload_ask() {
 }
 
 function upload() {
-	const github_gist_account = config.github_gist_account;
-	const shouldUploadWithGithub = github_gist_account != null && github_gist_account != '';
+	return shouldUploadWithS3 ? uploadToS3() : (shouldUploadWithGithub ? uploadToGithub() : uploadToSpringRTS());
+}
 
-	return shouldUploadWithGithub ? uploadToGithub() : uploadToSpringRTS();
+function uploadToS3() {
+	const fileContent = fs.readFileSync(logPath);
+	const fileName = 'infolog_' + new Date().getTime() + '.txt' // File name to save as
+
+	const s3 = new AWS.S3({
+		accessKeyId: aws_id,
+		secretAccessKey: aws_secret
+	});
+
+	const params = {
+		Bucket: logs_s3_bucket,
+		Key: fileName,
+		Body: fileContent,
+		ContentType: 'text/plain'
+	};
+
+	return new Promise((resolve, reject) => {
+		s3.upload(params, function(err, data) {
+			if (err) {
+				reject(err);
+			}
+			resolve({ 'url': data?.Location });
+		});
+	});
 }
 
 function uploadToGithub() {
+	const fileName = 'infolog_' + new Date().getTime() + '.txt' // File name to save as
+
 	var content = {
 		description: '',
 		files: {
-			'infolog.txt': {
+			[fileName]: {
 				'content': fs.readFileSync(logPath).toString(),
 			}
 		}
@@ -92,9 +140,12 @@ function uploadToGithub() {
 
 	gistClient.setToken(github_access_token)
 
-	return gistClient.create(content).then(newGist => {
-		//console.log(newGist)
-		return { 'url': newGist.html_url };
+	return new Promise((resolve, reject) => {
+		gistClient.create(content).then(newGist => {
+			resolve({ 'url': newGist?.html_url });
+		}).catch(err => {
+			reject(err.toString());
+		});
 	});
 }
 

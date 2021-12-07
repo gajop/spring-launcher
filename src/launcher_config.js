@@ -22,7 +22,10 @@ const configDefault = {
 	'no_start_script': false,
 	'load_dev_exts': false,
 	'route_prd_to_nextgen': false,
-	'github_gist_account': null,
+
+	// Logs can be uploaded either to S3 (default) or to Gist, depending on which parameter is specified:
+	'logs_s3_bucket': null,
+	'logs_github_gist_account': null,
 
 	'downloads': {
 		'games': [],
