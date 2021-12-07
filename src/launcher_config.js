@@ -23,8 +23,9 @@ const configDefault = {
 	'load_dev_exts': false,
 	'route_prd_to_nextgen': false,
 
-	// Possible values are 's3' (default), 'gist', 'spring'
+	// Possible values are 's3', 'gist', 'spring' (default)
 	'logs_upload_location': null,
+	'logs_s3_bucket': null,
 
 	'downloads': {
 		'games': [],
