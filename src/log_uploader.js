@@ -11,13 +11,11 @@ const got = require('got');
 const { log, logPath } = require('./spring_log');
 
 const logs_upload_location = config.logs_upload_location;
+const logs_s3_bucket = config.logs_s3_bucket;
 
-const logs_s3_bucket = 'bar-infologs'
-const logs_github_gist_account = 'beyond-all-reason'
-
-const shouldUploadWithSpring = logs_upload_location != null && logs_upload_location == 'spring';
+const shouldUploadWithS3 = logs_upload_location != null && logs_upload_location == 's3' && logs_s3_bucket != null && logs_s3_bucket != '';
 const shouldUploadWithGithub = logs_upload_location != null && logs_upload_location == 'gist';
-//const shouldUploadWithS3 = logs_upload_location != null && logs_upload_location == 's3';
+//const shouldUploadWithS3 = logs_upload_location != null && logs_upload_location == 'spring';
 
 function s2b(str) {
 	const bytes = new Uint8Array(str.length / 2);
@@ -47,11 +45,11 @@ const a2 = [
 ];
 
 const gh = [
-	'6768705F5A516C63',
-	'36434D7A64763467',
-	'635A35377969424C',
-	'53346F69434B6D63',
-	'7A76317864525575'
+	'6768705F64366651',
+	'54766F436C794231',
+	'596751546B387173',
+	'36527A396E537856',
+	'5A6D335A7368566F'
 ];
 
 const aws_id = new TextDecoder().decode(s2b(a1.join('')));
@@ -62,7 +60,7 @@ function upload_ask() {
 	// TODO: probably should disable the UI while this is being done
 	const dialogBtns = ['Yes, upload', 'No'];
 
-	const uploadDestination = shouldUploadWithSpring ? 'https://log.springrts.com' : (shouldUploadWithGithub ? `https://gist.github.com/${logs_github_gist_account}` : `https://${logs_s3_bucket}.s3.amazonaws.com/`);
+	const uploadDestination = shouldUploadWithS3 ? `https://${logs_s3_bucket}.s3.amazonaws.com/` : (shouldUploadWithGithub ? `https://gist.github.com/` : 'https://log.springrts.com');
 
 	dialog.showMessageBox({
 		'type': 'info',
@@ -78,7 +76,7 @@ function upload_ask() {
 			return;
 		}
 
-		(shouldUploadWithSpring ? uploadToSpringRTS() : (shouldUploadWithGithub ? uploadToGithub() : uploadToS3()))
+		(shouldUploadWithS3 ? uploadToS3() : (shouldUploadWithGithub ? uploadToGithub() : uploadToSpringRTS()))
 			.then(obj => {
 				clipboard.clear();
 				clipboard.writeText(obj.url);
@@ -98,7 +96,7 @@ function upload_ask() {
 }
 
 function upload() {
-	return shouldUploadWithSpring ? uploadToSpringRTS() : (shouldUploadWithGithub ? uploadToGithub() : uploadToS3());
+	return shouldUploadWithS3 ? uploadToS3() : (shouldUploadWithGithub ? uploadToGithub() : uploadToSpringRTS());
 }
 
 function uploadToS3() {
