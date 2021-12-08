@@ -26,7 +26,7 @@ function upload_ask() {
 
 	const github_log_repo = config.github_log_repo;
 	const shouldUploadWithGithub = github_log_repo != null && github_log_repo != '';
-	const uploadDestination = shouldUploadWithGithub ? `https://github.com/${github_log_repo}` : 'https://log.springrts.com';
+	const uploadDestination = shouldUploadWithGithub ? `https://github.com/${github_log_repo}` : 'http://log.springrts.com';
 
 	dialog.showMessageBox({
 		'type': 'info',
@@ -45,7 +45,7 @@ function upload_ask() {
 				clipboard.clear();
 				clipboard.writeText(obj.url);
 				const msg = `Your log has been uploaded to: ${obj.url}` +
-                    '\n(Copied to clipboard)';
+					'\n(Copied to clipboard)';
 				dialog.showMessageBox({
 					'type': 'info',
 					'buttons': ['OK'],
@@ -86,7 +86,7 @@ function uploadToSpringRTS() {
 			tags.push('dev');
 		}
 
-		got.post('https://logs.springrts.com/logfiles/', {
+		got.post('http://logs.springrts.com/logfiles/', {
 			json: {
 				name: `spring-launcher log: ${config.title}`,
 				text: fileData,
