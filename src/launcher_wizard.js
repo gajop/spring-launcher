@@ -10,6 +10,7 @@ const { gui } = require('./launcher_gui');
 const updater = require('./updater');
 const springDownloader = require('./spring_downloader');
 const { launcher } = require('./engine_launcher');
+const fs = require('fs');
 
 const path = require('path');
 const springPlatform = require('./spring_platform');
@@ -32,6 +33,27 @@ class Wizard extends EventEmitter {
 	generateSteps() {
 		var steps = [];
 		if (!config.no_downloads) {
+			if (config.config_url != null) {
+				steps.push({
+					name: 'config fetch',
+					action: () => {
+						log.info(`Fetching latest config from: ${config.config_url}...`);
+						this.isActive = true;
+						this.isConfigDownload = true;
+						const TMP_CONFIG = 'config.new.json';
+						const TMP_CONFIG_FILE = path.join(springPlatform.writePath, TMP_CONFIG);
+						if (fs.existsSync(TMP_CONFIG_FILE)) {
+							fs.unlinkSync(TMP_CONFIG_FILE);
+						}
+						springDownloader.downloadResource({
+							'url': config.config_url,
+							'destination': TMP_CONFIG,
+							'extract': false
+						});
+					}
+				});
+			}
+
 			steps.push({
 				name: 'launcher_update',
 				action: () => {
@@ -47,6 +69,7 @@ class Wizard extends EventEmitter {
 					}
 				}
 			});
+
 
 			config.downloads.engines.forEach((engine) => {
 				steps.push({

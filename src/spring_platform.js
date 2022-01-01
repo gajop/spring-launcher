@@ -4,12 +4,12 @@ const log = require('electron-log');
 const path = require('path');
 const fs = require('fs');
 const { existsSync, mkdirSync } = fs;
-const { app } = require('electron');
 const assert = require('assert');
 
 const platformName = process.platform;
 
 const { config } = require('./launcher_config');
+const { resolveWritePath } = require('./write_path');
 
 var FILES_DIR = 'files';
 FILES_DIR = path.resolve(`${__dirname}/../files`);
@@ -22,41 +22,15 @@ if (!existsSync(FILES_DIR)) {
 // 2. Set logfile based on the writedir
 // 3. Start logging
 
-// bad path (mounted)
-// const writePath = path.join(app.getPath('exe'), config.title);
-// bad path (relative to current directory, not app directory)
-// const writePath = `./${config.title}`;
 assert(config.title != undefined);
-const resolveWritePath = () => {
-	const argv = require('./launcher_args');
-	if (argv.writePath != null) {
-		return argv.writePath;
-	}
-
-	if (process.env.PORTABLE_EXECUTABLE_DIR != null) {
-		return path.join(process.env.PORTABLE_EXECUTABLE_DIR, config.title);
-	}
-
-	if (platformName === 'win32') {
-		const isDev = require('electron-is-dev');
-		if (isDev) {
-			return path.join(app.getAppPath(), 'data');
-		} else {
-			return path.join(app.getAppPath(), '../../data');
-		}
-	}
-
-	return path.join(app.getPath('documents'), config.title);
-};
-
-const writePath = resolveWritePath();
+const writePath = resolveWritePath(config.title);
 
 assert(writePath != undefined);
 if (!existsSync(writePath)) {
 	mkdirSync(writePath);
 }
 if (existsSync(FILES_DIR)) {
-	fs.readdirSync(FILES_DIR).forEach(function(file) {
+	fs.readdirSync(FILES_DIR).forEach(function (file) {
 		const srcPath = path.join(FILES_DIR, file);
 		const dstPath = path.join(writePath, file);
 		// NB: we copy files each time, which is possibly slow
@@ -76,10 +50,10 @@ if (platformName === 'win32') {
 	prDownloaderBin = 'pr-downloader';
 	butlerBin = 'butler/linux/butler';
 	exports.springBin = 'spring';
-// } else if (platformName === 'darwin') {
-// 	prDownloaderBin = 'pr-downloader-mac';
-// 	butlerBin = 'butler'; // TODO: Support Mac?
-// 	exports.springBin = 'Contents/MacOS/spring';
+	// } else if (platformName === 'darwin') {
+	// 	prDownloaderBin = 'pr-downloader-mac';
+	// 	butlerBin = 'butler'; // TODO: Support Mac?
+	// 	exports.springBin = 'Contents/MacOS/spring';
 } else {
 	log.error(`Unsupported platform: ${platformName}`);
 	process.exit(-1);

@@ -7,6 +7,10 @@ const { gui } = require('./launcher_gui');
 const springDownloader = require('./spring_downloader');
 const { wizard } = require('./launcher_wizard');
 const springPlatform = require('./spring_platform');
+const path = require('path');
+const fs = require('fs');
+const { applyDefaults, isSameAsCurrent } = require('./launcher_config');
+const { app } = require('electron');
 
 springDownloader.on('started', downloadItem => {
 	log.info(`Download started: ${downloadItem}`);
@@ -59,9 +63,42 @@ springDownloader.on('finished', (downloadItem) => {
 	if (wizard.isActive) {
 		wizard.isActive = false;
 		gui.send('dl-finished', downloadItem);
-		wizard.nextStep();
+		if (wizard.isConfigDownload) {
+			try {
+				if (maybeUpdateConfig(downloadItem)) {
+					gui.send('dl-finished', 'config');
+					log.info('Config files are different - restarting');
+					app.relaunch();
+					app.exit();
+				} else {
+					log.info('Config files are same - continue');
+					wizard.nextStep();
+				}
+			} catch (err) {
+				log.error('Failed to update config file. Ignoring.');
+				log.error(err);
+				wizard.nextStep();
+			}
+		} else {
+			wizard.nextStep();
+		}
 	}
+
+	wizard.isActive = false;
+	wizard.isConfigDownload = false;
 });
+
+function maybeUpdateConfig(downloadItem) {
+	const tmpFile = path.join(springPlatform.writePath, downloadItem);
+	const configFile = path.join(springPlatform.writePath, 'config.json');
+	if (fs.existsSync(configFile)) {
+		fs.unlinkSync(configFile);
+	}
+	fs.copyFileSync(tmpFile, configFile);
+	let newConfig = JSON.parse(fs.readFileSync(configFile));
+	newConfig = applyDefaults(newConfig);
+	return !isSameAsCurrent(newConfig);
+}
 
 springDownloader.on('failed', (downloadItem, msg) => {
 	log.error(`${downloadItem}: ${msg}`);
