@@ -137,9 +137,6 @@ app.on('ready', () => {
 			settings.set('config', undefined);
 		}
 	}
-
-	console.log(`config.silent: ${config.silent} ${config.config_url}`);
-
 });
 
 app.on('window-all-closed', () => {
