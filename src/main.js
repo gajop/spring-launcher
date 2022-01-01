@@ -74,7 +74,7 @@ autoUpdater.on('update-not-available', () => {
 });
 
 autoUpdater.on('update-downloaded', () => {
-	setImmediate(() => autoUpdater.quitAndInstall(true, true));
+	setImmediate(() => autoUpdater.quitAndInstall(config.silent, true));
 });
 
 autoUpdater.on('error', error => {
@@ -137,6 +137,9 @@ app.on('ready', () => {
 			settings.set('config', undefined);
 		}
 	}
+
+	console.log(`config.silent: ${config.silent} ${config.config_url}`);
+
 });
 
 app.on('window-all-closed', () => {

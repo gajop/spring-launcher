@@ -24,6 +24,7 @@ const defaultSetup = {
 	'route_prd_to_nextgen': false,
 	'github_log_repo': null,
 	'config_url': null,
+	'silent': true,
 
 	'downloads': {
 		'games': [],
@@ -82,7 +83,9 @@ function mergeDeep(target, ...sources) {
 	if (isObject(target) && isObject(source)) {
 		for (const key in source) {
 			if (isObject(source[key])) {
-				if (!target[key]) Object.assign(target, { [key]: {} });
+				if (!target[key]) {
+					Object.assign(target, { [key]: {} });
+				}
 				mergeDeep(target[key], source[key]);
 			} else {
 				Object.assign(target, { [key]: source[key] });
@@ -107,7 +110,6 @@ function loadConfig(filePath) {
 		}
 
 		console.log(`Loading Config file: ${configFile}`);
-		console.log(JSON.parse(fs.readFileSync(configFile)));
 		return JSON.parse(fs.readFileSync(configFile));
 	} catch (err) {
 		// TODO: Perhaps too early to log at this point? We'll use console instead
@@ -185,11 +187,11 @@ const proxy = new Proxy({
 			return target[name];
 		} else if (configFile[name] != undefined) {
 			return configFile[name];
-		} {
-			return currentConfig[name];
 		}
+
+		return currentConfig[name];
 	},
-	set: function (target, name, value) {
+	set: function (_, name, value) {
 		currentConfig[name] = value;
 		return true;
 	}
