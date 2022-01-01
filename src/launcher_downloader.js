@@ -62,8 +62,11 @@ springDownloader.on('finished', (downloadItem) => {
 	log.info(`Download finished: ${downloadItem}`);
 	if (wizard.isActive) {
 		wizard.isActive = false;
+
 		gui.send('dl-finished', downloadItem);
 		if (wizard.isConfigDownload) {
+			wizard.isConfigDownload = false;
+
 			try {
 				if (maybeUpdateConfig(downloadItem)) {
 					gui.send('dl-finished', 'config');
@@ -83,9 +86,6 @@ springDownloader.on('finished', (downloadItem) => {
 			wizard.nextStep();
 		}
 	}
-
-	wizard.isActive = false;
-	wizard.isConfigDownload = false;
 });
 
 function maybeUpdateConfig(downloadItem) {
