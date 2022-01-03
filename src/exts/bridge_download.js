@@ -40,6 +40,23 @@ function DownloadFront() {
 		springDownloader.downloadMap(name);
 	} else if (type === 'engine') {
 		springDownloader.downloadEngine(name);
+	} else if (type === 'resource') {
+		const resource = dl.resource;
+		if (resource == null) {
+			log.error('Resource field missing');
+			return;
+		}
+		if (resource.url == null || resource.destination == null) {
+			log.error('Resource field missing: "url" and "destination" fields are mandatory.');
+			return;
+		}
+		if (resource.extract == null) {
+			log.warn('Extract field missing, assuming false.');
+			resource.extract = false;
+		}
+		springDownloader.downloadResource(resource);
+	} else {
+		log.error(`Unknown type: ${type} for download ${dl}`);
 	}
 }
 
