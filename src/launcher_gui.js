@@ -41,7 +41,7 @@ app.prependListener('ready', () => {
 			enableRemoteModule: true,
 		},
 	};
-	windowOpts.resizable = false;
+	windowOpts.resizable = true; // enable resizing here, because this is what gets passed to spring.exe, and we want that to be resizeable
 	Menu.setApplicationMenu(null);
 	mainWindow = new BrowserWindow(windowOpts);
 
@@ -89,6 +89,7 @@ app.prependListener('ready', () => {
 
 	mainWindow.once('ready-to-show', () => {
 		mainWindow.show();
+		mainWindow.resizable = false; // Disable resizing of the launcher window, this does not get passed to spring.exe
 
 		gui.send('all-configs', config.getAvailableConfigs());
 
