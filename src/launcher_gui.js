@@ -89,7 +89,7 @@ app.prependListener('ready', () => {
 
 	mainWindow.once('ready-to-show', () => {
 		mainWindow.show();
-		mainWindow.resizable = false; // Disable resizing of the launcher window, this does not get passed to spring.exe
+		//mainWindow.resizable = false; // Disable resizing of the launcher window, this does not get passed to spring.exe
 
 		gui.send('all-configs', config.getAvailableConfigs());
 
