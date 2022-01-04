@@ -47,7 +47,12 @@ launcher.on('finished', (code) => {
 launcher.on('failed', (error) => {
 	log.error(error);
 	const mainWindow = gui.getMainWindow();
-	mainWindow.show();
+
+	if (!mainWindow) {
+		app.quit();
+	} else {
+		mainWindow.show();
+	}
 	setTimeout(() => {
 		gui.send('launch-failed', error);
 	}, 100);
