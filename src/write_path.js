@@ -13,7 +13,7 @@ function resolveWritePath(title) {
 	}
 
 	if (platformName === 'win32') {
-		const isDev = require('electron-is-dev');
+		const isDev = !require('electron').isPackaged;
 		if (isDev) {
 			return path.join(app.getAppPath(), 'data');
 		} else {

@@ -57,7 +57,7 @@ class Wizard extends EventEmitter {
 			steps.push({
 				name: 'launcher_update',
 				action: () => {
-					const isDev = require('electron-is-dev');
+					const isDev = !require('electron').isPackaged;
 					log.info('Checking for launcher update');
 					if (!isDev) {
 						updater.checkForUpdates();
