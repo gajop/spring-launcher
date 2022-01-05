@@ -158,7 +158,7 @@ class Launcher extends EventEmitter {
 
 		log.info(`Launching Spring with command: ${enginePath} ${args.join(' ')}`);
 		const spring = spawn(enginePath, args,
-			{ stdio: outputMode, stderr: outputMode, windowsHide: false });
+			{ stdio: outputMode, stderr: outputMode, windowsHide: false, detached: true });
 
 		// After launching we toggle back resizable since it will no longer impact the child process window
 		gui.getMainWindow().resizable = oldResizable;
