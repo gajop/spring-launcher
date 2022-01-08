@@ -40,7 +40,12 @@ if (existsSync(FILES_DIR) && existsSync(writePath)) {
 		const dstPath = path.join(writePath, file);
 		// NB: we copy files each time, which is possibly slow
 		// if (!existsSync(dstPath)) {
-		fs.copyFileSync(srcPath, dstPath);
+		try {
+			fs.copyFileSync(srcPath, dstPath);
+		} catch (err) {
+			log.error(`Failed to copy file from ${srcPath} tp ${dstPath}`);
+			log.error(err);
+		}
 		//}
 	});
 }

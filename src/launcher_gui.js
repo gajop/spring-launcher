@@ -2,7 +2,7 @@
 
 const electron = require('electron');
 const { app, BrowserWindow, Menu, Tray } = electron;
-const isDev = !require('electron').isPackaged;
+const isDev = !require('electron').app.isPackaged;
 
 const { config } = require('./launcher_config');
 

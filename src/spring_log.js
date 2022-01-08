@@ -1,5 +1,7 @@
 'use strict';
 
+const { existsSync, unlinkSync } = require('fs');
+
 const { app } = require('electron');
 const util = require('util');
 const { format } = util;
@@ -22,9 +24,13 @@ log.transports.console = (msg) => {
 };
 
 const logPath = `${springPlatform.writePath}/spring-launcher.log`;
-const { existsSync, unlinkSync } = require('fs');
 if (existsSync(logPath)) {
-	unlinkSync(logPath);
+	try {
+		unlinkSync(logPath);
+	} catch (err) {
+		log.error(`Cannot remove file at: ${logPath}`);
+		log.error(err);
+	}
 }
 log.transports.file.file = logPath;
 log.transports.file.level = 'info';

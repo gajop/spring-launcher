@@ -1,7 +1,7 @@
 'use strict';
 
 const { ipcRenderer } = require('electron');
-const isDev = !require('electron').isPackaged;
+const isDev = !require('@electron/remote').app.isPackaged;
 
 const btnShowDir = document.getElementById('btn-show-dir');
 const lblMainTitle = document.getElementById('title');

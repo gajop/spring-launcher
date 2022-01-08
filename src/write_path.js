@@ -1,7 +1,7 @@
 const { app } = require('electron');
 const path = require('path');
 const platformName = process.platform;
-const isDev = !require('electron').isPackaged;
+const isDev = !require('electron').app.isPackaged;
 
 function resolveWritePath(title) {
 	const argv = require('./launcher_args');
