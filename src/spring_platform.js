@@ -27,9 +27,14 @@ const writePath = resolveWritePath(config.title);
 
 assert(writePath != undefined);
 if (!existsSync(writePath)) {
-	mkdirSync(writePath);
+	try {
+		mkdirSync(writePath);
+	} catch (err) {
+		log.error(`Cannot create writePath at: ${writePath}`);
+		log.error(err);
+	}
 }
-if (existsSync(FILES_DIR)) {
+if (existsSync(FILES_DIR) && existsSync(writePath)) {
 	fs.readdirSync(FILES_DIR).forEach(function (file) {
 		const srcPath = path.join(FILES_DIR, file);
 		const dstPath = path.join(writePath, file);

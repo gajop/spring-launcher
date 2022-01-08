@@ -1,6 +1,7 @@
 const { app } = require('electron');
 const path = require('path');
 const platformName = process.platform;
+const isDev = !require('electron').isPackaged;
 
 function resolveWritePath(title) {
 	const argv = require('./launcher_args');
@@ -13,7 +14,6 @@ function resolveWritePath(title) {
 	}
 
 	if (platformName === 'win32') {
-		const isDev = !require('electron').isPackaged;
 		if (isDev) {
 			return path.join(app.getAppPath(), 'data');
 		} else {
