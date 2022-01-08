@@ -16,7 +16,8 @@ fs.readdirSync(normalizedPath).forEach(function(file) {
 		try {
 			require(extPath);
 		} catch (err) {
-			log.error(`Failed to load exception: ${err}`);
+			log.error(`Failed to load extension: ${extPath}`);
+			log.error(err);
 		}
 	}
 });
