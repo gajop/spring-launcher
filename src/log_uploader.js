@@ -90,7 +90,7 @@ function upload_ask() {
 }
 
 function upload() {
-	return return shouldUploadWithS3 ? uploadToS3() : (shouldUploadWithGithub ? uploadToGithub() : uploadToSpringRTS());
+	return shouldUploadWithS3 ? uploadToS3() : (shouldUploadWithGithub ? uploadToGithub() : uploadToSpringRTS());
 }
 
 function uploadToS3() {
