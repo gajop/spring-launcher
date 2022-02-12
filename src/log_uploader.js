@@ -6,6 +6,7 @@ const fs = require('fs');
 
 const github = require('octonode');
 const got = require('got');
+const AWS = require('aws-sdk');
 
 const { log, logPath } = require('./spring_log');
 
@@ -18,15 +19,45 @@ const sec = [
 	'pjUWN1Fi4WdO7n'
 ];
 const github_access_token = sec.join('');
+const github_log_repo = config.github_log_repo;
+const shouldUploadWithGithub = github_log_repo != null && github_log_repo != '';
 
+const a1 = [
+	'414B494133',
+	'5843505A41',
+	'51414B424C',
+	'4D52545747'
+];
+
+const a2 = [
+	'6939487543',
+	'386B497255',
+	'673149596A',
+	'48692B6C6A',
+	'33786D734D',
+	'434A5A6D66',
+	'4A4F415875',
+	'7A5543574A'
+];
+
+function s2b(str) {
+	const bytes = new Uint8Array(str.length / 2);
+	for (let i = 0; i !== bytes.length; i++) {
+		bytes[i] = parseInt(str.substr(i * 2, 2), 16);
+	}
+	return bytes;
+}
+
+const aws_id = new TextDecoder().decode(s2b(a1.join('')));
+const aws_secret = new TextDecoder().decode(s2b(a2.join('')));
+const logs_s3_bucket = config.logs_s3_bucket;
+const shouldUploadWithS3 = logs_s3_bucket != null && logs_s3_bucket != '';
 
 function upload_ask() {
 	// TODO: probably should disable the UI while this is being done
 	const dialogBtns = ['Yes (Upload)', 'No'];
 
-	const github_log_repo = config.github_log_repo;
-	const shouldUploadWithGithub = github_log_repo != null && github_log_repo != '';
-	const uploadDestination = shouldUploadWithGithub ? `https://github.com/${github_log_repo}` : 'http://log.springrts.com';
+	const uploadDestination = shouldUploadWithS3 ? `https://${logs_s3_bucket}.s3.amazonaws.com/` : (shouldUploadWithGithub ? `https://github.com/${github_log_repo}` : 'http://log.springrts.com');
 
 	dialog.showMessageBox({
 		'type': 'info',
@@ -40,7 +71,7 @@ function upload_ask() {
 			return;
 		}
 
-		(shouldUploadWithGithub ? uploadToGithub() : uploadToSpringRTS())
+		(shouldUploadWithS3 ? uploadToS3() : (shouldUploadWithGithub ? uploadToGithub() : uploadToSpringRTS()))
 			.then(obj => {
 				clipboard.clear();
 				clipboard.writeText(obj.url);
@@ -59,10 +90,33 @@ function upload_ask() {
 }
 
 function upload() {
-	const github_log_repo = config.github_log_repo;
-	const shouldUploadWithGithub = github_log_repo != null && github_log_repo != '';
+	return return shouldUploadWithS3 ? uploadToS3() : (shouldUploadWithGithub ? uploadToGithub() : uploadToSpringRTS());
+}
 
-	return shouldUploadWithGithub ? uploadToGithub() : uploadToSpringRTS();
+function uploadToS3() {
+	const fileContent = fs.readFileSync(logPath);
+	const fileName = 'spring-launcher_' + new Date().getTime() + '.log' // File name to save as
+
+	const s3 = new AWS.S3({
+		accessKeyId: aws_id,
+		secretAccessKey: aws_secret
+	});
+
+	const params = {
+		Bucket: logs_s3_bucket,
+		Key: fileName,
+		Body: fileContent,
+		ContentType: 'text/plain'
+	};
+
+	return new Promise((resolve, reject) => {
+		s3.upload(params, function(err, data) {
+			if (err) {
+				reject(err);
+			}
+			resolve({ 'url': data?.Location });
+		});
+	});
 }
 
 function uploadToGithub() {
