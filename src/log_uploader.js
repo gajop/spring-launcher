@@ -7,6 +7,9 @@ const fs = require('fs');
 const github = require('octonode');
 const got = require('got');
 const AWS = require('aws-sdk');
+AWS.config.update({
+	correctClockSkew: true, // Fix for RequestTimeTooSkewed error
+});
 
 const { log, logPath } = require('./spring_log');
 
