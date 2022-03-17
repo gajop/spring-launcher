@@ -109,6 +109,16 @@ app.prependListener('ready', () => {
 			gui.send('wizard-stopped');
 		}
 	});
+
+	// Workaround for linux/wayland on which electron has a problem with
+	// properly setting window size from the beggining and a simple size refresh
+	// after it got rendered once fixes it.
+	// TODO: check if it can be dropped once on electron >= 18.
+	mainWindow.once('show', () => {
+		setTimeout(() => {
+			mainWindow.setSize(width, height);
+		}, 0);
+	});
 });
 
 class GUI {
