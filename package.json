@@ -20,13 +20,26 @@
   "build": {
     "appId": "com.springrts.launcher",
     "extraFiles": [
-      "bin/**",
       "files/*"
+    ],
+    "files": [
+      "!bin/**"
     ],
     "artifactName": "${productName}-${version}.${ext}",
     "linux": {
       "target": "AppImage",
-      "category": "Game"
+      "category": "Game",
+      "extraFiles": [
+        "bin/butler/linux/*",
+        "bin/pr-downloader"
+      ]
+    },
+    "win": {
+      "extraFiles": [
+        "bin/butler/windows/*",
+        "bin/pr-downloader.exe",
+        "bin/*.dll"
+      ]
     },
     "nsis": {
       "oneClick": false,
