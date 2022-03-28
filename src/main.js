@@ -2,6 +2,8 @@
 
 const { app, ipcMain } = require('electron');
 
+require('@electron/remote/main').initialize();
+
 const settings = require('electron-settings');
 
 const isFirstInstance = app.requestSingleInstanceLock();

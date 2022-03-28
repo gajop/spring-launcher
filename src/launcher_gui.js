@@ -2,7 +2,7 @@
 
 const electron = require('electron');
 const { app, BrowserWindow, Menu, Tray } = electron;
-const isDev = require('electron-is-dev');
+const isDev = !require('electron').app.isPackaged;
 
 const { config } = require('./launcher_config');
 
@@ -39,11 +39,15 @@ app.prependListener('ready', () => {
 		webPreferences: {
 			nodeIntegration: true,
 			enableRemoteModule: true,
+			contextIsolation: false,
+			worldSafeExecuteJavaScript: false,
 		},
 	};
 	windowOpts.resizable = true; // enable resizing here, because this is what gets passed to spring.exe, and we want that to be resizeable
 	Menu.setApplicationMenu(null);
 	mainWindow = new BrowserWindow(windowOpts);
+
+	require('@electron/remote/main').enable(mainWindow.webContents);
 
 	mainWindow.loadFile(`${__dirname}/renderer/index.html`);
 	if (isDev) {
@@ -104,6 +108,16 @@ app.prependListener('ready', () => {
 		} else {
 			gui.send('wizard-stopped');
 		}
+	});
+
+	// Workaround for linux/wayland on which electron has a problem with
+	// properly setting window size from the beggining and a simple size refresh
+	// after it got rendered once fixes it.
+	// TODO: check if it can be dropped once on electron >= 18.
+	mainWindow.once('show', () => {
+		setTimeout(() => {
+			mainWindow.setSize(width, height);
+		}, 0);
 	});
 });
 

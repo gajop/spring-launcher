@@ -2,7 +2,9 @@
 
 const { ipcRenderer } = require('electron');
 
-const mainWindow = require('electron').remote.getCurrentWindow();
+const { getCurrentWindow } = require('@electron/remote');
+
+const mainWindow = getCurrentWindow();
 
 const { format } = require('util');
 const util = require('util');

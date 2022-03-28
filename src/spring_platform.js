@@ -27,15 +27,25 @@ const writePath = resolveWritePath(config.title);
 
 assert(writePath != undefined);
 if (!existsSync(writePath)) {
-	mkdirSync(writePath);
+	try {
+		mkdirSync(writePath);
+	} catch (err) {
+		log.error(`Cannot create writePath at: ${writePath}`);
+		log.error(err);
+	}
 }
-if (existsSync(FILES_DIR)) {
+if (existsSync(FILES_DIR) && existsSync(writePath)) {
 	fs.readdirSync(FILES_DIR).forEach(function (file) {
 		const srcPath = path.join(FILES_DIR, file);
 		const dstPath = path.join(writePath, file);
 		// NB: we copy files each time, which is possibly slow
 		// if (!existsSync(dstPath)) {
-		fs.copyFileSync(srcPath, dstPath);
+		try {
+			fs.copyFileSync(srcPath, dstPath);
+		} catch (err) {
+			log.error(`Failed to copy file from ${srcPath} tp ${dstPath}`);
+			log.error(err);
+		}
 		//}
 	});
 }

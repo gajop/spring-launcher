@@ -137,7 +137,7 @@ function uploadToSpringRTS() {
 	return new Promise((resolve, reject) => {
 		log.info('Uploading...');
 		const fileData = fs.readFileSync(logPath).toString();
-		const isDev = require('electron-is-dev');
+		const isDev = !require('electron').app.isPackaged;
 		var tags = ['spring-launcher', config.title];
 		if (isDev) {
 			tags.push('dev');
