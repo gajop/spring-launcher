@@ -68,8 +68,8 @@
     "got": "^11.8.3",
     "node-7z": "^2.1.2",
     "octonode": "^0.10.2",
-    "sdfz-demo-parser": "^4.7.0",
-    "spring-map-parser": "^2.1.0",
+    "sdfz-demo-parser": "^4.8.0",
+    "spring-map-parser": "^4.4.0",
     "spring-nextgen-dl": "^0.2.3",
     "yargs": "^15.4.1"
   },
