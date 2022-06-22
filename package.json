@@ -63,7 +63,7 @@
     "electron-settings": "^3.2.0",
     "electron-updater": "^4.6.1",
     "extract-zip": "^2.0.1",
-    "got": "^11.8.3",
+    "got": "^11.8.5",
     "node-7z": "^2.1.2",
     "octonode": "^0.10.2",
     "sdfz-demo-parser": "^4.8.0",
