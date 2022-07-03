@@ -27,6 +27,10 @@ const defaultSetup = {
 	'config_url': null,
 	'silent': true,
 
+	// Default values for environment variables to be set for all the executed
+	// child processes like pr-downloader.
+	'env_variables': {},
+
 	'downloads': {
 		'games': [],
 		'maps': [],
@@ -133,10 +137,24 @@ function applyDefaults(conf) {
 let configs = [];
 let availableConfigs = [];
 let currentConfig = null;
+let originalEnv = {...process.env};
+
+function setCurrentConfig(setup) {
+	process.env = {...originalEnv};
+	if (setup) {
+		for (const key in setup.env_variables) {
+			if (!(key in process.env)) {
+				process.env[key] = setup.env_variables[key];
+			}
+		}
+	}
+	currentConfig = setup;
+}
+
 function reloadConfig(conf) {
 	configs = [];
 	availableConfigs = [];
-	currentConfig = null;
+	setCurrentConfig(null);
 
 	conf.setups.forEach((setup) => {
 		configs.push(setup);
@@ -144,7 +162,7 @@ function reloadConfig(conf) {
 		if (canUse(setup)) {
 			availableConfigs.push(setup);
 			if (!currentConfig) {
-				currentConfig = setup;
+				setCurrentConfig(setup);
 			}
 		}
 	});
@@ -165,7 +183,7 @@ const proxy = new Proxy({
 		var found = false;
 		availableConfigs.forEach((cfg) => {
 			if (cfg.package.id == id) {
-				currentConfig = cfg;
+				setCurrentConfig(cfg);
 				found = true;
 			}
 		});
@@ -194,6 +212,9 @@ const proxy = new Proxy({
 	},
 	set: function (_, name, value) {
 		currentConfig[name] = value;
+		// Just in case setCurrentConfig does something with the property that
+		// is being set.
+		setCurrentConfig(currentConfig);
 		return true;
 	}
 });
