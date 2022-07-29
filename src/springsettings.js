@@ -7,7 +7,8 @@ const os = require('os');
 const { writePath } = require('./spring_platform');
 
 class Springsettings extends EventEmitter {
-	applyDefaultsOnSettings(defaults, springsettingsPath) {
+	// Parsing according to implementation in rts/System/Config/ConfigSource.cpp
+	readSettings(springsettingsPath) {
 		var fileContent = '';
 		try {
 			fileContent = fs.readFileSync(springsettingsPath).toString();
@@ -15,50 +16,72 @@ class Springsettings extends EventEmitter {
 			// ignore errors
 		}
 		const lines = fileContent.split(/\r?\n/g);
-
-		var newContent = '';
-		var keysSeen = {};
-		// read existing settings for any different values
+		if (lines[lines.length-1] === '') lines.pop();
+		const values = {};
+		const comments = {};
+		let comment = '';
 		for (let i = 0; i < lines.length; i++) {
 			const line = lines[i];
-
-			const keyvalue = line.split(/=/);
-			if (keyvalue.length != 2) {
-				if (line.trim() != '') {
-					newContent += line + os.EOL;
-				}
+			if (line.trim() === '' || line.trim()[0] === '#') {
+				comment += line + '\n';
 				continue;
+			}
+			const keyvalue = line.split(/=/, 2);
+			if (keyvalue.length != 2) {
+				throw new Error(
+					`Error loading ${springsettingsPath}: Cannot parse line ` +
+					`${i+1} ("${line}"): it's not a comment or option assignment`);
 			}
 			const key = keyvalue[0].trim();
 			const value = keyvalue[1].trim();
 
-			if (defaults[key] === null) {
-				newContent += line + os.EOL;
-			} else {
-				keysSeen[key] = true;
-				if (defaults[key] == value) {
-					newContent += line + os.EOL;
-				} else {
-					newContent += key + ' = ' + value + os.EOL;
-				}
-			}
+			values[key] = value;
+			comments[key] = comment;
+			comment = '';
 		}
-
-		// add any keys that aren't in the current config
-		for (var key in defaults) {
-			if (keysSeen[key]) {
-				continue;
-			}
-			newContent += key + ' = ' + defaults[key] + os.EOL;
-		}
-		return newContent;
+		return {
+			values: values,
+			comments: comments,
+			endComment: comment,
+		};
 	}
 
-	applyDefaults() {
+	writeSettings(settings, springsettingsPath) {
+		const valuesKeys = Object.keys(settings.values).sort();
+		const commentKeys = Object.keys(settings.comments).sort();
+		const result = [];
+		let commi = 0;
+		for (let vali = 0; vali < valuesKeys.length; vali++) {
+			const valk = valuesKeys[vali];
+			for (; commi < commentKeys.length && commentKeys[commi] <= valk; commi++) {
+				result.push(settings.comments[commentKeys[commi]]);
+			}
+			result.push(valk + ' = ' + settings.values[valk] + '\n');
+		}
+		for (; commi < commentKeys.length; commi++) {
+			result.push(settings.comments[commentKeys[commi]]);
+		}
+		result.push(settings.endComment);
+		fs.writeFileSync(springsettingsPath, result.join(''));
+	}
+
+	applyDefaultsAndOverrides(overrides) {
 		const defaults = require('./springsettings.json');
 		const springsettingsPath = `${writePath}/springsettings.cfg`;
-		const newSpringsettings = this.applyDefaultsOnSettings(defaults, springsettingsPath);
-		fs.writeFileSync(springsettingsPath, newSpringsettings);
+		const settings = this.readSettings(springsettingsPath);
+		for (const key in defaults) {
+			if (!(key in settings.values)) {
+				settings.values[key] = defaults[key];
+			}
+		}
+		for (const key in overrides) {
+			if (overrides[key] === null) {
+				delete settings.values[key];
+			} else {
+				settings.values[key] = overrides[key];
+			}
+		}
+		this.writeSettings(settings, springsettingsPath);
 	}
 }
 

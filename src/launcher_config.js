@@ -45,7 +45,8 @@ const defaultSetup = {
 		'engine': undefined,
 		'map_options': undefined,
 		'mod_options': undefined,
-		'game_options': undefined
+		'game_options': undefined,
+		'springsettings': {}
 	}
 };
 

@@ -116,7 +116,17 @@ function generateScriptTXT() {
 
 class Launcher extends EventEmitter {
 	launch(enginePath, opts) {
-		springsettings.applyDefaults();
+		try {
+			springsettings.applyDefaultsAndOverrides(config.launch.springsettings);
+		} catch (e) {
+			// Failures need to be asynchornous to be handled properly.
+			setTimeout(() => {
+				this.state = 'failed';
+				this.emit('failed', e.message);
+			}, 0);
+			return;
+		}
+
 		if (config.no_start_script) {
 			fs.writeFileSync(`${springPlatform.writePath}/sl-connection.json`, JSON.stringify({
 				_sl_address: address,
