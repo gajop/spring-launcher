@@ -88,14 +88,14 @@ function maybeSetConfig(cfgName) {
 		return false;
 	}
 
-	settings.set('config', cfgName);
+	settings.setSync('config', cfgName);
 	generateAndBroadcastWizard();
 
 	return true;
 }
 
 ipcMain.on('change-cfg', (_, cfgName) => {
-	settings.set('checkForUpdates', undefined);
+	settings.setSync('checkForUpdates', undefined);
 	if (maybeSetConfig(cfgName)) {
 		wizard.setEnabled(true);
 	}
@@ -118,11 +118,11 @@ ipcMain.on('wizard-next', () => {
 });
 
 ipcMain.on('wizard-check-for-updates', (_, checkForUpdates) => {
-	if (checkForUpdates === settings.get('checkForUpdates')) {
+	if (checkForUpdates === settings.getSync('checkForUpdates')) {
 		return;
 	}
 	log.info('wizard-check-for-updates', checkForUpdates);
-	settings.set('checkForUpdates', checkForUpdates);
+	settings.setSync('checkForUpdates', checkForUpdates);
 	generateAndBroadcastWizard();
 });
 
@@ -131,12 +131,16 @@ app.on('ready', () => {
 		return;
 	}
 	// Use local settings file
-	settings.setPath(`${writePath}/launcher_cfg.json`);
-	const oldConfig = settings.get('config');
+	settings.configure({
+		dir: writePath,
+		fileName: 'launcher_cfg.json',
+		prettify: true
+	});
+	const oldConfig = settings.getSync('config');
 	if (oldConfig) {
 		if (!maybeSetConfig(oldConfig)) {
 			// forget invalid configs
-			settings.set('config', undefined);
+			settings.unsetSync('config');
 		}
 	}
 });
