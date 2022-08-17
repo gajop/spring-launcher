@@ -7,58 +7,76 @@ const os = require('os');
 const { writePath } = require('./spring_platform');
 
 class Springsettings extends EventEmitter {
-	applyDefaultsOnSettings(defaults, springsettingsPath) {
-		var fileContent = '';
+
+	// Returns instance of Map, each config line in it's own entry.
+	// Map preserves insertion order, so it can be iterated in the same order as
+	// in the file, and it also contains comments, under unique
+	// Symbol('comment') keys.
+	#readSettings(springsettingsPath) {
+		let fileContent = '';
 		try {
 			fileContent = fs.readFileSync(springsettingsPath).toString();
 		} catch (err) {
 			// ignore errors
 		}
 		const lines = fileContent.split(/\r?\n/g);
-
-		var newContent = '';
-		var keysSeen = {};
-		// read existing settings for any different values
+		const settings = new Map();
 		for (let i = 0; i < lines.length; i++) {
 			const line = lines[i];
-
-			const keyvalue = line.split(/=/);
+			if (line.trim() === '' || line.trim()[0] === '#') {
+				settings.set(Symbol('comment'), line);
+				continue;
+			}
+			const keyvalue = line.split(/=/, 2);
 			if (keyvalue.length != 2) {
-				if (line.trim() != '') {
-					newContent += line + os.EOL;
-				}
-				continue;
+				throw new Error(
+					`Error loading ${springsettingsPath}: Cannot parse line ` +
+					`${i+1} ("${line}"): it's not a comment or option assignment`);
 			}
-			const key = keyvalue[0].trim();
-			const value = keyvalue[1].trim();
-
-			if (defaults[key] === null) {
-				newContent += line + os.EOL;
-			} else {
-				keysSeen[key] = true;
-				if (defaults[key] == value) {
-					newContent += line + os.EOL;
-				} else {
-					newContent += key + ' = ' + value + os.EOL;
-				}
-			}
+			settings.set(keyvalue[0].trim(), keyvalue[1].trim());
 		}
-
-		// add any keys that aren't in the current config
-		for (var key in defaults) {
-			if (keysSeen[key]) {
-				continue;
-			}
-			newContent += key + ' = ' + defaults[key] + os.EOL;
-		}
-		return newContent;
+		return settings;
 	}
 
-	applyDefaults() {
+	#writeSettings(settings, springsettingsPath) {
+		const result = [];
+		for (const [key, value] of settings) {
+			if (typeof key === 'symbol' && key.description === 'comment') {
+				result.push(value);
+			} else if (typeof key === 'string') {
+				result.push(`${key} = ${value}`);
+			} else {
+				throw new Error(`internal error: unexpected key in map: ${key}`);
+			}
+		}
+		fs.writeFileSync(springsettingsPath, result.join(os.EOL));
+	}
+
+	#applyDefaults(settings, defaults) {
+		for (const key in defaults) {
+			if (!settings.has(key)) {
+				settings.set(key, defaults[key]);
+			}
+		}
+	}
+
+	#applyOverrides(settings, overrides) {
+		for (const key in overrides) {
+			if (overrides[key] === null) {
+				settings.delete(key);
+			} else {
+				settings.set(key, overrides[key]);
+			}
+		}
+	}
+
+	applyDefaultsAndOverrides(overrides) {
 		const defaults = require('./springsettings.json');
 		const springsettingsPath = `${writePath}/springsettings.cfg`;
-		const newSpringsettings = this.applyDefaultsOnSettings(defaults, springsettingsPath);
-		fs.writeFileSync(springsettingsPath, newSpringsettings);
+		const settings = this.#readSettings(springsettingsPath);
+		this.#applyDefaults(settings, defaults);
+		this.#applyOverrides(settings, overrides);
+		this.#writeSettings(settings, springsettingsPath);
 	}
 }
 
