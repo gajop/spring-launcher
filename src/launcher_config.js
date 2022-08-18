@@ -46,7 +46,11 @@ const defaultSetup = {
 		'engine': undefined,
 		'map_options': undefined,
 		'mod_options': undefined,
-		'game_options': undefined
+		'game_options': undefined,
+		// Key value settings to set in springsettings.cfg. It *overrides* 
+		// the existing values, including user specified ones. For setting
+		// defaults for options, see springsettings.json.
+		'springsettings': {}
 	}
 };
 

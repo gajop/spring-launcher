@@ -56,27 +56,25 @@
     }
   },
   "dependencies": {
-    "@electron/remote": "^2.0.1",
-    "7zip-bin": "^5.0.3",
-    "aws-sdk": "^2.1044.0",
-    "electron-is-dev": "^1.2.0",
-    "chokidar": "^3.5.2",
-    "electron-log": "^4.4.4",
-    "electron-settings": "^3.2.0",
-    "electron-updater": "^4.6.1",
+    "@electron/remote": "^2.0.8",
+    "7zip-bin": "^5.2.0",
+    "aws-sdk": "^2.1198.0",
+    "chokidar": "^3.5.3",
+    "electron-log": "^4.4.8",
+    "electron-settings": "^4.0.2",
+    "electron-updater": "^5.2.1",
     "extract-zip": "^2.0.1",
-    "got": "^11.8.3",
-    "node-7z": "^2.1.2",
+    "got": "^11.8.5",
+    "node-7z": "^3.0.0",
     "octonode": "^0.10.2",
     "sdfz-demo-parser": "^4.8.0",
     "spring-map-parser": "^4.4.0",
     "spring-nextgen-dl": "^0.2.3",
-    "yargs": "^15.4.1"
+    "yargs": "^17.5.1"
   },
   "devDependencies": {
-    "electron": "^17.4.3",
-    "electron-builder": "^22.14.5",
-    "eslint": "^6.8.0",
-    "jest": "^26.6.3"
+    "electron": "^20.0.2",
+    "electron-builder": "^23.3.3",
+    "eslint": "^8.21.0"
   }
 }
