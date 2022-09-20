@@ -19,7 +19,7 @@ bridge.on('StartNewSpring', async command => {
 		springPlatform.springBin
 	);
 
-	const replayPath = join(springPlatform.writePath, 'demos', command.StartDemoName);
+	const replayPath = join(springPlatform.writePath, command.StartDemoName); // Removed the hardcoded 'demos' folder to allow launching savegames too
 
 	launcher.launchSpring(enginePath, [replayPath]);
 
