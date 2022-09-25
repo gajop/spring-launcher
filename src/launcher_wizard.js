@@ -70,6 +70,16 @@ class Wizard extends EventEmitter {
 				}
 			});
 
+			config.downloads.resources.forEach((resource) => {
+				steps.push({
+					name: 'resource',
+					item: resource,
+					action: () => {
+						this.isActive = true;
+						springDownloader.downloadResource(resource);
+					}
+				});
+			});
 
 			config.downloads.engines.forEach((engine) => {
 				steps.push({
@@ -100,17 +110,6 @@ class Wizard extends EventEmitter {
 					action: () => {
 						this.isActive = true;
 						springDownloader.downloadMap(map);
-					}
-				});
-			});
-
-			config.downloads.resources.forEach((resource) => {
-				steps.push({
-					name: 'resource',
-					item: resource,
-					action: () => {
-						this.isActive = true;
-						springDownloader.downloadResource(resource);
 					}
 				});
 			});
