@@ -8,9 +8,8 @@ const { gui } = require('./launcher_gui');
 
 function generateAndBroadcastWizard()
 {
-	const checkForUpdates = settings.getSync('checkForUpdates', null);
-	if (checkForUpdates !== null) {
-		config.no_downloads = !checkForUpdates;
+	if (settings.hasSync('checkForUpdates')) {
+		config.no_downloads = !settings.getSync('checkForUpdates');
 	}
 
 	wizard.generateSteps();
