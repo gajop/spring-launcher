@@ -10,7 +10,7 @@ const springPlatform = require('./spring_platform');
 const path = require('path');
 const fs = require('fs');
 const { applyDefaults, isSameAsCurrent } = require('./launcher_config');
-const { app } = require('electron');
+const { app, BrowserWindow, dialog } = require('electron');
 
 springDownloader.on('started', downloadItem => {
 	log.info(`Download started: ${downloadItem}`);
@@ -71,7 +71,19 @@ springDownloader.on('finished', (downloadItem) => {
 				if (maybeUpdateConfig(downloadItem)) {
 					gui.send('dl-finished', 'config');
 					log.info('Config files are different - restarting');
-					app.relaunch();
+
+					if (process.platform == 'win32') {
+						app.relaunch();
+					} else {
+						// Unfortunatelly on Linux relaunch doesn't work correctly
+						dialog.showMessageBoxSync(BrowserWindow.getAllWindows()[0], {
+							type: 'info',
+							buttons: ['OK'],
+							defaultId: 0,
+							title: 'Restart required',
+							message: 'Updated launcher configuration, this requires application restart. Closing launcher.',
+						});
+					}
 					app.exit();
 				} else {
 					log.info('Config files are same - continue');
