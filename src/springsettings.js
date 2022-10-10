@@ -20,6 +20,9 @@ class Springsettings extends EventEmitter {
 			// ignore errors
 		}
 		const lines = fileContent.split(/\r?\n/g);
+		if (lines[lines.length - 1] === '') {
+			lines.pop();
+		}
 		const settings = new Map();
 		for (let i = 0; i < lines.length; i++) {
 			const line = lines[i];
@@ -49,7 +52,7 @@ class Springsettings extends EventEmitter {
 				throw new Error(`internal error: unexpected key in map: ${key}`);
 			}
 		}
-		fs.writeFileSync(springsettingsPath, result.join(os.EOL));
+		fs.writeFileSync(springsettingsPath, result.join(os.EOL) + os.EOL);
 	}
 
 	#applyDefaults(settings, defaults) {
