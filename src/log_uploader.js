@@ -20,13 +20,13 @@ const sec = [
 const github_access_token = sec.join('');
 
 
+
 function upload_ask() {
 	// TODO: probably should disable the UI while this is being done
 	const dialogBtns = ['Yes (Upload)', 'No'];
 
-	const github_log_repo = config.github_log_repo;
-	const shouldUploadWithGithub = github_log_repo != null && github_log_repo != '';
-	const uploadDestination = shouldUploadWithGithub ? `https://github.com/${github_log_repo}` : 'http://log.springrts.com';
+	const shouldUploadWithGithub = getShouldUploadWithGithub();
+	const uploadDestination = getUploadDestination(config.github_log_repo);
 
 	dialog.showMessageBox({
 		'type': 'info',
@@ -58,6 +58,18 @@ function upload_ask() {
 	});
 }
 
+function getShouldUploadWithGithub() {
+	const github_log_repo = config.github_log_repo;
+	const shouldUploadWithGithub = github_log_repo != null && github_log_repo != '';
+	return shouldUploadWithGithub;
+}
+
+
+function getUploadDestination(githubLogRepo) {
+	const shouldUploadWithGithub = githubLogRepo != null && githubLogRepo != '';
+	return shouldUploadWithGithub ? `https://github.com/${githubLogRepo}` : 'http://localhost:8787';
+}
+
 function upload() {
 	const github_log_repo = config.github_log_repo;
 	const shouldUploadWithGithub = github_log_repo != null && github_log_repo != '';
@@ -86,7 +98,7 @@ function uploadToSpringRTS() {
 			tags.push('dev');
 		}
 
-		got.post('http://logs.springrts.com/logfiles/', {
+		got.post(getUploadDestination(config.githubLogRepo), {
 			json: {
 				name: `spring-launcher log: ${config.title}`,
 				text: fileData,
@@ -99,6 +111,8 @@ function uploadToSpringRTS() {
 			reject(err);
 		});
 	}).then(obj => {
+		console.log(obj);
+		console.log(obj.url);
 		obj.url = obj.url.replace('http://', 'https://');
 		return obj;
 	});

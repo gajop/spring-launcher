@@ -1,0 +1,21 @@
+{
+    "title" : "Beyond All Reason",
+    "setups" : [
+        {
+            "package": {
+                "id": "dev-lobby",
+                "display": "Dev Lobby"
+            },
+            "downloads": {
+                "engines" : [ "104.0.1-1553-gd3c0012 maintenance" ]
+            },
+            "no_start_script" : true,
+            "no_downloads" : true,
+            "auto_start": true,
+            "launch": {
+                "start_args" : ["--menu", "BYAR Chobby $VERSION"]
+            }
+        }
+    ]
+
+}
