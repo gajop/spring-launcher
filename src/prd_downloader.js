@@ -88,17 +88,21 @@ class PrdDownloader extends EventEmitter {
 		this.downloadPackage(engineName, ['--filesystem-writepath', springPlatform.writePath, '--download-engine', engineName]);
 	}
 
-	downloadGame(gameName) {
-		if (gameName.includes(':')) {
-			const rapidTag = gameName.split(':')[0];
-			const versionsGz = path.join(springPlatform.writePath, `rapid/repos.springrts.com/${rapidTag}/versions.gz`);
-			if (this.nextGenRapidCompat.isTouchedByNextgen(versionsGz)) {
-				fs.unlinkSync(versionsGz);
-				this.nextGenRapidCompat.setTouchedByNextgen(versionsGz, false);
+	downloadGames(gameNames) {
+		const args = ['--filesystem-writepath', springPlatform.writePath];
+		for (const game of gameNames) {
+			if (game.includes(':')) {
+				const rapidTag = game.split(':')[0];
+				const versionsGz = path.join(springPlatform.writePath, `rapid/repos.springrts.com/${rapidTag}/versions.gz`);
+				if (this.nextGenRapidCompat.isTouchedByNextgen(versionsGz)) {
+					fs.unlinkSync(versionsGz);
+					this.nextGenRapidCompat.setTouchedByNextgen(versionsGz, false);
+				}
 			}
+			args.push(...['--download-game', game])
 		}
 
-		this.downloadPackage(gameName, ['--filesystem-writepath', springPlatform.writePath, '--download-game', gameName]);
+		this.downloadPackage(gameNames.join(', '), args);
 	}
 
 	downloadMap(mapName) {

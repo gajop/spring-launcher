@@ -92,16 +92,27 @@ class Wizard extends EventEmitter {
 				});
 			});
 
-			config.downloads.games.forEach((game) => {
+			if (config.route_prd_to_nextgen) {
+				config.downloads.games.forEach((game) => {
+					steps.push({
+						name: 'game',
+						item: game,
+						action: () => {
+							this.isActive = true;
+							springDownloader.downloadGameNextGen(game);
+						}
+					});
+				});
+			} else if (config.downloads.games && config.downloads.games.length > 0) {
 				steps.push({
-					name: 'game',
-					item: game,
+					name: 'games',
+					item: config.downloads.games.join(', '),
 					action: () => {
 						this.isActive = true;
-						springDownloader.downloadGame(game);
+						springDownloader.downloadGames(config.downloads.games);
 					}
 				});
-			});
+			}
 
 			config.downloads.maps.forEach((map) => {
 				steps.push({
