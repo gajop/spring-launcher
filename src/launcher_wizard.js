@@ -54,22 +54,6 @@ class Wizard extends EventEmitter {
 				});
 			}
 
-			steps.push({
-				name: 'launcher_update',
-				action: () => {
-					const isDev = !require('electron').app.isPackaged;
-					log.info('Checking for launcher update');
-					if (!isDev) {
-						updater.checkForUpdates();
-					} else {
-						console.log('Development version: no self-update required');
-						setTimeout(() => {
-							this.nextStep();
-						}, 300);
-					}
-				}
-			});
-
 			config.downloads.resources.forEach((resource) => {
 				steps.push({
 					name: 'resource',
@@ -135,6 +119,63 @@ class Wizard extends EventEmitter {
 					}
 				});
 			});
+
+			// Queue asynchronous check for launcher update.
+			const isDev = !require('electron').app.isPackaged;
+			if (!isDev) {
+				const updateCheckPromise = new Promise((resolve, reject) => {
+					updater.on('update-available', () => {
+						resolve(true);
+					});
+					updater.on('update-not-available', () => {
+						resolve(false);
+					});
+					updater.on('error', error => {
+						reject(error);
+					});
+				});
+
+				const performUpdate = () => {
+					gui.send('dl-started', 'autoupdate');
+
+					updater.on('download-progress', (d) => {
+						console.info(`Self-download progress: ${d.percent}`);
+						gui.send('dl-progress', 'autoUpdate', d.percent, 100);
+					});
+					updater.on('update-downloaded', () => {
+						log.info('Self-update downloaded');
+						gui.send('dl-finished', 'autoupdate');
+						setImmediate(() => updater.quitAndInstall(config.silent, true));
+					});
+
+					updater.on('error', error => {
+						log.error(`Application failed to self-update. Error: ${error}`);
+					});
+
+					updater.downloadUpdate();
+				}
+
+				steps.push({
+					name: 'launcher_update',
+					action: () => {
+						log.info('Checking for launcher update');
+						updateCheckPromise.then(updateAvailable => {
+							if (!updateAvailable) {
+								log.info('No update available.');
+								wizard.nextStep();
+							} else {
+								performUpdate();
+							}
+						}).catch(error => {
+							log.error(`Failed to check for launcher updates. Error: ${error}`);
+						});
+					}
+				});
+
+				updater.checkForUpdates();
+			} else {
+				console.log('Development version: no self-update required');
+			}
 		}
 
 		let enginePath;

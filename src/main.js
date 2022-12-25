@@ -55,34 +55,6 @@ launcher.on('failed', (error) => {
 	}, 100);
 });
 
-autoUpdater.on('update-available', () => {
-	gui.send('dl-started', 'autoupdate');
-
-	autoUpdater.on('download-progress', (d) => {
-		console.info(`Self-download progress: ${d.percent}`);
-		gui.send('dl-progress', 'autoUpdate', d.percent, 100);
-	});
-	autoUpdater.on('update-downloaded', () => {
-		log.info('Self-update downloaded');
-		gui.send('dl-finished', 'autoupdate');
-	});
-
-	autoUpdater.downloadUpdate();
-});
-
-autoUpdater.on('update-not-available', () => {
-	log.info('No update available.');
-	wizard.nextStep();
-});
-
-autoUpdater.on('update-downloaded', () => {
-	setImmediate(() => autoUpdater.quitAndInstall(config.silent, true));
-});
-
-autoUpdater.on('error', error => {
-	log.error(`Application failed to self-update. Error: ${error}`);
-});
-
 function maybeSetConfig(cfgName) {
 	if (!config.setConfig(cfgName)) {
 		return false;
