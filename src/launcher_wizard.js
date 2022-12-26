@@ -10,7 +10,9 @@ const { gui } = require('./launcher_gui');
 const updater = require('./updater');
 const springDownloader = require('./spring_downloader');
 const { launcher } = require('./engine_launcher');
+const { handleConfigUpdate } = require('./launcher_config_update');
 const fs = require('fs');
+const got = require('got');
 
 const path = require('path');
 const springPlatform = require('./spring_platform');
@@ -33,25 +35,36 @@ class Wizard extends EventEmitter {
 	generateSteps() {
 		var steps = [];
 		if (!config.no_downloads) {
+			let pushConfigFetchActionAtEnd = null;
 			if (config.config_url != null) {
-				steps.push({
-					name: 'config fetch',
+				const newConfig = got(config.config_url).json();
+
+				const configFetchAction = {
+					name: 'config update',
 					action: () => {
-						log.info(`Fetching latest config from: ${config.config_url}...`);
-						this.isActive = true;
-						this.isConfigDownload = true;
-						const TMP_CONFIG = 'config.new.json';
-						const TMP_CONFIG_FILE = path.join(springPlatform.writePath, TMP_CONFIG);
-						if (fs.existsSync(TMP_CONFIG_FILE)) {
-							fs.unlinkSync(TMP_CONFIG_FILE);
-						}
-						springDownloader.downloadResource({
-							'url': config.config_url,
-							'destination': TMP_CONFIG,
-							'extract': false
+						log.info(`Checking for config update from: ${config.config_url}...`);
+						newConfig.then(newConfig => {
+							try {
+								handleConfigUpdate(newConfig);
+							} catch (err) {
+								log.error('Failed to update config file. Ignoring.');
+								log.error(err);
+							}
+							wizard.nextStep();
+						}).catch(error => {
+							log.error(`Failed to get config update. Error: ${error}, ignoring`);
+							wizard.nextStep();
 						});
 					}
-				});
+				}
+
+				// During first run, we check config first because the one with the
+				// launcher might be very old.
+				if (!fs.existsSync(path.join(springPlatform.writePath, 'config.json'))) {
+					steps.push(configFetchAction);
+				} else {
+					pushConfigFetchActionAtEnd = configFetchAction;
+				}
 			}
 
 			config.downloads.resources.forEach((resource) => {
@@ -119,6 +132,10 @@ class Wizard extends EventEmitter {
 					}
 				});
 			});
+
+			if (pushConfigFetchActionAtEnd) {
+				steps.push(pushConfigFetchActionAtEnd);
+			}
 
 			// Queue asynchronous check for launcher update.
 			const isDev = !require('electron').app.isPackaged;

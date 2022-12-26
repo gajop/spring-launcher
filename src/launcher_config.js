@@ -203,6 +203,10 @@ function objEqual(a, b, ignoreProp = []) {
 }
 
 function hotReloadSafe(newFile) {
+	if (objEqual(newFile, configFile)) {
+		return "identical";
+	}
+
 	if (!objEqual(newFile, configFile, ['setups'])) {
 		return "restart";
 	}
@@ -210,7 +214,7 @@ function hotReloadSafe(newFile) {
 	for (const setup of newFile.setups) {
 		if (setup.package.id == currentConfig.package.id &&
 		    objEqual(setup, currentConfig)) {
-			return "same";
+			return "same-setup";
 		}
 	}
 

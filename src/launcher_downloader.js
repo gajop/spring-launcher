@@ -6,12 +6,7 @@ const { log, wrapEmitterLogs } = require('./spring_log');
 const { gui } = require('./launcher_gui');
 const springDownloader = require('./spring_downloader');
 const { wizard } = require('./launcher_wizard');
-const { generateAndBroadcastWizard } = require('./launcher_wizard_util');
 const springPlatform = require('./spring_platform');
-const path = require('path');
-const fs = require('fs');
-const { applyDefaults, hotReloadSafe, reloadConfig, config } = require('./launcher_config');
-const { app } = require('electron');
 
 springDownloader.on('started', downloadItem => {
 	log.info(`Download started: ${downloadItem}`);
@@ -63,56 +58,10 @@ springDownloader.on('finished', (downloadItem) => {
 	log.info(`Download finished: ${downloadItem}`);
 	if (wizard.isActive) {
 		wizard.isActive = false;
-
 		gui.send('dl-finished', downloadItem);
-		if (wizard.isConfigDownload) {
-			wizard.isConfigDownload = false;
-
-			try {
-				if (maybeUpdateConfig(downloadItem)) {
-					gui.send('dl-finished', 'config');
-					log.info('Config files are different - restarting');
-					app.relaunch();
-					app.exit();
-				} else {
-					log.info('Config files are same - continue');
-					wizard.nextStep();
-				}
-			} catch (err) {
-				log.error('Failed to update config file. Ignoring.');
-				log.error(err);
-				wizard.nextStep();
-			}
-		} else {
-			wizard.nextStep();
-		}
+		wizard.nextStep();
 	}
 });
-
-function maybeUpdateConfig(downloadItem) {
-	const tmpFile = path.join(springPlatform.writePath, downloadItem);
-	const configFile = path.join(springPlatform.writePath, 'config.json');
-	fs.renameSync(tmpFile, configFile);
-	let newConfig = JSON.parse(fs.readFileSync(configFile));
-	newConfig = applyDefaults(newConfig);
-
-	switch (hotReloadSafe(newConfig)) {
-		case "restart":
-			return true;
-		case "reload":
-			const oldConfigId = config.package.id;
-			reloadConfig(newConfig);
-			config.setConfig(oldConfigId);
-			gui.send('all-configs', config.getAvailableConfigs());
-			generateAndBroadcastWizard();
-			return false;
-		case "same":
-			// In case current config is the same but the list of configs changed.
-			reloadConfig(newConfig);
-			gui.send('all-configs', config.getAvailableConfigs());
-			return false;
-	}
-}
 
 springDownloader.on('failed', (downloadItem, msg) => {
 	log.error(`${downloadItem}: ${msg}`);

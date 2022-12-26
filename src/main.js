@@ -22,7 +22,6 @@ const { wizard } = require('./launcher_wizard');
 // Setup downloader bindings
 require('./launcher_downloader');
 const { generateAndBroadcastWizard } = require('./launcher_wizard_util');
-const autoUpdater = require('./updater');
 // TODO: Despite not using it in this file, we have to require spring_api here
 require('./spring_api');
 const { launcher } = require('./engine_launcher');
