@@ -9,6 +9,8 @@ const { writePath } = require('./spring_platform');
 const { applyDefaults, hotReloadSafe, reloadConfig, validateNewConfig, config } = require('./launcher_config');
 
 function handleConfigUpdate(newConfig) {
+	validateNewConfig(newConfig);
+
 	newConfig = applyDefaults(newConfig);
 	const reloadType = hotReloadSafe(newConfig);
 	if (reloadType == "identical") {

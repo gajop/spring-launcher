@@ -202,6 +202,18 @@ function objEqual(a, b, ignoreProp = []) {
 	return JSON.stringify(a) == JSON.stringify(b);
 }
 
+function validateNewConfig(newFile) {
+	if (!isObject(newFile)) {
+		throw Error("Config must be object");
+	}
+	if (newFile.title !== configFile.title) {
+		throw Error("New config title must be identical to the old one");
+	}
+	if (!Array.isArray(newFile.setups) || !newFile.setups.some(canUse)) {
+		throw Error("New config file must have at least 1 usable setup");
+	}
+}
+
 function hotReloadSafe(newFile) {
 	if (objEqual(newFile, configFile)) {
 		return "identical";
@@ -267,4 +279,5 @@ module.exports = {
 	applyDefaults: applyDefaults,
 	hotReloadSafe: hotReloadSafe,
 	reloadConfig: reloadConfig,
+	validateNewConfig: validateNewConfig
 };
