@@ -6,10 +6,11 @@ const { log, wrapEmitterLogs } = require('./spring_log');
 const { gui } = require('./launcher_gui');
 const springDownloader = require('./spring_downloader');
 const { wizard } = require('./launcher_wizard');
+const { generateAndBroadcastWizard } = require('./launcher_wizard_util');
 const springPlatform = require('./spring_platform');
 const path = require('path');
 const fs = require('fs');
-const { applyDefaults, isSameAsCurrent } = require('./launcher_config');
+const { applyDefaults, hotReloadSafe, reloadConfig, config } = require('./launcher_config');
 const { app } = require('electron');
 
 springDownloader.on('started', downloadItem => {
@@ -91,13 +92,26 @@ springDownloader.on('finished', (downloadItem) => {
 function maybeUpdateConfig(downloadItem) {
 	const tmpFile = path.join(springPlatform.writePath, downloadItem);
 	const configFile = path.join(springPlatform.writePath, 'config.json');
-	if (fs.existsSync(configFile)) {
-		fs.unlinkSync(configFile);
-	}
-	fs.copyFileSync(tmpFile, configFile);
+	fs.renameSync(tmpFile, configFile);
 	let newConfig = JSON.parse(fs.readFileSync(configFile));
 	newConfig = applyDefaults(newConfig);
-	return !isSameAsCurrent(newConfig);
+
+	switch (hotReloadSafe(newConfig)) {
+		case "restart":
+			return true;
+		case "reload":
+			const oldConfigId = config.package.id;
+			reloadConfig(newConfig);
+			config.setConfig(oldConfigId);
+			gui.send('all-configs', config.getAvailableConfigs());
+			generateAndBroadcastWizard();
+			return false;
+		case "same":
+			// In case current config is the same but the list of configs changed.
+			reloadConfig(newConfig);
+			gui.send('all-configs', config.getAvailableConfigs());
+			return false;
+	}
 }
 
 springDownloader.on('failed', (downloadItem, msg) => {
