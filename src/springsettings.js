@@ -5,6 +5,7 @@ const fs = require('fs');
 const os = require('os');
 
 const { writePath } = require('./spring_platform');
+const { log } = require('./spring_log');
 
 class Springsettings extends EventEmitter {
 
@@ -52,7 +53,9 @@ class Springsettings extends EventEmitter {
 				throw new Error(`internal error: unexpected key in map: ${key}`);
 			}
 		}
-		fs.writeFileSync(springsettingsPath, result.join(os.EOL) + os.EOL);
+		const springsettingsPathTmp = springsettingsPath + '.tmp';
+		fs.writeFileSync(springsettingsPathTmp, result.join(os.EOL) + os.EOL);
+		fs.renameSync(springsettingsPathTmp, springsettingsPath);
 	}
 
 	#applyDefaults(settings, defaults) {
@@ -73,10 +76,68 @@ class Springsettings extends EventEmitter {
 		}
 	}
 
+	#settingsEqual(settingsA, settingsB) {
+		const a = Array.from(settingsA.entries());
+		const b = Array.from(settingsB.entries());
+		if (a.length != b.length) {
+			return false;
+		}
+		for (let i = 0; i < a.length; ++i) {
+			const [aKey, aVal] = a[i];
+			const [bKey, bVal] = b[i];
+			switch (typeof aKey) {
+				case 'symbol':
+					if (typeof bKey !== 'symbol' || aKey.description !== bKey.description) {
+						return false;
+					}
+					break;
+				case 'string':
+					if (typeof bKey !== 'string' || aKey !== bKey) {
+						return false;
+					}
+					break;
+				default:
+					throw new Error(`internal error: unexpected key type in map: ${aKey}`);
+			}
+			if (aVal !== bVal) {
+				return false;
+			}
+		}
+		return true;
+	}
+
 	applyDefaultsAndOverrides(overrides) {
 		const defaults = require('./springsettings.json');
 		const springsettingsPath = `${writePath}/springsettings.cfg`;
-		const settings = this.#readSettings(springsettingsPath);
+		const backupSettingsPath = `${writePath}/springsettings-backup.cfg`
+
+		// As of 2022-12-30 there are issues with reliability of operations
+		// on settings file in engine, so this code is a workaround to silently
+		// keep backup of setting and apply it once detected that main file is
+		// corrupted.
+		let backupSettings = null;
+		try {
+			backupSettings = this.#readSettings(backupSettingsPath);
+		} catch (err) {
+			log.warn(`Failed to read backup settings file: ${err}, falling back to empty config.`);
+			backupSettings = new Map();
+		}
+		let settings = null;
+		try {
+			settings = this.#readSettings(springsettingsPath);
+		} catch (err) {
+			log.warn(`Failed to read setting file: ${err}, will use backup config.`);
+			settings = backupSettings;
+		}
+		// We verify and write before applying overrides because often engine
+		// and launcher are fighting over certain settings values, e.g. engine
+		// by default removes settings that are set to default values, and we
+		// want to reduce number of writes to the backup settings file.
+		if (!this.#settingsEqual(settings, backupSettings)) {
+			log.info(`Writing backup settings to ${backupSettingsPath}`);
+			this.#writeSettings(settings, backupSettingsPath);
+		}
+
 		this.#applyDefaults(settings, defaults);
 		this.#applyOverrides(settings, overrides);
 		this.#writeSettings(settings, springsettingsPath);
