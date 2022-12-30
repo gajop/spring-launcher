@@ -79,13 +79,7 @@ class SpringDownloader extends EventEmitter {
 		currentDownloader = prdDownloader;
 	}
 
-	async downloadGame(gameName) {
-		if (!config.route_prd_to_nextgen) {
-			prdDownloader.downloadGame(gameName);
-			currentDownloader = prdDownloader;
-			return;
-		}
-
+	async downloadGameNextGen(gameName) {
 		let nextgenName;
 		try {
 			nextgenName = await springToNextgen(gameName);
@@ -99,6 +93,11 @@ class SpringDownloader extends EventEmitter {
 
 		nextgenToSpringMapping[nextgenName] = gameName;
 		nextGenDownloader.download(nextgenName);
+	}
+
+	downloadGames(gameNames) {
+		prdDownloader.downloadGames(gameNames);
+		currentDownloader = prdDownloader;
 	}
 
 	downloadMap(mapName) {

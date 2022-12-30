@@ -158,6 +158,7 @@ function setCurrentConfig(setup) {
 function reloadConfig(conf) {
 	configs = [];
 	availableConfigs = [];
+	currentConfig = null;
 	setCurrentConfig(null);
 
 	conf.setups.forEach((setup) => {
@@ -178,8 +179,59 @@ let configFile = loadConfig(argv.config != null ? argv.config : './config.json')
 configFile = applyDefaults(configFile);
 reloadConfig(configFile);
 
-function isSameAsCurrent(newFile) {
-	return JSON.stringify(newFile) == JSON.stringify(configFile);
+/**
+ * Deep compare of two objects for equality with support for ingoring properties.
+ *
+ * @param a - first object
+ * @param b - second object
+ * @param ignoreProp - optional list of properties to ignore when comparing
+ * @returns boolean
+ */
+function objEqual(a, b, ignoreProp = []) {
+	if (a === b) {
+		return true;
+	}
+	if (!a || !b) {
+		return false;
+	}
+	a = JSON.parse(JSON.stringify(a));
+	b = JSON.parse(JSON.stringify(b));
+	for (const prop of ignoreProp) {
+		a[prop] = null;
+		b[prop] = null;
+	}
+	return JSON.stringify(a) == JSON.stringify(b);
+}
+
+function validateNewConfig(newFile) {
+	if (!isObject(newFile)) {
+		throw Error("Config must be object");
+	}
+	if (newFile.title !== configFile.title) {
+		throw Error("New config title must be identical to the old one");
+	}
+	if (!Array.isArray(newFile.setups) || !newFile.setups.some(canUse)) {
+		throw Error("New config file must have at least 1 usable setup");
+	}
+}
+
+function hotReloadSafe(newFile) {
+	if (objEqual(newFile, configFile)) {
+		return "identical";
+	}
+
+	if (!objEqual(newFile, configFile, ['setups'])) {
+		return "restart";
+	}
+
+	for (const setup of newFile.setups) {
+		if (setup.package.id == currentConfig.package.id &&
+		    objEqual(setup, currentConfig)) {
+			return "same-setup";
+		}
+	}
+
+	return "reload";
 }
 
 const proxy = new Proxy({
@@ -226,5 +278,7 @@ const proxy = new Proxy({
 module.exports = {
 	config: proxy,
 	applyDefaults: applyDefaults,
-	isSameAsCurrent: isSameAsCurrent,
+	hotReloadSafe: hotReloadSafe,
+	reloadConfig: reloadConfig,
+	validateNewConfig: validateNewConfig
 };

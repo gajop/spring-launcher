@@ -58,7 +58,7 @@
   "dependencies": {
     "@electron/remote": "2.0.8",
     "7zip-bin": "5.0.3",
-    "aws-sdk": "2.1198.0",
+    "aws-sdk": "2.1285.0",
     "chokidar": "3.5.3",
     "electron-log": "4.4.8",
     "electron-settings": "4.0.2",
@@ -73,8 +73,8 @@
     "yargs": "17.5.1"
   },
   "devDependencies": {
-    "electron": "20.0.3",
-    "electron-builder": "23.3.3",
+    "electron": "21.3.3",
+    "electron-builder": "23.6.0",
     "eslint": "8.21.0"
   }
 }
