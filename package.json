@@ -72,8 +72,8 @@
     "yargs": "17.5.1"
   },
   "devDependencies": {
-    "electron": "20.0.2",
-    "electron-builder": "23.3.3",
+    "electron": "21.3.3",
+    "electron-builder": "23.6.0",
     "eslint": "8.21.0"
   }
 }

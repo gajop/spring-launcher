@@ -22,7 +22,6 @@ const { wizard } = require('./launcher_wizard');
 // Setup downloader bindings
 require('./launcher_downloader');
 const { generateAndBroadcastWizard } = require('./launcher_wizard_util');
-const autoUpdater = require('./updater');
 // TODO: Despite not using it in this file, we have to require spring_api here
 require('./spring_api');
 const { launcher } = require('./engine_launcher');
@@ -53,34 +52,6 @@ launcher.on('failed', (error) => {
 	setTimeout(() => {
 		gui.send('launch-failed', error);
 	}, 100);
-});
-
-autoUpdater.on('update-available', () => {
-	gui.send('dl-started', 'autoupdate');
-
-	autoUpdater.on('download-progress', (d) => {
-		console.info(`Self-download progress: ${d.percent}`);
-		gui.send('dl-progress', 'autoUpdate', d.percent, 100);
-	});
-	autoUpdater.on('update-downloaded', () => {
-		log.info('Self-update downloaded');
-		gui.send('dl-finished', 'autoupdate');
-	});
-
-	autoUpdater.downloadUpdate();
-});
-
-autoUpdater.on('update-not-available', () => {
-	log.info('No update available.');
-	wizard.nextStep();
-});
-
-autoUpdater.on('update-downloaded', () => {
-	setImmediate(() => autoUpdater.quitAndInstall(config.silent, true));
-});
-
-autoUpdater.on('error', error => {
-	log.error(`Application failed to self-update. Error: ${error}`);
 });
 
 function maybeSetConfig(cfgName) {

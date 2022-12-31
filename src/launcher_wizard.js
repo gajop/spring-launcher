@@ -10,7 +10,9 @@ const { gui } = require('./launcher_gui');
 const updater = require('./updater');
 const springDownloader = require('./spring_downloader');
 const { launcher } = require('./engine_launcher');
+const { handleConfigUpdate } = require('./launcher_config_update');
 const fs = require('fs');
+const got = require('got');
 
 const path = require('path');
 const springPlatform = require('./spring_platform');
@@ -33,42 +35,37 @@ class Wizard extends EventEmitter {
 	generateSteps() {
 		var steps = [];
 		if (!config.no_downloads) {
+			let pushConfigFetchActionAtEnd = null;
 			if (config.config_url != null) {
-				steps.push({
-					name: 'config fetch',
+				const newConfig = got(config.config_url).json();
+
+				const configFetchAction = {
+					name: 'config update',
 					action: () => {
-						log.info(`Fetching latest config from: ${config.config_url}...`);
-						this.isActive = true;
-						this.isConfigDownload = true;
-						const TMP_CONFIG = 'config.new.json';
-						const TMP_CONFIG_FILE = path.join(springPlatform.writePath, TMP_CONFIG);
-						if (fs.existsSync(TMP_CONFIG_FILE)) {
-							fs.unlinkSync(TMP_CONFIG_FILE);
-						}
-						springDownloader.downloadResource({
-							'url': config.config_url,
-							'destination': TMP_CONFIG,
-							'extract': false
+						log.info(`Checking for config update from: ${config.config_url}...`);
+						newConfig.then(newConfig => {
+							try {
+								handleConfigUpdate(newConfig);
+							} catch (err) {
+								log.error('Failed to update config file. Ignoring.');
+								log.error(err);
+							}
+							wizard.nextStep();
+						}).catch(error => {
+							log.error(`Failed to get config update. Error: ${error}, ignoring`);
+							wizard.nextStep();
 						});
 					}
-				});
-			}
-
-			steps.push({
-				name: 'launcher_update',
-				action: () => {
-					const isDev = !require('electron').app.isPackaged;
-					log.info('Checking for launcher update');
-					if (!isDev) {
-						updater.checkForUpdates();
-					} else {
-						console.log('Development version: no self-update required');
-						setTimeout(() => {
-							this.nextStep();
-						}, 300);
-					}
 				}
-			});
+
+				// During first run, we check config first because the one with the
+				// launcher might be very old.
+				if (!fs.existsSync(path.join(springPlatform.writePath, 'config.json'))) {
+					steps.push(configFetchAction);
+				} else {
+					pushConfigFetchActionAtEnd = configFetchAction;
+				}
+			}
 
 			config.downloads.resources.forEach((resource) => {
 				steps.push({
@@ -92,16 +89,27 @@ class Wizard extends EventEmitter {
 				});
 			});
 
-			config.downloads.games.forEach((game) => {
+			if (config.route_prd_to_nextgen) {
+				config.downloads.games.forEach((game) => {
+					steps.push({
+						name: 'game',
+						item: game,
+						action: () => {
+							this.isActive = true;
+							springDownloader.downloadGameNextGen(game);
+						}
+					});
+				});
+			} else if (config.downloads.games && config.downloads.games.length > 0) {
 				steps.push({
-					name: 'game',
-					item: game,
+					name: 'games',
+					item: config.downloads.games.join(', '),
 					action: () => {
 						this.isActive = true;
-						springDownloader.downloadGame(game);
+						springDownloader.downloadGames(config.downloads.games);
 					}
 				});
-			});
+			}
 
 			config.downloads.maps.forEach((map) => {
 				steps.push({
@@ -124,6 +132,67 @@ class Wizard extends EventEmitter {
 					}
 				});
 			});
+
+			if (pushConfigFetchActionAtEnd) {
+				steps.push(pushConfigFetchActionAtEnd);
+			}
+
+			// Queue asynchronous check for launcher update.
+			const isDev = !require('electron').app.isPackaged;
+			if (!isDev) {
+				const updateCheckPromise = new Promise((resolve, reject) => {
+					updater.on('update-available', () => {
+						resolve(true);
+					});
+					updater.on('update-not-available', () => {
+						resolve(false);
+					});
+					updater.on('error', error => {
+						reject(error);
+					});
+				});
+
+				const performUpdate = () => {
+					gui.send('dl-started', 'autoupdate');
+
+					updater.on('download-progress', (d) => {
+						console.info(`Self-download progress: ${d.percent}`);
+						gui.send('dl-progress', 'autoUpdate', d.percent, 100);
+					});
+					updater.on('update-downloaded', () => {
+						log.info('Self-update downloaded');
+						gui.send('dl-finished', 'autoupdate');
+						setImmediate(() => updater.quitAndInstall(config.silent, true));
+					});
+
+					updater.on('error', error => {
+						log.error(`Application failed to self-update. Error: ${error}`);
+					});
+
+					updater.downloadUpdate();
+				}
+
+				steps.push({
+					name: 'launcher_update',
+					action: () => {
+						log.info('Checking for launcher update');
+						updateCheckPromise.then(updateAvailable => {
+							if (!updateAvailable) {
+								log.info('No update available.');
+								wizard.nextStep();
+							} else {
+								performUpdate();
+							}
+						}).catch(error => {
+							log.error(`Failed to check for launcher updates. Error: ${error}`);
+						});
+					}
+				});
+
+				updater.checkForUpdates();
+			} else {
+				console.log('Development version: no self-update required');
+			}
 		}
 
 		let enginePath;

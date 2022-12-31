@@ -37,10 +37,18 @@ ipcRenderer.on('config', (e, c) => {
 ipcRenderer.on('all-configs', (e, ac) => {
 	allConfigs = ac;
 
+	while (cmbConfig.firstChild) {
+		cmbConfig.removeChild(cmbConfig.firstChild);
+	}
+
 	allConfigs.forEach((cfg) => {
 		let cfgElement = document.createElement('option');
 		cfgElement.id = `cfg-${cfg.package.id}`;
 		cfgElement.appendChild(document.createTextNode(cfg.package.display));
+
+		if (config && `cfg-${config.package.id}` == cfgElement.id) {
+			cfgElement.selected = true;
+		}
 
 		cmbConfig.appendChild(cfgElement);
 	});

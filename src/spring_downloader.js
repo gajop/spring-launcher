@@ -79,26 +79,25 @@ class SpringDownloader extends EventEmitter {
 		currentDownloader = prdDownloader;
 	}
 
-	async downloadGame(gameName) {
-		if (!config.route_prd_to_nextgen) {
-			prdDownloader.downloadGame(gameName);
-			currentDownloader = prdDownloader;
-			return;
-		}
-
+	async downloadGameNextGen(gameName) {
 		let nextgenName;
 		try {
 			nextgenName = await springToNextgen(gameName);
 		} catch (err) {
 			log.warn(err);
 			log.warn(`Cannot find ${gameName} on nextgen. Fallback to prd`);
-			prdDownloader.downloadGame(gameName);
+			prdDownloader.downloadGames([gameName]);
 			currentDownloader = prdDownloader;
 			return;
 		}
 
 		nextgenToSpringMapping[nextgenName] = gameName;
 		nextGenDownloader.download(nextgenName);
+	}
+
+	downloadGames(gameNames) {
+		prdDownloader.downloadGames(gameNames);
+		currentDownloader = prdDownloader;
 	}
 
 	downloadMap(mapName) {
