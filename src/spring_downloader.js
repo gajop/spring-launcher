@@ -86,7 +86,7 @@ class SpringDownloader extends EventEmitter {
 		} catch (err) {
 			log.warn(err);
 			log.warn(`Cannot find ${gameName} on nextgen. Fallback to prd`);
-			prdDownloader.downloadGame(gameName);
+			prdDownloader.downloadGames([gameName]);
 			currentDownloader = prdDownloader;
 			return;
 		}
