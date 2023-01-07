@@ -93,8 +93,14 @@ class HttpDownloader extends EventEmitter {
 					}
 				}
 				log.info('failed', `Download failed: ${reason}`);
-				log.error(reason);
-				this.emit('failed', this.name, reason);
+				if (resource['optional']) {
+					log.warn(reason);
+					log.warn("Download is optional, marking as finished succesfully.");
+					this.emit('finished', name);
+				} else {
+					log.error(reason);
+					this.emit('failed', this.name, reason);
+				}
 			});
 	}
 
