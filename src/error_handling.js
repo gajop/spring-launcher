@@ -1,7 +1,14 @@
 // const { app, dialog } = require('electron');
 
+const process = require('process');
 const log = require('electron-log');
 const { gui } = require('./launcher_gui');
+
+// If we failed to write stuff to stderr or stdout: it's fine, let's not create
+// intfinite loop when writing info about unhandled exception causes another unhandled
+// exception: we managed to create 1TiB of logs for one user this way 🤣.
+process.stdout.on('error', () => {});
+process.stderr.on('error', () => {});
 
 log.catchErrors({
 	showDialog: false,
