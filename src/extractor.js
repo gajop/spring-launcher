@@ -11,28 +11,10 @@ const { extractFull: extract7z } = require('node-7z');
 
 const { log } = require('./spring_log');
 
+const { getTemporaryFileName } = require('./fs_utils');
+
 const TOTAL_EXTRACT_ATTEMPTS = 5;
 const TIME_BETWEEN_ATTEMPTS_MS = 3000;
-
-function RemoveEmptyDirs(path) {
-	if (!IsDirTreeEmpty(path)) {
-		throw 'Cannot delete directory. Directory tree is not empty.';
-	}
-	fs.rmdirSync(path, { recursive: true });
-}
-
-function IsDirTreeEmpty(dir) {
-	for (const file of fs.readdirSync(dir)) {
-		const filePath = path.join(dir, file);
-		const stats = fs.statSync(filePath);
-		if (stats.isDirectory()) {
-			return IsDirTreeEmpty(filePath);
-		} else {
-			return false;
-		}
-	}
-	return true;
-}
 
 class Extractor extends EventEmitter {
 	constructor() {
@@ -42,8 +24,18 @@ class Extractor extends EventEmitter {
 	}
 
 	extract(name, url, source, destination, attempts = TOTAL_EXTRACT_ATTEMPTS, timeBetweenAttempts = TIME_BETWEEN_ATTEMPTS_MS) {
+		const tmpDestination = getTemporaryFileName('extract');
+
 		const extractor = this.getExtractor(url);
 		extractor.on('finished', () => {
+			try {
+				log.info(`Moving from ${tmpDestination} after extraction has been finished to ${destination}`);
+				fs.renameSync(tmpDestination, destination);
+			} catch (error) {
+				log.error(`Failed to move ${tmpDestination} to final destination ${destination} with error: ${error}.`);
+				this.emit('failed', name, `Extraction failure: failed to move to destination ${err}`);
+				return;
+			}
 			try {
 				log.info(`Deleting file after extraction has been finished: ${source}`);
 				fs.unlinkSync(source);
@@ -64,7 +56,7 @@ class Extractor extends EventEmitter {
 				setTimeout(() => {
 					this.attemptNumber++;
 					log.info(`Retrying extraction ${this.attemptNumber} / ${attempts}`);
-					extractor.extract(source, destination);
+					extractor.extract(source, tmpDestination);
 				}, timeBetweenAttempts);
 			} else {
 				try {
@@ -74,17 +66,17 @@ class Extractor extends EventEmitter {
 					log.error(`Cannot unlink file after extracting: ${source}`);
 				}
 				try {
-					log.info(`Deleting destination after extraction has failed: ${destination}`);
-					RemoveEmptyDirs(destination);
+					log.info(`Deleting temp destination after extraction has failed: ${tmpDestination}`);
+					fs.rmdirSync(tmpDestination, { recursive: true });
 				} catch (error) {
-					log.error(`Cannot unlink file after extracting: ${destination}`);
+					log.error(`Cannot unlink temp file after extracting: ${tmpDestination}`);
 				}
 
 				this.emit('failed', name, `Extraction failure: ${err}`);
 			}
 		});
 
-		extractor.extract(source, destination);
+		extractor.extract(source, tmpDestination);
 	}
 
 	getExtractor(url) {
