@@ -12,6 +12,20 @@ if (!isFirstInstance) {
 	return;
 }
 
+// This is a hacky temporary workaround for bug in pr-downloader:
+// https://github.com/beyond-all-reason/pr-downloader/issues/48
+// Once it's resolved, the commit that added this piece of code
+// can be fully reverted.
+if (process.platform == 'win32' && !('SSL_CERT_FILE' in process.env)) {
+	const path = require('path');
+	const fs = require('fs');
+	let cacertPath = path.resolve(`${__dirname}/../bin/cacert.pem`);
+	if (!fs.existsSync(cacertPath)) {
+		cacertPath = path.resolve(`${process.resourcesPath}/../bin/cacert.pem`);
+	}
+	process.env['SSL_CERT_FILE'] = cacertPath;
+}
+
 const { log } = require('./spring_log');
 // Setup error handling
 require('./error_handling');

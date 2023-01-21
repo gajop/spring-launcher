@@ -36,6 +36,7 @@
     },
     "win": {
       "extraFiles": [
+        "bin/cacert.pem",
         "bin/butler/windows/*",
         "bin/pr-downloader.exe",
         "bin/*.dll"
