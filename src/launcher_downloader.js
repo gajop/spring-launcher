@@ -60,6 +60,10 @@ springDownloader.on('finished', (downloadItem) => {
 		wizard.isActive = false;
 		gui.send('dl-finished', downloadItem);
 		wizard.nextStep();
+		const mainWindow = gui.getMainWindow();
+		if (mainWindow != null) {
+			mainWindow.setProgressBar(-1);
+		}
 	}
 });
 
@@ -69,6 +73,10 @@ springDownloader.on('failed', (downloadItem, msg) => {
 		wizard.isActive = false;
 		gui.send('error', msg);
 		wizard.setEnabled(false);
+		const mainWindow = gui.getMainWindow();
+		if (mainWindow != null) {
+			mainWindow.setProgressBar(-1);
+		}
 	}
 });
 
