@@ -47,7 +47,7 @@ const defaultSetup = {
 		'map_options': undefined,
 		'mod_options': undefined,
 		'game_options': undefined,
-		// Key value settings to set in springsettings.cfg. It *overrides* 
+		// Key value settings to set in springsettings.cfg. It *overrides*
 		// the existing values, including user specified ones. For setting
 		// defaults for options, see springsettings.json.
 		'springsettings': {}
@@ -105,11 +105,16 @@ function mergeDeep(target, ...sources) {
 	return mergeDeep(target, ...sources);
 }
 
-function loadConfig(filePath) {
-	// 1. Load config file that comes with the application
-	const conf = require(filePath);
+function loadConfig() {
+	// 1. argv.config should override any existing setting
+	if (argv.config) {
+		return require(argv.config);
+	}
 
-	// 2. If there's a config.json file use that instead
+	// 2. Load config file that comes with the application
+	const conf = require('./config.json');
+
+	// 3. If there's a config.json file use that instead
 	//    but if that fails to parse just ignore it and use the application one
 	try {
 		const writePath = resolveWritePath(conf.title);
@@ -141,10 +146,10 @@ function applyDefaults(conf) {
 let configs = [];
 let availableConfigs = [];
 let currentConfig = null;
-let originalEnv = {...process.env};
+let originalEnv = { ...process.env };
 
 function setCurrentConfig(setup) {
-	process.env = {...originalEnv};
+	process.env = { ...originalEnv };
 	if (setup) {
 		for (const key in setup.env_variables) {
 			if (!(key in process.env)) {
@@ -175,7 +180,7 @@ function reloadConfig(conf) {
 	return conf;
 }
 
-let configFile = loadConfig(argv.config != null ? argv.config : './config.json');
+let configFile = loadConfig();
 configFile = applyDefaults(configFile);
 reloadConfig(configFile);
 
@@ -205,33 +210,33 @@ function objEqual(a, b, ignoreProp = []) {
 
 function validateNewConfig(newFile) {
 	if (!isObject(newFile)) {
-		throw Error("Config must be object");
+		throw Error('Config must be object');
 	}
 	if (newFile.title !== configFile.title) {
-		throw Error("New config title must be identical to the old one");
+		throw Error('New config title must be identical to the old one');
 	}
 	if (!Array.isArray(newFile.setups) || !newFile.setups.some(canUse)) {
-		throw Error("New config file must have at least 1 usable setup");
+		throw Error('New config file must have at least 1 usable setup');
 	}
 }
 
 function hotReloadSafe(newFile) {
 	if (objEqual(newFile, configFile)) {
-		return "identical";
+		return 'identical';
 	}
 
 	if (!objEqual(newFile, configFile, ['setups'])) {
-		return "restart";
+		return 'restart';
 	}
 
 	for (const setup of newFile.setups) {
 		if (setup.package.id == currentConfig.package.id &&
-		    objEqual(setup, currentConfig)) {
-			return "same-setup";
+			objEqual(setup, currentConfig)) {
+			return 'same-setup';
 		}
 	}
 
-	return "reload";
+	return 'reload';
 }
 
 const proxy = new Proxy({
