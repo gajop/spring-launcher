@@ -31,12 +31,14 @@
       "category": "Game",
       "extraFiles": [
         "bin/butler/linux/*",
-        "bin/pr-downloader"
+        "bin/pr-downloader",
+        "bin/linux/*"
       ]
     },
     "win": {
       "extraFiles": [
         "bin/butler/windows/*",
+        "bin/windows/*",
         "bin/pr-downloader.exe",
         "bin/*.dll"
       ]
